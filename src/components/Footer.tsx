@@ -1,7 +1,5 @@
-
 import { Link } from 'react-router-dom';
 import { MapPin, Phone, Mail, Linkedin, Facebook, Instagram, Youtube, MessageSquare } from 'lucide-react';
-
 const Footer = () => {
   const currentYear = new Date().getFullYear();
   return <footer className="bg-idvl-blue-dark text-white pt-12 pb-6">
@@ -42,24 +40,19 @@ const Footer = () => {
                 <Link to="/guia-completo" className="hover:text-idvl-blue-light transition-colors">Guia Completo da Reforma</Link>
               </li>
               <li>
-                <Link to="/impacto-por-setor" className="hover:text-idvl-blue-light transition-colors">Impacto por Setor</Link>
+                
               </li>
               <li>
-                <Link to="/ferramentas" className="hover:text-idvl-blue-light transition-colors">Ferramentas Úteis</Link>
+                
               </li>
               <li>
-                <Link to="/noticias" className="hover:text-idvl-blue-light transition-colors">Notícias e Atualizações</Link>
+                
               </li>
               <li>
-                <Link to="/solucoes" className="hover:text-idvl-blue-light transition-colors">IDVL Soluções</Link>
+                
               </li>
               <li>
-                <a 
-                  href="https://wa.me/41996946641" 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="hover:text-idvl-blue-light transition-colors flex items-center gap-1"
-                >
+                <a href="https://wa.me/41996946641" target="_blank" rel="noopener noreferrer" className="hover:text-idvl-blue-light transition-colors flex items-center gap-1">
                   <MessageSquare className="w-4 h-4" />
                   Contato
                 </a>
