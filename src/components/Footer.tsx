@@ -1,22 +1,14 @@
-
 import { Link } from 'react-router-dom';
 import { MapPin, Phone, Mail } from 'lucide-react';
-
 const Footer = () => {
   const currentYear = new Date().getFullYear();
-  
-  return (
-    <footer className="bg-idvl-blue-dark text-white pt-12 pb-6">
+  return <footer className="bg-idvl-blue-dark text-white pt-12 pb-6">
       <div className="container-custom">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Logo and About */}
           <div>
             <Link to="/">
-              <img
-                src="/logo-idvl-white.png" 
-                alt="IDVL Logo"
-                className="h-12 mb-4"
-              />
+              <img src="/logo-idvl-white.png" alt="IDVL Logo" className="h-12 mb-4" />
             </Link>
             <p className="text-sm opacity-80 mb-4">
               A IDVL oferece soluções estratégicas para empresas navegarem
@@ -71,7 +63,7 @@ const Footer = () => {
             <ul className="space-y-3">
               <li className="flex items-start">
                 <MapPin className="w-5 h-5 mr-2 mt-0.5 flex-shrink-0" />
-                <span>Av. Paulista, 1000, São Paulo - SP, CEP: 01310-100</span>
+                <span>R. Antônio Stival, 94 - Santa Felicidade, Curitiba - PR, 82400-060</span>
               </li>
               <li className="flex items-center">
                 <Phone className="w-5 h-5 mr-2 flex-shrink-0" />
@@ -91,15 +83,8 @@ const Footer = () => {
               Receba atualizações sobre a reforma tributária e novidades da IDVL:
             </p>
             <form className="flex flex-col space-y-3">
-              <input
-                type="email"
-                placeholder="Seu e-mail"
-                className="p-3 rounded bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-idvl-blue-light"
-              />
-              <button
-                type="submit"
-                className="bg-idvl-blue-light text-white font-medium py-3 px-4 rounded hover:bg-opacity-90 transition-colors"
-              >
+              <input type="email" placeholder="Seu e-mail" className="p-3 rounded bg-white/10 border border-white/20 text-white placeholder-white/50 focus:outline-none focus:ring-2 focus:ring-idvl-blue-light" />
+              <button type="submit" className="bg-idvl-blue-light text-white font-medium py-3 px-4 rounded hover:bg-opacity-90 transition-colors">
                 Inscrever-se
               </button>
             </form>
@@ -114,8 +99,6 @@ const Footer = () => {
           </div>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 };
-
 export default Footer;
