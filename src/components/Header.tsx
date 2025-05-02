@@ -1,139 +1,145 @@
 
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X, Search } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { useAuth } from '@/hooks/useAuth';
 
-const Header = () => {
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
+type HeaderProps = {
+  // Add any props here
+};
 
-  const toggleMobileMenu = () => {
-    setMobileMenuOpen(!mobileMenuOpen);
+const Header: React.FC<HeaderProps> = () => {
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  
+  const { user, isAdmin } = useAuth();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 10);
+    };
+    
+    window.addEventListener('scroll', handleScroll);
+    
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
   };
-
-  const toggleSearch = () => {
-    setSearchOpen(!searchOpen);
-  };
-
-  const menuItems = [
-    { name: 'Guia Completo', href: '/guia-completo' },
-    { name: 'Impacto por Setor', href: '/impacto-por-setor' },
-    { name: 'Ferramentas Úteis', href: '/ferramentas' },
-    { name: 'Notícias e Atualizações', href: '/noticias' },
-    { name: 'IDVL Soluções', href: '/solucoes' },
-    { name: 'Contato', href: '/contato' }
-  ];
 
   return (
-    <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
-      <div className="container-custom flex justify-between items-center py-4">
-        {/* Logo */}
+    <header 
+      className={`sticky top-0 z-50 transition-all duration-300 ${
+        isScrolled ? 'bg-white shadow-md py-2' : 'bg-transparent py-4'
+      }`}
+    >
+      <div className="container-custom flex justify-between items-center">
         <Link to="/" className="flex items-center">
-          <img
-            src="/logo-idvl.png"
-            alt="IDVL Logo"
-            className="h-10 md:h-12"
+          <img 
+            src="/logo-idvl.png" 
+            alt="IDVL Logo" 
+            className="h-10 mr-3" 
           />
-          <div className="ml-3 md:ml-4">
-            <h1 className="text-lg md:text-xl text-idvl-blue-dark font-bold">
-              Reforma Tributária
-            </h1>
-            <p className="text-xs md:text-sm text-idvl-text-light">Simplificada</p>
-          </div>
+          <span className={`font-bold text-xl ${isScrolled ? 'text-idvl-blue-dark' : ''}`}>
+            IDVL
+          </span>
         </Link>
-
-        {/* Desktop Navigation */}
-        <nav className="hidden lg:flex items-center space-x-6">
-          {menuItems.map((item) => (
-            <Link
-              key={item.name}
-              to={item.href}
-              className="text-idvl-text-dark hover:text-idvl-blue-dark font-medium transition-colors"
-            >
-              {item.name}
-            </Link>
-          ))}
-          <button 
-            onClick={toggleSearch} 
-            aria-label="Buscar"
-            className="text-idvl-text-dark hover:text-idvl-blue-dark transition-colors"
-          >
-            <Search size={20} />
-          </button>
-        </nav>
-
-        {/* Mobile Menu Button */}
-        <div className="flex items-center lg:hidden">
-          <button 
-            onClick={toggleSearch} 
-            aria-label="Buscar"
-            className="p-2 mr-2 text-idvl-text-dark"
-          >
-            <Search size={20} />
-          </button>
+        
+        <div className="lg:hidden">
           <button
-            type="button"
-            className="p-2 text-idvl-text-dark"
-            onClick={toggleMobileMenu}
-            aria-label="Menu"
+            onClick={toggleMenu}
+            className={`p-2 rounded-md ${
+              isScrolled ? 'text-idvl-blue-dark hover:bg-gray-100' : 'text-white hover:bg-white/10'
+            }`}
+            aria-expanded={isMenuOpen}
           >
-            {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            <span className="sr-only">Menu Principal</span>
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+              className="h-6 w-6"
+            >
+              {isMenuOpen ? (
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              ) : (
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M4 6h16M4 12h16M4 18h16"
+                />
+              )}
+            </svg>
           </button>
         </div>
-
-        {/* Search Overlay */}
-        <div 
-          className={cn(
-            "fixed inset-0 bg-black bg-opacity-50 z-50 flex items-start justify-center pt-24",
-            searchOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-          )}
-          onClick={() => setSearchOpen(false)}
+        
+        <nav
+          className={`absolute top-full left-0 w-full p-4 lg:p-0 lg:static lg:w-auto lg:flex lg:space-x-8 ${
+            isMenuOpen ? 'block bg-white shadow-md' : 'hidden'
+          } lg:flex`}
         >
-          <div 
-            className="bg-white p-4 rounded-md w-full max-w-2xl mx-4"
-            onClick={(e) => e.stopPropagation()}
+          <Link 
+            to="/" 
+            className={`block py-2 px-3 rounded-md ${
+              isScrolled || isMenuOpen
+                ? 'text-idvl-text-dark hover:bg-gray-100'
+                : 'text-white hover:bg-white/10'
+            } lg:px-3 lg:py-2`}
           >
-            <div className="relative">
-              <input 
-                type="text" 
-                placeholder="Buscar informações sobre a reforma tributária..."
-                className="w-full p-3 border border-gray-300 rounded-md pr-10"
-              />
-              <Search size={20} className="absolute right-3 top-3 text-gray-400" />
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile Menu */}
-      <div
-        className={cn(
-          "fixed inset-0 z-40 transform transition-transform duration-300 lg:hidden",
-          mobileMenuOpen ? "translate-x-0" : "translate-x-full"
-        )}
-      >
-        <div className="relative h-full">
-          <div className="bg-white h-full w-3/4 ml-auto pt-20 px-6 overflow-y-auto">
-            <nav className="flex flex-col space-y-6">
-              {menuItems.map((item) => (
-                <Link
-                  key={item.name}
-                  to={item.href}
-                  className="text-idvl-text-dark font-medium py-2 border-b border-gray-100"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  {item.name}
-                </Link>
-              ))}
-            </nav>
-          </div>
-          {/* Backdrop */}
-          <div
-            className="absolute inset-0 bg-black bg-opacity-50 z-[-1]"
-            onClick={() => setMobileMenuOpen(false)}
-          />
-        </div>
+            Início
+          </Link>
+          <Link 
+            to="/guia-completo" 
+            className={`block py-2 px-3 rounded-md ${
+              isScrolled || isMenuOpen
+                ? 'text-idvl-text-dark hover:bg-gray-100'
+                : 'text-white hover:bg-white/10'
+            } lg:px-3 lg:py-2`}
+          >
+            Guia Completo
+          </Link>
+          <Link 
+            to="/contato" 
+            className={`block py-2 px-3 rounded-md ${
+              isScrolled || isMenuOpen
+                ? 'text-idvl-text-dark hover:bg-gray-100'
+                : 'text-white hover:bg-white/10'
+            } lg:px-3 lg:py-2`}
+          >
+            Contato
+          </Link>
+          
+          {isAdmin && (
+            <Link 
+              to="/admin" 
+              className={`block py-2 px-3 rounded-md text-white bg-idvl-blue-dark hover:bg-idvl-blue-light`}
+            >
+              Administração
+            </Link>
+          )}
+          
+          {!user && (
+            <Link 
+              to="/auth" 
+              className={`block py-2 px-3 rounded-md ${
+                isScrolled || isMenuOpen
+                  ? 'bg-idvl-blue-dark text-white hover:bg-idvl-blue-light'
+                  : 'bg-white text-idvl-blue-dark hover:bg-opacity-90'
+              } lg:px-3 lg:py-2`}
+            >
+              Login
+            </Link>
+          )}
+        </nav>
       </div>
     </header>
   );

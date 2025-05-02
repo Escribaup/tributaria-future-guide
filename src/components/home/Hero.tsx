@@ -1,18 +1,72 @@
 
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 
 const Hero = () => {
+  const [heroContent, setHeroContent] = useState<{
+    title: string;
+    content: string;
+  }>({
+    title: 'Desvende a Reforma Tributária e Prepare seu Futuro',
+    content: 'Navegue com confiança pelas mudanças tributárias com nossa orientação especializada e ferramentas exclusivas.'
+  });
+  
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchHeroContent = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('homepage_content')
+          .select('title, content')
+          .eq('section', 'hero')
+          .single();
+          
+        if (error) {
+          if (error.code !== 'PGRST116') { // No rows returned
+            console.error('Erro ao buscar conteúdo do hero:', error);
+          }
+          return;
+        }
+        
+        if (data) {
+          setHeroContent({
+            title: data.title,
+            content: data.content
+          });
+        }
+      } catch (error) {
+        console.error('Erro inesperado:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchHeroContent();
+  }, []);
+
   return (
     <section className="relative bg-gradient-to-r from-idvl-blue-dark to-idvl-blue-light py-16 md:py-24 overflow-hidden">
       <div className="container-custom relative z-10">
         <div className="flex flex-col-reverse lg:flex-row items-center">
           <div className="lg:w-1/2 text-white my-8 lg:my-0 lg:pr-8">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight animate-fade-in">
-              Desvende a Reforma Tributária e Prepare seu Futuro
-            </h1>
-            <p className="text-xl md:text-2xl mb-8 text-white/90 max-w-lg animate-fade-in" style={{ animationDelay: '0.2s' }}>
-              Navegue com confiança pelas mudanças tributárias com nossa orientação especializada e ferramentas exclusivas.
-            </p>
+            {loading ? (
+              <>
+                <div className="h-12 bg-white/20 rounded w-3/4 mb-6 animate-pulse"></div>
+                <div className="h-6 bg-white/20 rounded w-full mb-2 animate-pulse"></div>
+                <div className="h-6 bg-white/20 rounded w-5/6 mb-8 animate-pulse"></div>
+              </>
+            ) : (
+              <>
+                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight animate-fade-in">
+                  {heroContent.title}
+                </h1>
+                <p className="text-xl md:text-2xl mb-8 text-white/90 max-w-lg animate-fade-in" style={{ animationDelay: '0.2s' }}>
+                  {heroContent.content}
+                </p>
+              </>
+            )}
             <div className="flex flex-wrap gap-4 animate-fade-in" style={{ animationDelay: '0.4s' }}>
               <Link to="/guia-completo" className="bg-white text-idvl-blue-dark hover:bg-opacity-90 transition-all px-8 py-4 rounded-md font-semibold text-lg">
                 Comece Aqui
