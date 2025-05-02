@@ -63,13 +63,13 @@ export default {
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
 				},
-        // IDVL Custom Colors
+        // Atualizando cores da IDVL com base na nova paleta
         idvl: {
-          'blue-dark': '#0B3B60',
-          'blue-light': '#3E9BCD',
-          'gray': '#F2F2F2',
-          'text-dark': '#333333',
-          'text-light': '#777777',
+          'blue-dark': '#232d42', // Nova cor confiável
+          'blue-light': '#1e6efb', // Nova cor vibrante
+          'gray': '#f2f2f2',       // Nova cor neutralidade
+          'text-dark': '#232d42',  // Nova cor confiável para texto
+          'text-light': '#777777', // Mantendo texto secundário
         },
 			},
 			fontFamily: {
