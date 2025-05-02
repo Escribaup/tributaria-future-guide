@@ -1,79 +1,35 @@
-
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
-import { Circle } from 'lucide-react';
-
 const Timeline = () => {
   const [activeYear, setActiveYear] = useState("2023");
-  
-  const timelineData = [
-    {
-      year: "2023",
-      title: "Aprovação da Reforma",
-      description: "Implementação inicial da reforma tributária.",
-      events: [
-        "Emenda Constitucional da Reforma Tributária"
-      ]
-    },
-    {
-      year: "2024-2025",
-      title: "Regulamentação",
-      description: "Definição das regras específicas através de legislação complementar.",
-      events: [
-        "Leis Complementares que regulamentam:",
-        "O IBS e a CBS",
-        "O Conselho Federativo do IBS",
-        "O Fundo de Desenvolvimento Regional",
-        "O ressarcimento dos saldos credores acumulados do ICMS",
-        "Lei ordinária do Imposto Seletivo",
-        "Desenvolvimento do sistema de cobrança da CBS e do IBS"
-      ]
-    },
-    {
-      year: "2026",
-      title: "Ano Teste",
-      description: "Início da implementação com alíquota teste.",
-      events: [
-        "Ano teste da CBS, à alíquota de 0,9%, e do IBS, à alíquota de 0,1%, compensáveis com PIS/Cofins e com outros tributos federais"
-      ]
-    },
-    {
-      year: "2027",
-      title: "Início da Transição",
-      description: "Começo da extinção gradual dos tributos antigos.",
-      events: [
-        "Cobrança da CBS e extinção do PIS e da Cofins",
-        "Redução a zero das alíquotas do IPI (exceto ZFM)",
-        "Instituição do Imposto Seletivo"
-      ]
-    },
-    {
-      year: "2029-2032",
-      title: "Transição Completa",
-      description: "Período de substituição gradual dos impostos atuais.",
-      events: [
-        "Transição ICMS e do ISS para o IBS via aumento gradual da alíquota do IBS e redução gradual das alíquotas do ICMS e do ISS:",
-        "10% em 2029",
-        "20% em 2030",
-        "30% em 2031",
-        "40% em 2032",
-        "100% em 2033"
-      ]
-    },
-    {
-      year: "2033",
-      title: "Novo Sistema em Vigor",
-      description: "Implementação total do novo sistema tributário.",
-      events: [
-        "Vigência integral do novo modelo e extinção do ICMS, do ISS e do IPI"
-      ]
-    }
-  ];
-
+  const timelineData = [{
+    year: "2023",
+    title: "Aprovação da Reforma",
+    description: "Aprovação da Emenda Constitucional 132/2023, que marca o início da implementação da nova estrutura tributária no Brasil.",
+    events: ["Discussão e apresentação da reforma no Congresso Nacional", "Votação e aprovação da PEC", "Promulgação da Emenda Constitucional"]
+  }, {
+    year: "2024",
+    title: "Regulamentação e Transição",
+    description: "Definição das regras específicas e preparação para o início da implementação gradual do novo sistema.",
+    events: ["Aprovação das leis complementares", "Definição das alíquotas de referência", "Preparação dos sistemas governamentais"]
+  }, {
+    year: "2026",
+    title: "Início da Implementação",
+    description: "Começo da transição para os novos tributos, com implementação parcial das novas regras.",
+    events: ["Início da implementação do IBS e da CBS com alíquota teste de 0,1%", "Início da redução gradual dos tributos existentes", "Adaptação dos sistemas empresariais"]
+  }, {
+    year: "2027-2032",
+    title: "Transição Completa",
+    description: "Período de transição gradual até a implementação completa do novo sistema tributário.",
+    events: ["Redução progressiva dos tributos antigos", "Aumento progressivo dos novos tributos", "Ajustes e correções no sistema"]
+  }, {
+    year: "2033",
+    title: "Novo Sistema em Vigor",
+    description: "Implementação completa do novo sistema tributário brasileiro, com extinção dos tributos anteriores.",
+    events: ["Fim do período de transição", "IBS e CBS em plena vigência", "Extinção completa do PIS, Cofins, IPI, ICMS e ISS"]
+  }];
   const activeData = timelineData.find(item => item.year === activeYear) || timelineData[0];
-
-  return (
-    <section className="section-padding bg-idvl-gray">
+  return <section className="section-padding bg-idvl-gray">
       <div className="container-custom">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-idvl-blue-dark mb-4">
@@ -84,37 +40,11 @@ const Timeline = () => {
           </p>
         </div>
 
-        {/* New Timeline Visualization inspired by the image */}
-        <div className="mb-12 relative">
-          {/* Timeline line */}
-          <div className="hidden md:block absolute top-6 left-0 right-0 h-1 bg-blue-600 z-0"></div>
-          
-          {/* Timeline points and year labels */}
-          <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
-            {timelineData.map((item, index) => (
-              <div key={index} className="flex flex-col items-center">
-                <button
-                  onClick={() => setActiveYear(item.year)}
-                  className={cn(
-                    "w-12 h-12 rounded-full flex items-center justify-center z-10 transition-all",
-                    activeYear === item.year ? "bg-blue-600 ring-4 ring-blue-200" : "bg-blue-600"
-                  )}
-                >
-                  <Circle className="w-3 h-3 text-white fill-white" />
-                </button>
-                <div 
-                  className={cn(
-                    "mt-2 py-2 px-4 font-bold text-center transition-all w-full",
-                    activeYear === item.year 
-                      ? "bg-green-500 text-white" 
-                      : "bg-green-500 text-white"
-                  )}
-                >
-                  {item.year}
-                </div>
-              </div>
-            ))}
-          </div>
+        {/* Timeline Years */}
+        <div className="flex justify-between mb-8 overflow-x-auto pb-4">
+          {timelineData.map((item, index) => <button key={index} onClick={() => setActiveYear(item.year)} className={cn("min-w-[100px] p-4 text-center font-semibold rounded-md transition-all", activeYear === item.year ? "bg-idvl-blue-dark text-white" : "bg-white text-idvl-text-dark hover:bg-idvl-blue-light hover:text-white")}>
+              {item.year}
+            </button>)}
         </div>
 
         {/* Timeline Content */}
@@ -128,36 +58,15 @@ const Timeline = () => {
           
           <h4 className="font-semibold text-idvl-blue-dark mb-4">Principais eventos:</h4>
           <ul className="space-y-3">
-            {activeData.events.map((event, index) => (
-              <li key={index} className={cn(
-                "flex items-start",
-                index === 0 && !event.startsWith("O") && !event.startsWith("Transição") && !event.startsWith("Vigência") 
-                  ? "" 
-                  : "ml-5"
-              )}>
-                <span className={cn(
-                  "text-green-500 mr-2",
-                  index === 0 && !event.startsWith("O") && !event.startsWith("Transição") && !event.startsWith("Vigência") 
-                    ? "" 
-                    : ""
-                )}>•</span>
+            {activeData.events.map((event, index) => <li key={index} className="flex items-start bg-[idvl-blue-dark] bg-[#232d42]">
+                <span className="bg-idvl-blue-light text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-3 flex-shrink-0 mt-0.5">
+                  {index + 1}
+                </span>
                 <span>{event}</span>
-              </li>
-            ))}
+              </li>)}
           </ul>
         </div>
-
-        <div className="mt-8 p-6 bg-idvl-blue-light bg-opacity-10 rounded-lg">
-          <h3 className="font-bold text-idvl-blue-dark mb-2">Importante:</h3>
-          <p className="text-idvl-text-dark">
-            Este cronograma representa a previsão atual de implementação da reforma tributária, 
-            conforme aprovado na Emenda Constitucional 132/2023. Eventuais alterações podem ocorrer 
-            durante o processo de regulamentação.
-          </p>
-        </div>
       </div>
-    </section>
-  );
+    </section>;
 };
-
 export default Timeline;
