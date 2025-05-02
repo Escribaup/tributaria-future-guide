@@ -15,6 +15,9 @@ import Privacy from "./pages/Privacy";
 import { AuthProvider } from "./hooks/useAuth";
 import AdminRoute from "./components/AdminRoute";
 
+// Initialize environment variable to hide the Lovable badge
+window.VITE_HIDE_BADGE = true;
+
 const App = () => {
   // Criar o queryClient dentro do componente funcional
   const queryClient = new QueryClient();
