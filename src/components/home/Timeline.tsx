@@ -1,35 +1,79 @@
+
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
+import { Separator } from '@/components/ui/separator';
+import { ChevronRight } from 'lucide-react';
+
 const Timeline = () => {
   const [activeYear, setActiveYear] = useState("2023");
-  const timelineData = [{
-    year: "2023",
-    title: "Aprovação da Reforma",
-    description: "Aprovação da Emenda Constitucional 132/2023, que marca o início da implementação da nova estrutura tributária no Brasil.",
-    events: ["Discussão e apresentação da reforma no Congresso Nacional", "Votação e aprovação da PEC", "Promulgação da Emenda Constitucional"]
-  }, {
-    year: "2024",
-    title: "Regulamentação e Transição",
-    description: "Definição das regras específicas e preparação para o início da implementação gradual do novo sistema.",
-    events: ["Aprovação das leis complementares", "Definição das alíquotas de referência", "Preparação dos sistemas governamentais"]
-  }, {
-    year: "2026",
-    title: "Início da Implementação",
-    description: "Começo da transição para os novos tributos, com implementação parcial das novas regras.",
-    events: ["Início da implementação do IBS e da CBS com alíquota teste de 0,1%", "Início da redução gradual dos tributos existentes", "Adaptação dos sistemas empresariais"]
-  }, {
-    year: "2027-2032",
-    title: "Transição Completa",
-    description: "Período de transição gradual até a implementação completa do novo sistema tributário.",
-    events: ["Redução progressiva dos tributos antigos", "Aumento progressivo dos novos tributos", "Ajustes e correções no sistema"]
-  }, {
-    year: "2033",
-    title: "Novo Sistema em Vigor",
-    description: "Implementação completa do novo sistema tributário brasileiro, com extinção dos tributos anteriores.",
-    events: ["Fim do período de transição", "IBS e CBS em plena vigência", "Extinção completa do PIS, Cofins, IPI, ICMS e ISS"]
-  }];
+  const timelineData = [
+    {
+      year: "2023",
+      title: "Emenda Constitucional",
+      description: "Aprovação da Emenda Constitucional da Reforma Tributária.",
+      events: [
+        "Aprovação da Emenda Constitucional da Reforma Tributária"
+      ]
+    },
+    {
+      year: "2024-2025",
+      title: "Leis Complementares",
+      description: "Leis Complementares que regulamentam o novo sistema tributário.",
+      events: [
+        "Leis Complementares que regulamentam:",
+        "O IBS e a CBS",
+        "O Conselho Federativo do IBS",
+        "O Fundo de Desenvolvimento Regional",
+        "O ressarcimento dos saldos credores acumulados do ICMS",
+        "Lei ordinária do Imposto Seletivo",
+        "Desenvolvimento do sistema de cobrança da CBS e do IBS"
+      ]
+    },
+    {
+      year: "2026",
+      title: "Ano teste dos novos tributos",
+      description: "Implementação inicial com alíquotas teste dos novos tributos.",
+      events: [
+        "Ano teste da CBS, à alíquota de 0,9%, e do IBS, à alíquota de 0,1%, compensáveis com PIS/Cofins e com outros tributos federais"
+      ]
+    },
+    {
+      year: "2027",
+      title: "Início da transição",
+      description: "Cobrança da CBS e início da redução gradual de tributos.",
+      events: [
+        "Cobrança da CBS e extinção do PIS e da Cofins",
+        "Redução a zero das alíquotas do IPI (exceto ZFM)",
+        "Instituição do Imposto Seletivo"
+      ]
+    },
+    {
+      year: "2029-2032",
+      title: "Transição Gradual",
+      description: "Transição gradual entre o antigo e o novo sistema tributário.",
+      events: [
+        "Transição ICMS e do ISS para o IBS via aumento gradual da alíquota do IBS e redução gradual das alíquotas do ICMS e do ISS:",
+        "10% em 2029",
+        "20% em 2030",
+        "30% em 2031",
+        "40% em 2032",
+        "100% em 2033"
+      ]
+    },
+    {
+      year: "2033",
+      title: "Vigência Integral",
+      description: "Implementação completa do novo modelo tributário.",
+      events: [
+        "Vigência integral do novo modelo e extinção do ICMS, do ISS e do IPI"
+      ]
+    }
+  ];
+
   const activeData = timelineData.find(item => item.year === activeYear) || timelineData[0];
-  return <section className="section-padding bg-idvl-gray">
+
+  return (
+    <section className="section-padding bg-idvl-gray">
       <div className="container-custom">
         <div className="text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-idvl-blue-dark mb-4">
@@ -40,11 +84,35 @@ const Timeline = () => {
           </p>
         </div>
 
-        {/* Timeline Years */}
-        <div className="flex justify-between mb-8 overflow-x-auto pb-4">
-          {timelineData.map((item, index) => <button key={index} onClick={() => setActiveYear(item.year)} className={cn("min-w-[100px] p-4 text-center font-semibold rounded-md transition-all", activeYear === item.year ? "bg-idvl-blue-dark text-white" : "bg-white text-idvl-text-dark hover:bg-idvl-blue-light hover:text-white")}>
-              {item.year}
-            </button>)}
+        {/* Timeline visualization */}
+        <div className="relative mb-12 max-w-5xl mx-auto">
+          {/* Timeline line */}
+          <div className="absolute top-4 left-0 right-0 h-1 bg-idvl-blue-light" />
+          
+          {/* Timeline dots and years */}
+          <div className="flex justify-between relative">
+            {timelineData.map((item, index) => (
+              <div key={index} className="flex flex-col items-center">
+                <button 
+                  onClick={() => setActiveYear(item.year)}
+                  className={cn(
+                    "w-8 h-8 rounded-full z-10 transition-all duration-300 flex items-center justify-center border-2",
+                    activeYear === item.year 
+                      ? "bg-idvl-blue-dark border-white" 
+                      : "bg-idvl-blue-light border-idvl-blue-light hover:bg-idvl-blue-dark"
+                  )}
+                >
+                  <span className="sr-only">{item.year}</span>
+                </button>
+                <div className={cn(
+                  "mt-3 bg-idvl-blue-dark text-white font-semibold py-2 px-3 rounded-md transition-all",
+                  activeYear === item.year ? "scale-110" : ""
+                )}>
+                  {item.year}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Timeline Content */}
@@ -58,15 +126,30 @@ const Timeline = () => {
           
           <h4 className="font-semibold text-idvl-blue-dark mb-4">Principais eventos:</h4>
           <ul className="space-y-3">
-            {activeData.events.map((event, index) => <li key={index} className="flex items-start bg-[idvl-blue-dark] bg-[#232d42]">
-                <span className="bg-idvl-blue-light text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-3 flex-shrink-0 mt-0.5">
-                  {index + 1}
-                </span>
-                <span>{event}</span>
-              </li>)}
+            {activeData.events.map((event, index) => (
+              <li key={index} className="flex items-start">
+                {event.startsWith("O ") || event.startsWith("10%") || event.startsWith("20%") || event.startsWith("30%") || event.startsWith("40%") || event.startsWith("100%") ? (
+                  <>
+                    <span className="text-idvl-blue-light mr-2">
+                      <ChevronRight className="h-5 w-5" />
+                    </span>
+                    <span className="ml-2">{event}</span>
+                  </>
+                ) : (
+                  <>
+                    <span className="bg-idvl-blue-light text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-3 flex-shrink-0 mt-0.5">
+                      {index + 1}
+                    </span>
+                    <span>{event}</span>
+                  </>
+                )}
+              </li>
+            ))}
           </ul>
         </div>
       </div>
-    </section>;
+    </section>
+  );
 };
+
 export default Timeline;
