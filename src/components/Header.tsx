@@ -31,7 +31,7 @@ const Header = () => {
         {/* Logo */}
         <Link to="/" className="flex items-center">
           <img
-            src="/logo-idvl.png" // Placeholder for IDVL logo
+            src="/logo-idvl.png"
             alt="IDVL Logo"
             className="h-10 md:h-12"
           />

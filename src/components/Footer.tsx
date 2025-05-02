@@ -1,6 +1,6 @@
 
 import { Link } from 'react-router-dom';
-import { MapPin, Phone, Mail, ExternalLink } from 'lucide-react';
+import { MapPin, Phone, Mail } from 'lucide-react';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -13,7 +13,7 @@ const Footer = () => {
           <div>
             <Link to="/">
               <img
-                src="/logo-idvl-white.png" // Placeholder for IDVL white logo
+                src="/logo-idvl-white.png" 
                 alt="IDVL Logo"
                 className="h-12 mb-4"
               />
