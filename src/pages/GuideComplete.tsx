@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
@@ -6,6 +5,7 @@ import PageHeader from '@/components/PageHeader';
 import { Link } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { MessageSquarePlus, ArrowRight } from 'lucide-react';
 
 const GuideComplete = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -62,9 +62,15 @@ const GuideComplete = () => {
                   <p className="text-sm text-idvl-text-light mb-3">
                     Nossa equipe está pronta para esclarecer suas dúvidas sobre a reforma tributária.
                   </p>
-                  <Link to="/contato" className="btn-primary text-sm w-full text-center block">
+                  <a 
+                    href="https://wa.me/41996946641"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn-primary text-sm w-full text-center block flex items-center justify-center gap-2"
+                  >
+                    <MessageSquarePlus className="w-4 h-4" />
                     Fale com um especialista
-                  </Link>
+                  </a>
                 </div>
               </div>
             </aside>
@@ -163,7 +169,7 @@ const GuideComplete = () => {
                     
                     <div className="prose max-w-none text-idvl-text-dark">
                       <p className="mb-4">
-                        O sistema tributário brasileiro atual é reconhecido como um dos mais complexos e onerosos do mundo. 
+                        O sistema tributário brasileiro atual é reconhecido como um dos mais complexos e oneroso do mundo. 
                         Esta complexidade gera diversos problemas que afetam negativamente a economia e a sociedade como um todo.
                       </p>
 
@@ -677,13 +683,15 @@ const GuideComplete = () => {
                           Entre em contato com nossa equipe de especialistas para obter respostas personalizadas 
                           sobre como a reforma tributária afetará seu negócio.
                         </p>
-                        <Link 
-                          to="/contato"
+                        <a 
+                          href="https://wa.me/41996946641"
+                          target="_blank"
+                          rel="noopener noreferrer"
                           className="bg-white text-idvl-blue-dark hover:bg-opacity-90 transition-all px-6 py-3 rounded-md font-semibold inline-flex items-center"
                         >
                           Falar com um especialista
-                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 ml-2"><line x1="5" x2="19" y1="12" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                        </Link>
+                          <ArrowRight className="w-4 h-4 ml-2" />
+                        </a>
                       </div>
                     </div>
                   </div>
