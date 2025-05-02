@@ -71,9 +71,14 @@ const Hero = () => {
               <Link to="/guia-completo" className="bg-white text-idvl-blue-dark hover:bg-opacity-90 transition-all px-8 py-4 rounded-md font-semibold text-lg">
                 Comece Aqui
               </Link>
-              <Link to="/contato" className="bg-transparent border-2 border-white text-white hover:bg-white hover:bg-opacity-10 transition-all px-8 py-4 rounded-md font-semibold text-lg">
+              <a 
+                href="https://wa.me/41996946641" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="bg-transparent border-2 border-white text-white hover:bg-white hover:bg-opacity-10 transition-all px-8 py-4 rounded-md font-semibold text-lg"
+              >
                 Fale Conosco
-              </Link>
+              </a>
             </div>
           </div>
           <div className="lg:w-1/2 flex justify-center lg:justify-end">
