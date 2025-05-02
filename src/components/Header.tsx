@@ -18,6 +18,9 @@ const Header: React.FC<HeaderProps> = () => {
       setIsScrolled(window.scrollY > 10);
     };
     
+    // Verifica inicialmente se não estamos no topo da página
+    handleScroll();
+    
     window.addEventListener('scroll', handleScroll);
     
     return () => {
@@ -32,17 +35,17 @@ const Header: React.FC<HeaderProps> = () => {
   return (
     <header 
       className={`sticky top-0 z-50 transition-all duration-300 ${
-        isScrolled ? 'bg-white shadow-md py-2' : 'bg-transparent py-4'
+        isScrolled ? 'bg-white shadow-md py-2' : 'bg-idvl-blue-dark py-4'
       }`}
     >
       <div className="container-custom flex justify-between items-center">
         <Link to="/" className="flex items-center">
           <img 
-            src="/logo-idvl.png" 
+            src={isScrolled ? "/logo-idvl.png" : "/logo-idvl-white.png"}
             alt="IDVL Logo" 
             className="h-10 mr-3" 
           />
-          <span className={`font-bold text-xl ${isScrolled ? 'text-idvl-blue-dark' : ''}`}>
+          <span className={`font-bold text-xl ${isScrolled ? 'text-idvl-blue-dark' : 'text-white'}`}>
             IDVL
           </span>
         </Link>
@@ -91,7 +94,7 @@ const Header: React.FC<HeaderProps> = () => {
             to="/" 
             className={`block py-2 px-3 rounded-md ${
               isScrolled || isMenuOpen
-                ? 'text-idvl-text-dark hover:bg-gray-100'
+                ? 'text-idvl-blue-dark hover:bg-gray-100'
                 : 'text-white hover:bg-white/10'
             } lg:px-3 lg:py-2`}
           >
@@ -101,7 +104,7 @@ const Header: React.FC<HeaderProps> = () => {
             to="/guia-completo" 
             className={`block py-2 px-3 rounded-md ${
               isScrolled || isMenuOpen
-                ? 'text-idvl-text-dark hover:bg-gray-100'
+                ? 'text-idvl-blue-dark hover:bg-gray-100'
                 : 'text-white hover:bg-white/10'
             } lg:px-3 lg:py-2`}
           >
@@ -111,7 +114,7 @@ const Header: React.FC<HeaderProps> = () => {
             to="/contato" 
             className={`block py-2 px-3 rounded-md ${
               isScrolled || isMenuOpen
-                ? 'text-idvl-text-dark hover:bg-gray-100'
+                ? 'text-idvl-blue-dark hover:bg-gray-100'
                 : 'text-white hover:bg-white/10'
             } lg:px-3 lg:py-2`}
           >
