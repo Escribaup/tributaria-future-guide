@@ -6,23 +6,16 @@ import { Link } from 'react-router-dom';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { MessageSquarePlus, ArrowRight } from 'lucide-react';
-
 const GuideComplete = () => {
   const [activeTab, setActiveTab] = useState("overview");
-
-  const breadcrumbs = [
-    { text: "Guia Completo", href: "/guia-completo" },
-  ];
-
-  return (
-    <div className="flex flex-col min-h-screen">
+  const breadcrumbs = [{
+    text: "Guia Completo",
+    href: "/guia-completo"
+  }];
+  return <div className="flex flex-col min-h-screen">
       <Header />
       <main className="flex-grow">
-        <PageHeader
-          title="Guia Completo da Reforma Tributária"
-          description="Entenda todas as mudanças, impactos e o cronograma de implementação da reforma tributária brasileira."
-          breadcrumbs={breadcrumbs}
-        />
+        <PageHeader title="Guia Completo da Reforma Tributária" description="Entenda todas as mudanças, impactos e o cronograma de implementação da reforma tributária brasileira." breadcrumbs={breadcrumbs} />
 
         <div className="container-custom py-12">
           <div className="flex flex-col lg:flex-row gap-8">
@@ -31,28 +24,22 @@ const GuideComplete = () => {
               <div className="bg-white rounded-lg shadow-md p-6 sticky top-24">
                 <h2 className="text-xl font-bold text-idvl-blue-dark mb-4">Neste Guia</h2>
                 <nav className="space-y-2">
-                  <a href="#overview" onClick={() => setActiveTab("overview")} 
-                    className={`block p-3 rounded-md ${activeTab === "overview" ? "bg-idvl-blue-light text-white" : "hover:bg-gray-100"}`}>
+                  <a href="#overview" onClick={() => setActiveTab("overview")} className={`block p-3 rounded-md ${activeTab === "overview" ? "bg-idvl-blue-light text-white" : "hover:bg-gray-100"}`}>
                     O que é a Reforma
                   </a>
-                  <a href="#why" onClick={() => setActiveTab("why")}
-                    className={`block p-3 rounded-md ${activeTab === "why" ? "bg-idvl-blue-light text-white" : "hover:bg-gray-100"}`}>
+                  <a href="#why" onClick={() => setActiveTab("why")} className={`block p-3 rounded-md ${activeTab === "why" ? "bg-idvl-blue-light text-white" : "hover:bg-gray-100"}`}>
                     Por que é necessária
                   </a>
-                  <a href="#changes" onClick={() => setActiveTab("changes")}
-                    className={`block p-3 rounded-md ${activeTab === "changes" ? "bg-idvl-blue-light text-white" : "hover:bg-gray-100"}`}>
+                  <a href="#changes" onClick={() => setActiveTab("changes")} className={`block p-3 rounded-md ${activeTab === "changes" ? "bg-idvl-blue-light text-white" : "hover:bg-gray-100"}`}>
                     O que muda
                   </a>
-                  <a href="#timeline" onClick={() => setActiveTab("timeline")}
-                    className={`block p-3 rounded-md ${activeTab === "timeline" ? "bg-idvl-blue-light text-white" : "hover:bg-gray-100"}`}>
+                  <a href="#timeline" onClick={() => setActiveTab("timeline")} className={`block p-3 rounded-md ${activeTab === "timeline" ? "bg-idvl-blue-light text-white" : "hover:bg-gray-100"}`}>
                     Cronograma
                   </a>
-                  <a href="#glossary" onClick={() => setActiveTab("glossary")}
-                    className={`block p-3 rounded-md ${activeTab === "glossary" ? "bg-idvl-blue-light text-white" : "hover:bg-gray-100"}`}>
+                  <a href="#glossary" onClick={() => setActiveTab("glossary")} className={`block p-3 rounded-md ${activeTab === "glossary" ? "bg-idvl-blue-light text-white" : "hover:bg-gray-100"}`}>
                     Glossário
                   </a>
-                  <a href="#faq" onClick={() => setActiveTab("faq")}
-                    className={`block p-3 rounded-md ${activeTab === "faq" ? "bg-idvl-blue-light text-white" : "hover:bg-gray-100"}`}>
+                  <a href="#faq" onClick={() => setActiveTab("faq")} className={`block p-3 rounded-md ${activeTab === "faq" ? "bg-idvl-blue-light text-white" : "hover:bg-gray-100"}`}>
                     Perguntas Frequentes
                   </a>
                 </nav>
@@ -62,12 +49,7 @@ const GuideComplete = () => {
                   <p className="text-sm text-idvl-text-light mb-3">
                     Nossa equipe está pronta para esclarecer suas dúvidas sobre a reforma tributária.
                   </p>
-                  <a 
-                    href="https://wa.me/41996946641"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="btn-primary text-sm w-full text-center block flex items-center justify-center gap-2"
-                  >
+                  <a href="https://wa.me/41996946641" target="_blank" rel="noopener noreferrer" className="btn-primary text-sm w-full text-center block flex items-center justify-center gap-2">
                     <MessageSquarePlus className="w-4 h-4" />
                     Fale com um especialista
                   </a>
@@ -125,11 +107,7 @@ const GuideComplete = () => {
                       </div>
 
                       <figure className="my-8">
-                        <img 
-                          src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" 
-                          alt="Reforma Tributária" 
-                          className="w-full rounded-lg"
-                        />
+                        <img src="https://images.unsplash.com/photo-1454165804606-c3d57bc86b40?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" alt="Reforma Tributária" className="w-full rounded-lg" />
                         <figcaption className="text-center text-sm text-idvl-text-light mt-2">
                           A reforma tributária visa modernizar o sistema fiscal do Brasil
                         </figcaption>
@@ -152,13 +130,7 @@ const GuideComplete = () => {
                     </div>
                     
                     <div className="mt-8">
-                      <Link 
-                        to="/guia-completo/detalhes"
-                        className="btn-secondary inline-flex items-center"
-                      >
-                        Saiba mais detalhes
-                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 ml-2"><line x1="5" x2="19" y1="12" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
-                      </Link>
+                      
                     </div>
                   </div>
                 </TabsContent>
@@ -203,11 +175,7 @@ const GuideComplete = () => {
                       </ul>
 
                       <figure className="my-8">
-                        <img 
-                          src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" 
-                          alt="Complexidade Tributária" 
-                          className="w-full rounded-lg"
-                        />
+                        <img src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" alt="Complexidade Tributária" className="w-full rounded-lg" />
                         <figcaption className="text-center text-sm text-idvl-text-light mt-2">
                           A complexidade do sistema tributário brasileiro impõe altos custos às empresas
                         </figcaption>
@@ -683,12 +651,7 @@ const GuideComplete = () => {
                           Entre em contato com nossa equipe de especialistas para obter respostas personalizadas 
                           sobre como a reforma tributária afetará seu negócio.
                         </p>
-                        <a 
-                          href="https://wa.me/41996946641"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="bg-white text-idvl-blue-dark hover:bg-opacity-90 transition-all px-6 py-3 rounded-md font-semibold inline-flex items-center"
-                        >
+                        <a href="https://wa.me/41996946641" target="_blank" rel="noopener noreferrer" className="bg-white text-idvl-blue-dark hover:bg-opacity-90 transition-all px-6 py-3 rounded-md font-semibold inline-flex items-center">
                           Falar com um especialista
                           <ArrowRight className="w-4 h-4 ml-2" />
                         </a>
@@ -702,8 +665,6 @@ const GuideComplete = () => {
         </div>
       </main>
       <Footer />
-    </div>
-  );
+    </div>;
 };
-
 export default GuideComplete;
