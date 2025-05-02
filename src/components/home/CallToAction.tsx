@@ -2,6 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { Button } from '../ui/button';
+import { MessageSquarePlus } from 'lucide-react';
 
 const CallToAction = () => {
   const [ctaContent, setCtaContent] = useState<{
@@ -77,8 +79,9 @@ const CallToAction = () => {
               href="https://wa.me/41996946641"
               target="_blank"
               rel="noopener noreferrer"
-              className="bg-transparent border-2 border-white text-white hover:bg-white hover:bg-opacity-10 transition-all px-8 py-4 rounded-md font-semibold text-lg"
+              className="bg-transparent border-2 border-white text-white hover:bg-white hover:bg-opacity-10 transition-all px-8 py-4 rounded-md font-semibold text-lg flex items-center gap-2"
             >
+              <MessageSquarePlus className="w-5 h-5" />
               Fale com um Especialista
             </a>
           </div>

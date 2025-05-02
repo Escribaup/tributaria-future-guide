@@ -1,6 +1,6 @@
 
 import { Link } from 'react-router-dom';
-import { MapPin, Phone, Mail, Linkedin, Facebook, Instagram, Youtube } from 'lucide-react';
+import { MapPin, Phone, Mail, Linkedin, Facebook, Instagram, Youtube, MessageSquare } from 'lucide-react';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -54,7 +54,15 @@ const Footer = () => {
                 <Link to="/solucoes" className="hover:text-idvl-blue-light transition-colors">IDVL Soluções</Link>
               </li>
               <li>
-                <Link to="/contato" className="hover:text-idvl-blue-light transition-colors">Contato</Link>
+                <a 
+                  href="https://wa.me/41996946641" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="hover:text-idvl-blue-light transition-colors flex items-center gap-1"
+                >
+                  <MessageSquare className="w-4 h-4" />
+                  Contato
+                </a>
               </li>
             </ul>
           </div>
