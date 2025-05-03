@@ -23,7 +23,7 @@ export default defineConfig(({ mode }) => ({
   build: {
     // Adding this configuration to remove the Lovable editor badge
     define: {
-      'import.meta.env.VITE_HIDE_BADGE': JSON.stringify('true')
+      'window.VITE_HIDE_BADGE': JSON.stringify(true)
     }
   }
 }));
