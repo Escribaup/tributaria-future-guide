@@ -36,7 +36,7 @@ export type CenarioSimulacao = {
   uf_id?: number;
   ano_inicial?: number;
   ano_final?: number;
-  reducao_ibs?: number; // Novo campo para armazenar o percentual de redução do IBS
+  reducao_ibs?: number; // Percentual de redução do IBS
 };
 
 export type ResultadoSimulacao = {

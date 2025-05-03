@@ -43,7 +43,7 @@ export const calcularResultadosSimulacao = (
     dados.impostos_atuais.aliquota_pis + 
     dados.impostos_atuais.aliquota_cofins;
   
-  // CORREÇÃO: Para impostos "por dentro", a fórmula correta é: 
+  // Para impostos "por dentro", a fórmula correta é: 
   // preço sem imposto = preço com imposto / (1 + taxa)
   const precoAtualComImpostos = dados.impostos_atuais.preco_atual;
   const precoAtualSemImpostos = precoAtualComImpostos / (1 + impostoAtualTotal);
@@ -51,7 +51,8 @@ export const calcularResultadosSimulacao = (
   // Calcular lucro atual baseado na margem desejada
   const lucroAtual = precoAtualSemImpostos * (dados.margem_desejada / 100);
   
-  // Taxa de redução do IBS (usando o valor padrão de 70% se não for especificado)
+  // Taxa de redução do IBS (usando o valor informado ou padrão de 70%)
+  // CORREÇÃO: aplicamos a redução apenas ao IBS, não ao CBS
   const reducaoIBS = dados.cenario.reducao_ibs !== undefined ? dados.cenario.reducao_ibs / 100 : 0.7;
   
   const resultadosCalc: ResultadoSimulacao[] = [];
@@ -66,28 +67,32 @@ export const calcularResultadosSimulacao = (
     const aliquotaIBS = aliquota.aliquota_ibs;
     const aliquotaCBS = aliquota.aliquota_cbs;
     
-    // Aplicar redução na alíquota do IBS
+    // CORREÇÃO: Aplicar redução apenas na alíquota do IBS
     const aliquotaIBSEfetiva = aliquotaIBS * (1 - reducaoIBS);
+    
+    // CORREÇÃO: Alíquota efetiva total é a soma da alíquota IBS efetiva (reduzida) + CBS (sem redução)
     const aliquotaEfetivaTotal = aliquotaIBSEfetiva + aliquotaCBS;
     
     // Cenário 1: Manter preço final e lucro (necessário reduzir custo)
-    // Preço sem impostos futuro (considerando que o preço com impostos será o mesmo)
+    // CORREÇÃO: Preço sem impostos futuro (considerando que o preço com impostos será o mesmo)
     const precoSemImpostosFuturo = precoAtualComImpostos / (1 + aliquotaEfetivaTotal);
     
     // Custo necessário para manter o preço final e o lucro atual
     const custoNecessario = precoSemImpostosFuturo - lucroAtual;
     
-    // Percentual de redução de custo necessário
-    const reducaoCustoPct = (custoTotal - custoNecessario) / custoTotal * 100;
+    // CORREÇÃO: Percentual de redução de custo necessário
+    // Se for negativo, significa que não precisa reduzir custo
+    const reducaoCustoPct = custoTotal > custoNecessario ? 
+      ((custoTotal - custoNecessario) / custoTotal) * 100 : 0;
     
     // Cenário 2: Manter custo e lucro (necessário aumentar preço)
     // Preço sem impostos fixo (custo + lucro)
     const precoSemImpostosFixo = custoTotal + lucroAtual;
     
-    // Novo preço com impostos
+    // CORREÇÃO: Novo preço com impostos = preço sem impostos * (1 + alíquota efetiva total)
     const precoComImpostosNovo = precoSemImpostosFixo * (1 + aliquotaEfetivaTotal);
     
-    // Percentual de aumento no preço
+    // CORREÇÃO: Percentual de aumento no preço
     const aumentoPrecoPct = ((precoComImpostosNovo - precoAtualComImpostos) / precoAtualComImpostos) * 100;
     
     precosVenda.push(precoSemImpostosFuturo);
