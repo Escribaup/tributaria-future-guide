@@ -46,9 +46,12 @@ const ChatbotInput: React.FC = () => {
           <span className="sr-only">Enviar</span>
         </Button>
       </div>
-      <p className="mt-2 text-xs text-center text-muted-foreground">
-        Desenvolvido com tecnologia de IA para auxiliar em dúvidas sobre a Reforma Tributária
-      </p>
+      <div className="mt-2 flex flex-col items-center">
+        <p className="text-xs text-center text-muted-foreground mb-2">
+          Desenvolvido com tecnologia de IA para auxiliar em dúvidas sobre a Reforma Tributária
+        </p>
+        <img src="/logo-idvl.png" alt="IDVL Logo" className="h-6" />
+      </div>
     </form>
   );
 };

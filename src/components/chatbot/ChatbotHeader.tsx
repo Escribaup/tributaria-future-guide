@@ -29,14 +29,11 @@ const ChatbotHeader: React.FC<ChatbotHeaderProps> = ({ onClose }) => {
 
   return (
     <div className="flex items-center justify-between border-b p-4">
-      <div className="flex items-center gap-2">
-        <img src="/logo-idvl.png" alt="IDVL Logo" className="h-8" />
-        <div>
-          <h3 className="font-semibold">Assistente IDVL</h3>
-          <p className="text-xs text-muted-foreground">
-            Especialista em Reforma Tributária
-          </p>
-        </div>
+      <div>
+        <h3 className="font-semibold">Assistente IDVL</h3>
+        <p className="text-xs text-muted-foreground">
+          Especialista em Reforma Tributária
+        </p>
       </div>
 
       <div className="flex gap-1">
