@@ -8,9 +8,8 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
-  TooltipProps
 } from 'recharts';
-import { ResultadoSimulacao } from '@/pages/Simulador';
+import { ResultadoSimulacao } from '@/types/simulador';
 import { 
   Table, 
   TableBody, 
@@ -20,7 +19,6 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
-import { Textarea } from "@/components/ui/textarea";
 import { InfoIcon, FileTextIcon } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 

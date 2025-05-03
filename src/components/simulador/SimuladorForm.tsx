@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Form,
   FormControl,
@@ -24,7 +24,7 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Produto, Fornecedor, UF, AliquotaTransicao, CenarioSimulacao } from '@/pages/Simulador';
+import { Produto, Fornecedor, UF, AliquotaTransicao, CenarioSimulacao } from '@/types/simulador';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { InfoIcon } from "lucide-react";
 
