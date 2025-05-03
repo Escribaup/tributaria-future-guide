@@ -28,8 +28,8 @@ declare global {
 
 window.VITE_HIDE_BADGE = true;
 
-// URL do webhook padrão do n8n - Substitua pela URL real do seu webhook
-const DEFAULT_N8N_WEBHOOK_URL = "https://n8n.idvl.com.br/webhook/chatbot-reforma-tributaria";
+// URL do webhook da IDVL - URL fixa para produção
+const DEFAULT_N8N_WEBHOOK_URL = "https://webhook.idvl.com.br/webhook/reforma";
 
 // Componente para fornecer ChatbotProvider com contexto de autenticação
 const ChatbotProviderWithAuth: React.FC<{ children: React.ReactNode }> = ({ children }) => {

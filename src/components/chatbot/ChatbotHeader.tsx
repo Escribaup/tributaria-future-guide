@@ -40,6 +40,7 @@ const ChatbotHeader: React.FC<ChatbotHeaderProps> = ({ onClose }) => {
       </div>
 
       <div className="flex gap-1">
+        {/* Mostrar configurações apenas para administradores */}
         {isAdmin && (
           <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
             <DialogTrigger asChild>
@@ -54,15 +55,15 @@ const ChatbotHeader: React.FC<ChatbotHeaderProps> = ({ onClose }) => {
               </DialogHeader>
               <div className="space-y-4 py-4">
                 <div className="space-y-2">
-                  <Label htmlFor="webhook-url">URL do Webhook n8n</Label>
+                  <Label htmlFor="webhook-url">URL do Webhook</Label>
                   <Input
                     id="webhook-url"
-                    placeholder="https://n8n.seudominio.com/webhook/..."
+                    placeholder="https://webhook.idvl.com.br/webhook/reforma"
                     value={tempUrl}
                     onChange={(e) => setTempUrl(e.target.value)}
                   />
                   <p className="text-xs text-muted-foreground">
-                    Insira a URL do webhook do seu fluxo n8n que processa as mensagens do chatbot
+                    Insira a URL do webhook que processa as mensagens do chatbot
                   </p>
                 </div>
                 <div className="flex justify-end">
