@@ -49,8 +49,8 @@ const Hero = () => {
   return (
     <section className="relative bg-gradient-to-r from-idvl-blue-dark to-idvl-blue-light py-16 md:py-24 overflow-hidden">
       <div className="container-custom relative z-10">
-        <div className="flex flex-col-reverse lg:flex-row items-center">
-          <div className="lg:w-1/2 text-white my-8 lg:my-0 lg:pr-8">
+        <div className="flex flex-col lg:flex-row items-center gap-8">
+          <div className="lg:w-1/2 text-white">
             {loading ? (
               <>
                 <div className="h-12 bg-white/20 rounded w-3/4 mb-6 animate-pulse"></div>
@@ -59,7 +59,7 @@ const Hero = () => {
               </>
             ) : (
               <>
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 leading-tight animate-fade-in">
+                <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight animate-fade-in">
                   {heroContent.title}
                 </h1>
                 <p className="text-xl md:text-2xl mb-8 text-white/90 max-w-lg animate-fade-in" style={{ animationDelay: '0.2s' }}>
@@ -81,15 +81,19 @@ const Hero = () => {
               </a>
             </div>
           </div>
-          <div className="lg:w-1/2 flex justify-center lg:justify-end">
-            <div className="relative">
+          <div className="lg:w-1/2 w-full">
+            <div className="relative w-full h-[400px] md:h-[450px] overflow-hidden rounded-xl">
               <img 
-                src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                src="https://images.unsplash.com/photo-1573164713988-8665fc963095?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" 
                 alt="Profissional confiante" 
-                className="rounded-lg shadow-xl max-w-full h-auto animate-fade-in object-cover"
-                style={{ maxHeight: '500px', animationDelay: '0.3s', filter: 'brightness(0.9) saturate(1.1)' }}
+                className="w-full h-full object-cover animate-fade-in"
+                style={{ animationDelay: '0.3s' }}
               />
-              <div className="absolute inset-0 bg-gradient-to-r from-idvl-blue-dark/70 to-transparent rounded-lg"></div>
+              <div className="absolute inset-0 bg-gradient-to-r from-idvl-blue-dark/80 via-idvl-blue-dark/40 to-transparent"></div>
+              
+              {/* Elementos decorativos */}
+              <div className="absolute -bottom-10 -right-10 w-40 h-40 bg-idvl-blue-light/20 rounded-full blur-xl"></div>
+              <div className="absolute top-10 -left-10 w-28 h-28 bg-white/10 rounded-full blur-lg"></div>
             </div>
           </div>
         </div>
