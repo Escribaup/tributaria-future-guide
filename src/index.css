@@ -85,6 +85,7 @@
 
   body {
     @apply bg-background text-foreground font-open-sans;
+    padding-top: 0; /* The header is fixed, but we handle padding in the main content */
   }
 
   h1, h2, h3, h4, h5, h6 {
@@ -128,4 +129,15 @@
   .container-custom {
     @apply container mx-auto px-4 md:px-6;
   }
+}
+
+/* Add a class for the initial transparent header */
+.header-transparent {
+  background-color: transparent;
+}
+
+/* Add a class for the scrolled white header */
+.header-solid {
+  background-color: white;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
