@@ -24,7 +24,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-import { Produto } from '@/pages/Simulador';
+import { Produto } from '@/types/simulador';
 import { Pencil, Trash2 } from "lucide-react";
 
 const produtoSchema = z.object({

@@ -42,10 +42,11 @@ export const calcularResultadosSimulacao = (
     dados.impostos_atuais.aliquota_iss + 
     dados.impostos_atuais.aliquota_pis + 
     dados.impostos_atuais.aliquota_cofins;
-    
-  // CORREÇÃO: Para impostos "por dentro", a fórmula correta é: 
-  // preço sem imposto = preço com imposto / (1 - taxa)
-  const precoAtualSemImpostos = dados.impostos_atuais.preco_atual / (1 - impostoAtualTotal);
+  
+  // Para impostos "por dentro", a fórmula correta é: 
+  // preço sem imposto = preço com imposto / (1 + taxa)
+  // No caso atual, estamos considerando o preço já com imposto como entrada do usuário
+  const precoAtualSemImpostos = dados.impostos_atuais.preco_atual / (1 + impostoAtualTotal);
   
   const resultadosCalc: ResultadoSimulacao[] = [];
   const precosVenda: number[] = [];

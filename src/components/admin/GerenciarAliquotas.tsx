@@ -24,7 +24,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-import { AliquotaTransicao } from '@/pages/Simulador';
+import { AliquotaTransicao } from '@/types/simulador';
 import { Pencil } from "lucide-react";
 
 const aliquotaSchema = z.object({

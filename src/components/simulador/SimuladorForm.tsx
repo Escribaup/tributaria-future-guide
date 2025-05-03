@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import {
   Form,
@@ -484,7 +483,7 @@ const SimuladorForm: React.FC<SimuladorFormProps> = ({
                 name="preco_atual"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Preço de Venda Atual (R$)</FormLabel>
+                    <FormLabel>Preço de Venda Atual (com impostos)</FormLabel>
                     <FormControl>
                       <Input 
                         {...field} 
@@ -500,6 +499,14 @@ const SimuladorForm: React.FC<SimuladorFormProps> = ({
                 )}
               />
             </div>
+            
+            <Alert variant="default" className="bg-blue-50">
+              <InfoIcon className="h-4 w-4" />
+              <AlertDescription>
+                <strong>Importante:</strong> O preço de venda atual deve incluir todos os impostos (ICMS, ISS, PIS, COFINS).
+                Este valor será usado como base para calcular o preço sem impostos para a simulação do IVA.
+              </AlertDescription>
+            </Alert>
           </div>
           
           <Separator />
@@ -597,8 +604,8 @@ const SimuladorForm: React.FC<SimuladorFormProps> = ({
           <Alert variant="default" className="bg-blue-50">
             <InfoIcon className="h-4 w-4" />
             <AlertDescription>
-              Os cálculos da simulação consideram o IVA (IBS + CBS) calculado por fora do preço.
-              O preço sem imposto permanece o mesmo, e o comprador paga o IVA adicionalmente.
+              Os cálculos da simulação consideram o preço atual com impostos "por dentro" e o IVA (IBS + CBS) calculado por fora do preço.
+              O preço sem imposto é calculado removendo os impostos atuais do preço informado.
             </AlertDescription>
           </Alert>
           

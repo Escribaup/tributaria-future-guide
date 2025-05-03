@@ -85,26 +85,23 @@ const SimuladorResultados: React.FC<SimuladorResultadosProps> = ({ resultados })
                 <div className="text-gray-600">Custo do produto:</div>
                 <div>R$ 70,00</div>
                 
+                <div className="text-gray-600">Preço com impostos (21,25%):</div>
+                <div>R$ 126,98</div>
+                
                 <div className="text-gray-600">Preço sem impostos:</div>
-                <div>R$ 100,00</div>
-                
-                <div className="text-gray-600">Impostos atuais (21,25%):</div>
-                <div>R$ 26,98 (calculados "por dentro")</div>
-                
-                <div className="text-gray-600">Preço atual com impostos:</div>
-                <div>R$ 126,98 (100 / (1 - 21,25%))</div>
-                
-                <div className="text-gray-600">Preço sem impostos (base IVA):</div>
-                <div>R$ 100,00</div>
+                <div>R$ 104,73 (126,98 ÷ 1,2125)</div>
                 
                 <div className="text-gray-600">IVA (IBS+CBS = 8,8%):</div>
-                <div>R$ 8,80 (calculado "por fora")</div>
+                <div>R$ 9,22 (104,73 × 8,8%)</div>
                 
                 <div className="text-gray-600 font-medium">Preço final com IVA:</div>
-                <div className="font-medium">R$ 108,80</div>
+                <div className="font-medium">R$ 113,95 (104,73 + 9,22)</div>
                 
                 <div className="text-gray-600">Custo máximo (margem 30%):</div>
-                <div>R$ 70,00 (preço sem imposto × 70%)</div>
+                <div>R$ 73,31 (preço sem imposto × 70%)</div>
+                
+                <div className="text-gray-600">Margem líquida:</div>
+                <div>33,1% ((104,73 - 70) ÷ 104,73 × 100)</div>
               </div>
             </div>
           </div>

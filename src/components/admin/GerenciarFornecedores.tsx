@@ -31,7 +31,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/components/ui/use-toast';
-import { Fornecedor, UF } from '@/pages/Simulador';
+import { Fornecedor, UF } from '@/types/simulador';
 import { Pencil, Trash2 } from "lucide-react";
 
 const fornecedorSchema = z.object({
