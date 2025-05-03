@@ -11,18 +11,12 @@ import {
   salvarSimulacao 
 } from '@/services/simuladorService';
 import { 
-  Produto, 
-  Fornecedor, 
-  UF, 
   AliquotaTransicao, 
   CenarioSimulacao, 
   ResultadoSimulacao 
 } from '@/types/simulador';
 
 interface SimuladorContainerProps {
-  produtos: Produto[];
-  fornecedores: Fornecedor[];
-  ufs: UF[];
   aliquotas: AliquotaTransicao[];
   cenarios: CenarioSimulacao[];
   userId?: string;
@@ -30,9 +24,6 @@ interface SimuladorContainerProps {
 }
 
 const SimuladorContainer: React.FC<SimuladorContainerProps> = ({
-  produtos,
-  fornecedores,
-  ufs,
   aliquotas,
   cenarios,
   userId,
@@ -134,9 +125,6 @@ const SimuladorContainer: React.FC<SimuladorContainerProps> = ({
         <TabsContent value="simulador">
           <Card className="p-6">
             <SimuladorForm 
-              produtos={produtos}
-              fornecedores={fornecedores}
-              ufs={ufs}
               aliquotas={aliquotas}
               cenarios={cenarios}
               onSubmit={handleSubmitSimulacao}
