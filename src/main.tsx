@@ -5,6 +5,13 @@ import App from "./App";
 import "./index.css";
 
 // Set global configuration to hide the Lovable badge
+// Proper declaration for TypeScript
+declare global {
+  interface Window {
+    VITE_HIDE_BADGE: boolean;
+  }
+}
+
 window.VITE_HIDE_BADGE = true;
 
 ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
