@@ -71,7 +71,7 @@ const SimuladorResultados: React.FC<SimuladorResultadosProps> = ({ resultados })
       <h2 className="text-2xl font-bold">Resultados da Simulação</h2>
       
       <div className="bg-white rounded-lg shadow-sm p-4">
-        <h3 className="text-lg font-semibold mb-4">Resumo dos Resultados</h3>
+        <h3 className="text-lg font-semibold mb-4">Resumo dos Resultados para {primeiroAno.ano}</h3>
         
         <div className="grid md:grid-cols-2 gap-8">
           <Card className="bg-blue-50 border-blue-200">
