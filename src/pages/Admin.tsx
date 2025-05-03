@@ -1,5 +1,4 @@
-
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -7,6 +6,17 @@ import { toast } from "@/components/ui/use-toast";
 import GerenciarProdutos from "@/components/admin/GerenciarProdutos";
 import GerenciarFornecedores from "@/components/admin/GerenciarFornecedores";
 import GerenciarAliquotas from "@/components/admin/GerenciarAliquotas";
+import { supabase } from "@/integrations/supabase/client";
+import { 
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 
 const Admin = () => {
   const { user, signOut } = useAuth();
@@ -74,6 +84,7 @@ const Admin = () => {
 const HomepageContentEditor = () => {
   const [contents, setContents] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
   
   useEffect(() => {
     fetchContents();
@@ -130,8 +141,6 @@ const HomepageContentEditor = () => {
       });
     }
   };
-  
-  const { user } = useAuth();
   
   if (loading) {
     return (
@@ -233,6 +242,7 @@ const EditContentForm = ({ content, onSave }: { content: any, onSave: (title: st
 const FeaturesEditor = () => {
   const [features, setFeatures] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
   
   useEffect(() => {
     fetchFeatures();
@@ -363,8 +373,6 @@ const FeaturesEditor = () => {
       });
     }
   };
-  
-  const { user } = useAuth();
   
   if (loading) {
     return (

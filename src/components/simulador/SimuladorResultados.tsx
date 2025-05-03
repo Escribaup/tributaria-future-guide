@@ -95,16 +95,16 @@ const SimuladorResultados: React.FC<SimuladorResultadosProps> = ({ resultados })
                 <div>R$ 26,98 (calculados "por dentro")</div>
                 
                 <div className="text-gray-600">Preço atual com impostos:</div>
-                <div>R$ 126,98</div>
+                <div>R$ 126,98 (100 / (1 - 21,25%))</div>
                 
                 <div className="text-gray-600">Preço sem impostos (base IVA):</div>
                 <div>R$ 100,00</div>
                 
-                <div className="text-gray-600">IVA (IBS+CBS = 22,5%):</div>
-                <div>R$ 22,50 (calculado "por fora")</div>
+                <div className="text-gray-600">IVA (IBS+CBS = 8,8%):</div>
+                <div>R$ 8,80 (calculado "por fora")</div>
                 
                 <div className="text-gray-600 font-medium">Preço final com IVA:</div>
-                <div className="font-medium">R$ 122,50</div>
+                <div className="font-medium">R$ 108,80</div>
                 
                 <div className="text-gray-600">Custo máximo (margem 30%):</div>
                 <div>R$ 70,00 (preço sem imposto × 70%)</div>
@@ -120,6 +120,11 @@ const SimuladorResultados: React.FC<SimuladorResultadosProps> = ({ resultados })
                   <div className="text-sm text-gray-600">Alíquota Total (IBS+CBS) em {resultados[0].ano}:</div>
                   <div className="text-sm font-semibold">
                     {formatPercent((resultados[0].aliquota_ibs + resultados[0].aliquota_cbs) * 100)}
+                  </div>
+                  
+                  <div className="text-sm text-gray-600">Impostos atuais:</div>
+                  <div className="text-sm font-semibold">
+                    {formatPercent(resultados[0].impostos_atuais * 100)}
                   </div>
                   
                   <div className="text-sm text-gray-600">Preço sem imposto:</div>
