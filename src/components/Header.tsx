@@ -28,7 +28,7 @@ const Header = () => {
   return (
     <header 
       className={`fixed top-0 left-0 right-0 z-50 py-4 transition-all duration-300 ${
-        isScrolled ? 'bg-white shadow-md text-idvl-text-dark' : 'bg-transparent text-white'
+        isScrolled ? 'bg-white shadow-md text-idvl-text-dark' : 'bg-idvl-blue-dark text-white'
       }`}
     >
       <div className="container-custom flex items-center justify-between">
