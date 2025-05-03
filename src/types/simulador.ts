@@ -31,9 +31,6 @@ export type CenarioSimulacao = {
   id?: number;
   nome: string;
   descricao?: string;
-  produto_id?: number;
-  fornecedor_id?: number;
-  uf_id?: number;
   ano_inicial?: number;
   ano_final?: number;
   reducao_ibs?: number; // Percentual de redução do IBS

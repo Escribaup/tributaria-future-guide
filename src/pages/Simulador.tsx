@@ -10,9 +10,6 @@ import { useSimuladorData } from '@/hooks/useSimuladorData';
 const Simulador = () => {
   const { user } = useAuth();
   const { 
-    produtos, 
-    fornecedores, 
-    ufs, 
     aliquotas, 
     cenarios, 
     loading 
@@ -28,9 +25,6 @@ const Simulador = () => {
         />
         
         <SimuladorContainer 
-          produtos={produtos}
-          fornecedores={fornecedores}
-          ufs={ufs}
           aliquotas={aliquotas}
           cenarios={cenarios}
           userId={user?.id}

@@ -24,14 +24,11 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { Produto, Fornecedor, UF, AliquotaTransicao, CenarioSimulacao } from '@/types/simulador';
+import { AliquotaTransicao, CenarioSimulacao } from '@/types/simulador';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { InfoIcon } from "lucide-react";
 
 interface SimuladorFormProps {
-  produtos: Produto[];
-  fornecedores: Fornecedor[];
-  ufs: UF[];
   aliquotas: AliquotaTransicao[];
   cenarios: CenarioSimulacao[];
   onSubmit: (data: any) => void;
@@ -42,9 +39,6 @@ interface SimuladorFormProps {
 const formularioSchema = z.object({
   nome_cenario: z.string().min(3, "Nome do cenário deve ter pelo menos 3 caracteres"),
   descricao_cenario: z.string().optional(),
-  produto_id: z.string().optional(),
-  fornecedor_id: z.string().optional(),
-  uf_id: z.string().optional(),
   ano_inicial: z.string().min(1, "Ano inicial é obrigatório"),
   ano_final: z.string().min(1, "Ano final é obrigatório"),
   custo_compra: z.string().min(1, "Custo de compra é obrigatório"),
@@ -61,9 +55,6 @@ const formularioSchema = z.object({
 });
 
 const SimuladorForm: React.FC<SimuladorFormProps> = ({
-  produtos,
-  fornecedores,
-  ufs,
   aliquotas,
   cenarios,
   onSubmit,
@@ -75,9 +66,6 @@ const SimuladorForm: React.FC<SimuladorFormProps> = ({
     defaultValues: {
       nome_cenario: "",
       descricao_cenario: "",
-      produto_id: "",
-      fornecedor_id: "",
-      uf_id: "",
       ano_inicial: "2024",
       ano_final: "2032",
       custo_compra: "",
@@ -107,9 +95,6 @@ const SimuladorForm: React.FC<SimuladorFormProps> = ({
       if (cenario) {
         form.setValue("nome_cenario", cenario.nome);
         form.setValue("descricao_cenario", cenario.descricao || "");
-        form.setValue("produto_id", cenario.produto_id?.toString() || "");
-        form.setValue("fornecedor_id", cenario.fornecedor_id?.toString() || "");
-        form.setValue("uf_id", cenario.uf_id?.toString() || "");
         form.setValue("ano_inicial", cenario.ano_inicial?.toString() || "2024");
         form.setValue("ano_final", cenario.ano_final?.toString() || "2032");
         form.setValue("reducao_ibs", cenario.reducao_ibs?.toString() || "70");
@@ -124,9 +109,6 @@ const SimuladorForm: React.FC<SimuladorFormProps> = ({
   
   const handleSubmitForm = (values: z.infer<typeof formularioSchema>) => {
     // Converter strings para números onde aplicável
-    const produto_id = values.produto_id ? parseInt(values.produto_id) : undefined;
-    const fornecedor_id = values.fornecedor_id ? parseInt(values.fornecedor_id) : undefined;
-    const uf_id = values.uf_id ? parseInt(values.uf_id) : undefined;
     const ano_inicial = parseInt(values.ano_inicial);
     const ano_final = parseInt(values.ano_final);
     const custo_compra = parseFloat(values.custo_compra);
@@ -146,9 +128,6 @@ const SimuladorForm: React.FC<SimuladorFormProps> = ({
     const cenario: CenarioSimulacao = {
       nome: values.nome_cenario,
       descricao: values.descricao_cenario,
-      produto_id,
-      fornecedor_id,
-      uf_id,
       ano_inicial,
       ano_final,
       reducao_ibs
@@ -240,92 +219,6 @@ const SimuladorForm: React.FC<SimuladorFormProps> = ({
                     <FormControl>
                       <Input {...field} placeholder="Descrição do cenário" disabled={submitting} />
                     </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-            
-            <div className="grid md:grid-cols-3 gap-4">
-              <FormField
-                control={form.control}
-                name="produto_id"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Produto</FormLabel>
-                    <Select value={field.value} onValueChange={field.onChange} disabled={submitting}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione um produto" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectLabel>Produtos</SelectLabel>
-                          {produtos.map((produto) => (
-                            <SelectItem key={produto.id} value={produto.id.toString()}>
-                              {produto.nome}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="fornecedor_id"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Fornecedor</FormLabel>
-                    <Select value={field.value} onValueChange={field.onChange} disabled={submitting}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione um fornecedor" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectLabel>Fornecedores</SelectLabel>
-                          {fornecedores.map((fornecedor) => (
-                            <SelectItem key={fornecedor.id} value={fornecedor.id.toString()}>
-                              {fornecedor.nome}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={form.control}
-                name="uf_id"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>UF</FormLabel>
-                    <Select value={field.value} onValueChange={field.onChange} disabled={submitting}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecione um estado" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectGroup>
-                          <SelectLabel>Estados</SelectLabel>
-                          {ufs.map((uf) => (
-                            <SelectItem key={uf.id} value={uf.id.toString()}>
-                              {uf.sigla} - {uf.nome}
-                            </SelectItem>
-                          ))}
-                        </SelectGroup>
-                      </SelectContent>
-                    </Select>
                     <FormMessage />
                   </FormItem>
                 )}
