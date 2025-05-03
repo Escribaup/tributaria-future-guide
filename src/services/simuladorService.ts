@@ -51,9 +51,9 @@ export const calcularResultadosSimulacao = (
   // Calcular lucro atual baseado na margem desejada
   const lucroAtual = precoAtualSemImpostos * (dados.margem_desejada / 100);
   
-  // Taxa de redução do IBS (usando o valor informado ou padrão de 70%)
-  // CORREÇÃO: aplicamos a redução apenas ao IBS, não ao CBS
-  const reducaoIBS = dados.cenario.reducao_ibs !== undefined ? dados.cenario.reducao_ibs / 100 : 0.7;
+  // Taxa de redução do IVA (usando o valor informado ou padrão de 70%)
+  // CORREÇÃO: Agora aplicamos a redução ao IVA total (IBS+CBS), não apenas ao IBS
+  const reducaoIVA = dados.cenario.reducao_ibs !== undefined ? dados.cenario.reducao_ibs / 100 : 0.7;
   
   const resultadosCalc: ResultadoSimulacao[] = [];
   const precosVenda: number[] = [];
@@ -66,21 +66,26 @@ export const calcularResultadosSimulacao = (
     
     const aliquotaIBS = aliquota.aliquota_ibs;
     const aliquotaCBS = aliquota.aliquota_cbs;
+    const aliquotaIVA = aliquotaIBS + aliquotaCBS;
     
-    // CORREÇÃO: Aplicar redução apenas na alíquota do IBS
-    const aliquotaIBSEfetiva = aliquotaIBS * (1 - reducaoIBS);
+    // IMPLEMENTAÇÃO DO ALGORITMO FORNECIDO:
+    // 1. Soma das alíquotas vigentes - já calculada como impostoAtualTotal
     
-    // CORREÇÃO: Alíquota efetiva total é a soma da alíquota IBS efetiva (reduzida) + CBS (sem redução)
-    const aliquotaEfetivaTotal = aliquotaIBSEfetiva + aliquotaCBS;
+    // 2. Preço "sem impostos" originais - já calculada como precoAtualSemImpostos
+    
+    // 3. Alíquota efetiva de IVA após redução/isenção
+    const aliquotaIVAEfetiva = aliquotaIVA * (1 - reducaoIVA);
+    
+    // 4. Novo preço com IVA "por fora"
+    const precoComNovoIVA = precoAtualSemImpostos * (1 + aliquotaIVAEfetiva);
     
     // Cenário 1: Manter preço final e lucro (necessário reduzir custo)
-    // CORREÇÃO: Preço sem impostos futuro (considerando que o preço com impostos será o mesmo)
-    const precoSemImpostosFuturo = precoAtualComImpostos / (1 + aliquotaEfetivaTotal);
-    
-    // Custo necessário para manter o preço final e o lucro atual
+    // Se queremos manter o preço final com impostos igual ao atual,
+    // precisamos encontrar o custo necessário
+    const precoSemImpostosFuturo = precoAtualComImpostos / (1 + aliquotaIVAEfetiva);
     const custoNecessario = precoSemImpostosFuturo - lucroAtual;
     
-    // CORREÇÃO: Percentual de redução de custo necessário
+    // Percentual de redução de custo necessário
     // Se for negativo, significa que não precisa reduzir custo
     const reducaoCustoPct = custoTotal > custoNecessario ? 
       ((custoTotal - custoNecessario) / custoTotal) * 100 : 0;
@@ -89,10 +94,10 @@ export const calcularResultadosSimulacao = (
     // Preço sem impostos fixo (custo + lucro)
     const precoSemImpostosFixo = custoTotal + lucroAtual;
     
-    // CORREÇÃO: Novo preço com impostos = preço sem impostos * (1 + alíquota efetiva total)
-    const precoComImpostosNovo = precoSemImpostosFixo * (1 + aliquotaEfetivaTotal);
+    // Novo preço com impostos = preço sem impostos * (1 + alíquota efetiva)
+    const precoComImpostosNovo = precoSemImpostosFixo * (1 + aliquotaIVAEfetiva);
     
-    // CORREÇÃO: Percentual de aumento no preço
+    // Percentual de aumento no preço
     const aumentoPrecoPct = ((precoComImpostosNovo - precoAtualComImpostos) / precoAtualComImpostos) * 100;
     
     precosVenda.push(precoSemImpostosFuturo);
@@ -103,8 +108,8 @@ export const calcularResultadosSimulacao = (
       ano,
       aliquota_ibs: aliquotaIBS,
       aliquota_cbs: aliquotaCBS,
-      aliquota_ibs_efetiva: aliquotaIBSEfetiva,
-      aliquota_efetiva_total: aliquotaEfetivaTotal,
+      aliquota_ibs_efetiva: aliquotaIVAEfetiva, // Renomeada, mas agora é a alíquota total efetiva
+      aliquota_efetiva_total: aliquotaIVAEfetiva, // Mantida para compatibilidade
       
       // Valores atuais
       preco_com_impostos_atual: precoAtualComImpostos,
