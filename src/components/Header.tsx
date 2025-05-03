@@ -1,7 +1,9 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from "@/components/ui/button";
+
 const Header = () => {
   const {
     user
@@ -22,6 +24,7 @@ const Header = () => {
       window.removeEventListener('scroll', handleScroll);
     };
   }, []);
+
   return <header className={`fixed top-0 left-0 right-0 z-50 py-4 transition-all duration-300 ${isScrolled ? 'bg-white shadow-md text-idvl-text-dark' : 'bg-idvl-blue-dark text-white'}`}>
       <div className="container-custom flex items-center justify-between">
         <Link to="/" className="flex items-center">
@@ -54,9 +57,6 @@ const Header = () => {
                   Admin
                 </Link>
               </li>}
-            {!user && <li>
-                
-              </li>}
           </ul>
         </nav>
         {user && <div>
@@ -67,4 +67,5 @@ const Header = () => {
       </div>
     </header>;
 };
+
 export default Header;
