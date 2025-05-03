@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import {
   Form,
@@ -50,6 +51,7 @@ const formularioSchema = z.object({
   custo_frete: z.string().optional(),
   custo_armazenagem: z.string().optional(),
   margem_desejada: z.string().min(1, "Margem desejada é obrigatória"),
+  reducao_ibs: z.string().default("70").optional(),
   // Campos de alíquotas atuais
   aliquota_icms: z.string().optional(),
   aliquota_iss: z.string().optional(),
@@ -82,6 +84,7 @@ const SimuladorForm: React.FC<SimuladorFormProps> = ({
       custo_frete: "0",
       custo_armazenagem: "0",
       margem_desejada: "30",
+      reducao_ibs: "70",
       aliquota_icms: "18",
       aliquota_iss: "5",
       aliquota_pis: "1.65",
@@ -109,6 +112,7 @@ const SimuladorForm: React.FC<SimuladorFormProps> = ({
         form.setValue("uf_id", cenario.uf_id?.toString() || "");
         form.setValue("ano_inicial", cenario.ano_inicial?.toString() || "2024");
         form.setValue("ano_final", cenario.ano_final?.toString() || "2032");
+        form.setValue("reducao_ibs", cenario.reducao_ibs?.toString() || "70");
       }
     }
   };
@@ -130,6 +134,7 @@ const SimuladorForm: React.FC<SimuladorFormProps> = ({
     const custo_armazenagem = values.custo_armazenagem ? parseFloat(values.custo_armazenagem) : 0;
     const margem_desejada = parseFloat(values.margem_desejada);
     const preco_atual = parseFloat(values.preco_atual);
+    const reducao_ibs = values.reducao_ibs ? parseFloat(values.reducao_ibs) : 70;
     
     // Alíquotas atuais
     const aliquota_icms = values.aliquota_icms ? parseFloat(values.aliquota_icms) / 100 : 0;
@@ -145,7 +150,8 @@ const SimuladorForm: React.FC<SimuladorFormProps> = ({
       fornecedor_id,
       uf_id,
       ano_inicial,
-      ano_final
+      ano_final,
+      reducao_ibs
     };
     
     // Se um cenário existente foi selecionado, incluir o ID
@@ -326,7 +332,7 @@ const SimuladorForm: React.FC<SimuladorFormProps> = ({
               />
             </div>
             
-            <div className="grid md:grid-cols-2 gap-4">
+            <div className="grid md:grid-cols-3 gap-4">
               <FormField
                 control={form.control}
                 name="ano_inicial"
@@ -378,6 +384,28 @@ const SimuladorForm: React.FC<SimuladorFormProps> = ({
                         </SelectGroup>
                       </SelectContent>
                     </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="reducao_ibs"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Redução do IBS (%)</FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...field} 
+                        type="number" 
+                        step="1" 
+                        min="0" 
+                        max="100" 
+                        placeholder="70" 
+                        disabled={submitting}
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
@@ -604,8 +632,11 @@ const SimuladorForm: React.FC<SimuladorFormProps> = ({
           <Alert variant="default" className="bg-blue-50">
             <InfoIcon className="h-4 w-4" />
             <AlertDescription>
-              Os cálculos da simulação consideram o preço atual com impostos "por dentro" e o IVA (IBS + CBS) calculado por fora do preço.
-              O preço sem imposto é calculado removendo os impostos atuais do preço informado.
+              <strong>Simulação simplificada:</strong> O simulador calculará dois cenários importantes:
+              <ul className="mt-2 list-disc pl-4">
+                <li>Quanto você precisa reduzir seus custos para manter o mesmo preço final e lucro.</li> 
+                <li>Quanto você precisará aumentar o preço para manter o mesmo custo e lucro.</li>
+              </ul>
             </AlertDescription>
           </Alert>
           

@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   LineChart,
   Line,
@@ -9,6 +9,8 @@ import {
   Tooltip,
   Legend,
   ResponsiveContainer,
+  BarChart,
+  Bar,
 } from 'recharts';
 import { ResultadoSimulacao } from '@/types/simulador';
 import { 
@@ -20,8 +22,10 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
-import { InfoIcon, FileTextIcon } from "lucide-react";
+import { InfoIcon, FileTextIcon, ArrowDown, ArrowUp } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 
 interface SimuladorResultadosProps {
   resultados: ResultadoSimulacao[];
@@ -39,6 +43,8 @@ const formatPercent = (valor: number) => {
 };
 
 const SimuladorResultados: React.FC<SimuladorResultadosProps> = ({ resultados }) => {
+  const [activeTab, setActiveTab] = useState<string>("reduzir-custo");
+
   if (!resultados.length) {
     return (
       <div className="text-center py-8">
@@ -47,11 +53,17 @@ const SimuladorResultados: React.FC<SimuladorResultadosProps> = ({ resultados })
     );
   }
   
-  const dataFormatted = resultados.map(r => ({
+  // Pegando os dados do primeiro ano para o resumo inicial
+  const primeiroAno = resultados[0];
+  
+  // Formatar dados para os gráficos
+  const dadosGrafico = resultados.map(r => ({
     ...r,
-    aliquota_total: Number((r.aliquota_ibs + r.aliquota_cbs).toFixed(4)) * 100,
-    valor_iva: r.preco_sem_imposto * (r.aliquota_ibs + r.aliquota_cbs),
-    preco_com_iva: r.preco_sem_imposto * (1 + r.aliquota_ibs + r.aliquota_cbs)
+    ano: r.ano.toString(),
+    aliquota_efetiva_pct: Number((r.aliquota_efetiva_total * 100).toFixed(2)),
+    impostos_atuais_pct: Number((r.impostos_atuais * 100).toFixed(2)),
+    reducao_custo_pct: Number(r.reducao_custo_pct.toFixed(2)),
+    aumento_preco_pct: Number(r.aumento_preco_pct.toFixed(2)),
   }));
 
   return (
@@ -59,10 +71,324 @@ const SimuladorResultados: React.FC<SimuladorResultadosProps> = ({ resultados })
       <h2 className="text-2xl font-bold">Resultados da Simulação</h2>
       
       <div className="bg-white rounded-lg shadow-sm p-4">
-        <h3 className="text-lg font-semibold mb-4">Visão Geral</h3>
+        <h3 className="text-lg font-semibold mb-4">Resumo dos Resultados</h3>
+        
+        <div className="grid md:grid-cols-2 gap-8">
+          <Card className="bg-blue-50 border-blue-200">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-blue-800 flex items-center gap-2">
+                <ArrowDown className="h-5 w-5" />
+                Cenário 1: Necessidade de Redução de Custo
+              </CardTitle>
+              <CardDescription className="text-blue-700">
+                Para manter o mesmo preço final e lucro
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-y-2">
+                <div className="text-sm text-gray-600">Redução de custo necessária:</div>
+                <div className="text-xl font-semibold text-blue-700">
+                  {formatPercent(primeiroAno.reducao_custo_pct)}
+                </div>
+                
+                <div className="text-sm text-gray-600">Custo atual:</div>
+                <div className="font-semibold">{formatCurrency(primeiroAno.custo_atual)}</div>
+                
+                <div className="text-sm text-gray-600">Custo necessário:</div>
+                <div className="font-semibold">{formatCurrency(primeiroAno.custo_necessario)}</div>
+                
+                <div className="text-sm text-gray-600">Diferença:</div>
+                <div className="font-semibold">{formatCurrency(primeiroAno.custo_atual - primeiroAno.custo_necessario)}</div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="bg-amber-50 border-amber-200">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-amber-800 flex items-center gap-2">
+                <ArrowUp className="h-5 w-5" />
+                Cenário 2: Necessidade de Aumento de Preço
+              </CardTitle>
+              <CardDescription className="text-amber-700">
+                Para manter o mesmo custo e lucro
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-y-2">
+                <div className="text-sm text-gray-600">Aumento de preço necessário:</div>
+                <div className="text-xl font-semibold text-amber-700">
+                  {formatPercent(primeiroAno.aumento_preco_pct)}
+                </div>
+                
+                <div className="text-sm text-gray-600">Preço atual:</div>
+                <div className="font-semibold">{formatCurrency(primeiroAno.preco_com_impostos_atual)}</div>
+                
+                <div className="text-sm text-gray-600">Novo preço:</div>
+                <div className="font-semibold">{formatCurrency(primeiroAno.preco_com_impostos_novo)}</div>
+                
+                <div className="text-sm text-gray-600">Diferença:</div>
+                <div className="font-semibold">{formatCurrency(primeiroAno.preco_com_impostos_novo - primeiroAno.preco_com_impostos_atual)}</div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+        
+        <div className="mt-6">
+          <Alert className="bg-gray-50 border-gray-200">
+            <InfoIcon className="h-4 w-4" />
+            <AlertDescription>
+              <p className="font-medium">Alíquotas em {primeiroAno.ano}:</p>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-2">
+                <div>
+                  <p className="text-sm text-gray-600">Impostos Atuais:</p>
+                  <p className="font-semibold">{formatPercent(primeiroAno.impostos_atuais * 100)}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">IBS Original:</p>
+                  <p className="font-semibold">{formatPercent(primeiroAno.aliquota_ibs * 100)}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">IBS com Redução:</p>
+                  <p className="font-semibold">{formatPercent(primeiroAno.aliquota_ibs_efetiva * 100)}</p>
+                </div>
+                <div>
+                  <p className="text-sm text-gray-600">IVA Total:</p>
+                  <p className="font-semibold">{formatPercent(primeiroAno.aliquota_efetiva_total * 100)}</p>
+                </div>
+              </div>
+            </AlertDescription>
+          </Alert>
+        </div>
+      </div>
+      
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="reduzir-custo">Cenário: Reduzir Custo</TabsTrigger>
+          <TabsTrigger value="aumentar-preco">Cenário: Aumentar Preço</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value="reduzir-custo">
+          <Card className="p-0 overflow-hidden">
+            <CardHeader className="bg-blue-50 border-b">
+              <CardTitle>Redução de Custo Necessária ao Longo dos Anos</CardTitle>
+              <CardDescription>
+                Este gráfico mostra o quanto você precisa reduzir seus custos para manter o mesmo preço e lucro.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-4">
+              <div className="h-[350px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={dadosGrafico}
+                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="ano" />
+                    <YAxis 
+                      yAxisId="left" 
+                      orientation="left" 
+                      label={{ value: 'Redução de Custo (%)', angle: -90, position: 'insideLeft' }} 
+                    />
+                    <Tooltip formatter={(value: any) => [`${value}%`, 'Redução de Custo']} />
+                    <Legend />
+                    <Bar 
+                      yAxisId="left" 
+                      dataKey="reducao_custo_pct" 
+                      name="Redução de Custo (%)" 
+                      fill="#0E76FD" 
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+              
+              <div className="mt-6">
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="bg-gray-50 p-4 rounded-md space-y-4">
+                    <h4 className="font-medium text-gray-800">Como Entender Este Cenário</h4>
+                    <p className="text-sm text-gray-600">
+                      Para manter o mesmo preço final e o mesmo lucro, você precisará reduzir seus custos 
+                      conforme a reforma tributária for implementada. Este cenário é ideal se você estiver 
+                      em um mercado competitivo onde aumentar preços não é viável.
+                    </p>
+                  </div>
+                  
+                  <div className="bg-gray-50 p-4 rounded-md space-y-4">
+                    <h4 className="font-medium text-gray-800">Estratégias para Redução de Custos</h4>
+                    <ul className="text-sm text-gray-600 list-disc pl-5 space-y-1">
+                      <li>Renegociação com fornecedores</li>
+                      <li>Otimização de processos operacionais</li>
+                      <li>Economia de escala</li>
+                      <li>Redução de desperdícios</li>
+                      <li>Automação e tecnologia</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <div className="mt-6 overflow-x-auto">
+            <Table>
+              <TableCaption>Detalhamento de custos por ano</TableCaption>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Ano</TableHead>
+                  <TableHead>Custo Atual</TableHead>
+                  <TableHead>Custo Necessário</TableHead>
+                  <TableHead>Diferença</TableHead>
+                  <TableHead>Redução Necessária</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {resultados.map((resultado) => (
+                  <TableRow key={`custo-${resultado.ano}`}>
+                    <TableCell className="font-medium">{resultado.ano}</TableCell>
+                    <TableCell>{formatCurrency(resultado.custo_atual)}</TableCell>
+                    <TableCell>{formatCurrency(resultado.custo_necessario)}</TableCell>
+                    <TableCell>{formatCurrency(resultado.custo_atual - resultado.custo_necessario)}</TableCell>
+                    <TableCell>{formatPercent(resultado.reducao_custo_pct)}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="aumentar-preco">
+          <Card className="p-0 overflow-hidden">
+            <CardHeader className="bg-amber-50 border-b">
+              <CardTitle>Aumento de Preço Necessário ao Longo dos Anos</CardTitle>
+              <CardDescription>
+                Este gráfico mostra o quanto você precisa aumentar seus preços para manter o mesmo custo e lucro.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="p-4">
+              <div className="h-[350px]">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={dadosGrafico}
+                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="ano" />
+                    <YAxis 
+                      yAxisId="left" 
+                      orientation="left"
+                      label={{ value: 'Aumento de Preço (%)', angle: -90, position: 'insideLeft' }} 
+                    />
+                    <Tooltip formatter={(value: any) => [`${value}%`, 'Aumento de Preço']} />
+                    <Legend />
+                    <Bar 
+                      yAxisId="left" 
+                      dataKey="aumento_preco_pct" 
+                      name="Aumento de Preço (%)" 
+                      fill="#F59E0B" 
+                    />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+              
+              <div className="mt-6">
+                <div className="grid sm:grid-cols-2 gap-4">
+                  <div className="bg-gray-50 p-4 rounded-md space-y-4">
+                    <h4 className="font-medium text-gray-800">Como Entender Este Cenário</h4>
+                    <p className="text-sm text-gray-600">
+                      Para manter o mesmo custo e lucro, você precisará aumentar seus preços
+                      conforme a reforma tributária for implementada. Este cenário é recomendado
+                      quando você não tem mais como reduzir custos, mas tem flexibilidade para 
+                      ajustar preços.
+                    </p>
+                  </div>
+                  
+                  <div className="bg-gray-50 p-4 rounded-md space-y-4">
+                    <h4 className="font-medium text-gray-800">Estratégias para Ajuste de Preços</h4>
+                    <ul className="text-sm text-gray-600 list-disc pl-5 space-y-1">
+                      <li>Comunicação clara com clientes sobre a reforma</li>
+                      <li>Ajustes graduais nos preços</li>
+                      <li>Agregação de valor ao produto/serviço</li>
+                      <li>Diferenciação competitiva</li>
+                      <li>Revisão da política comercial</li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          
+          <div className="mt-6 overflow-x-auto">
+            <Table>
+              <TableCaption>Detalhamento de preços por ano</TableCaption>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Ano</TableHead>
+                  <TableHead>Preço Atual</TableHead>
+                  <TableHead>Novo Preço</TableHead>
+                  <TableHead>Diferença</TableHead>
+                  <TableHead>Aumento Necessário</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {resultados.map((resultado) => (
+                  <TableRow key={`preco-${resultado.ano}`}>
+                    <TableCell className="font-medium">{resultado.ano}</TableCell>
+                    <TableCell>{formatCurrency(resultado.preco_com_impostos_atual)}</TableCell>
+                    <TableCell>{formatCurrency(resultado.preco_com_impostos_novo)}</TableCell>
+                    <TableCell>{formatCurrency(resultado.preco_com_impostos_novo - resultado.preco_com_impostos_atual)}</TableCell>
+                    <TableCell>{formatPercent(resultado.aumento_preco_pct)}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </TabsContent>
+      </Tabs>
+      
+      <Card>
+        <CardHeader>
+          <CardTitle>Comparativo de Alíquotas</CardTitle>
+          <CardDescription>Evolução das alíquotas de impostos ao longo dos anos</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[350px]">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart
+                data={dadosGrafico}
+                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="ano" />
+                <YAxis />
+                <Tooltip 
+                  formatter={(value: number, name: string) => [value.toFixed(2) + "%", name]}
+                />
+                <Legend />
+                <Line
+                  type="monotone"
+                  dataKey="impostos_atuais_pct"
+                  name="Impostos Atuais (%)"
+                  stroke="#6C757D"
+                  strokeWidth={2}
+                  dot={{ r: 4 }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="aliquota_efetiva_pct"
+                  name="Alíquota IVA Efetiva (%)"
+                  stroke="#0E76FD"
+                  strokeWidth={2}
+                  dot={{ r: 4 }}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </CardContent>
+      </Card>
+      
+      <div className="bg-white rounded-lg shadow-sm p-4">
+        <h3 className="text-lg font-semibold mb-4">Como Funciona o IVA</h3>
         <div className="grid md:grid-cols-2 gap-6">
           <div>
-            <h4 className="font-medium text-gray-700 mb-2">Como funcionará o IVA</h4>
+            <h4 className="font-medium text-gray-700 mb-2">Como funciona o novo sistema</h4>
             <p className="text-sm text-gray-600 mb-4">
               O novo Imposto sobre Valor Agregado (IVA) é composto pelo IBS (Imposto sobre Bens e Serviços) 
               e CBS (Contribuição sobre Bens e Serviços). Diferente dos impostos atuais, o IVA é calculado por fora
@@ -90,168 +416,48 @@ const SimuladorResultados: React.FC<SimuladorResultadosProps> = ({ resultados })
                 <div>R$ 100,00</div>
                 
                 <div className="text-gray-600">Preço sem impostos:</div>
-                <div>R$ 67,75 (100,00 × (1-0,3225))</div>
+                <div>R$ 75,61 (100,00 ÷ 1,3225)</div>
                 
                 <div className="text-gray-600">IVA (IBS+CBS = 8,8%):</div>
-                <div>R$ 5,96 (67,75 × 8,8%)</div>
+                <div>R$ 6,65 (75,61 × 8,8%)</div>
                 
                 <div className="text-gray-600 font-medium">Preço final com IVA:</div>
-                <div className="font-medium">R$ 73,71 (67,75 + 5,96)</div>
-                
-                <div className="text-gray-600">Custo máximo (margem 30%):</div>
-                <div>R$ 47,43 (preço sem imposto × 70%)</div>
-                
-                <div className="text-gray-600">Margem líquida:</div>
-                <div>-3,3% ((67,75 - 70) ÷ 67,75 × 100)</div>
+                <div className="font-medium">R$ 82,26 (75,61 + 6,65)</div>
               </div>
             </div>
           </div>
           
           <div>
-            <h4 className="font-medium text-gray-700 mb-2">Principais Resultados</h4>
-            {resultados.length > 0 && (
-              <div className="bg-gray-50 p-4 rounded-md">
-                <div className="grid grid-cols-2 gap-y-2">
-                  <div className="text-sm text-gray-600">Alíquota Total (IBS+CBS) em {resultados[0].ano}:</div>
-                  <div className="text-sm font-semibold">
-                    {formatPercent((resultados[0].aliquota_ibs + resultados[0].aliquota_cbs) * 100)}
-                  </div>
-                  
-                  <div className="text-sm text-gray-600">Impostos atuais:</div>
-                  <div className="text-sm font-semibold">
-                    {formatPercent(resultados[0].impostos_atuais * 100)}
-                  </div>
-                  
-                  <div className="text-sm text-gray-600">Preço sem imposto:</div>
-                  <div className="text-sm font-semibold">{formatCurrency(resultados[0].preco_sem_imposto)}</div>
-                  
-                  <div className="text-sm text-gray-600">Valor do IVA:</div>
-                  <div className="text-sm font-semibold">
-                    {formatCurrency(resultados[0].preco_sem_imposto * (resultados[0].aliquota_ibs + resultados[0].aliquota_cbs))}
-                  </div>
-                  
-                  <div className="text-sm text-gray-600">Preço final com IVA:</div>
-                  <div className="text-sm font-semibold">
-                    {formatCurrency(resultados[0].preco_sem_imposto * (1 + resultados[0].aliquota_ibs + resultados[0].aliquota_cbs))}
-                  </div>
-                  
-                  <div className="text-sm text-gray-600">Custo máximo:</div>
-                  <div className="text-sm font-semibold">{formatCurrency(resultados[0].custo_maximo)}</div>
-                  
-                  <div className="text-sm text-gray-600">Margem líquida:</div>
-                  <div className="text-sm font-semibold">{formatPercent(resultados[0].margem_liquida)}</div>
-                </div>
-              </div>
-            )}
+            <h4 className="font-medium text-gray-700 mb-2">Impactos da Reforma</h4>
+            <ul className="text-sm text-gray-600 list-disc pl-5 space-y-2 mb-4">
+              <li>
+                <strong>Transparência tributária</strong>: O consumidor saberá exatamente quanto está 
+                pagando de imposto.
+              </li>
+              <li>
+                <strong>Simplicidade</strong>: Substituição de diversos tributos por um único imposto.
+              </li>
+              <li>
+                <strong>Não-cumulatividade</strong>: O imposto incide apenas sobre o valor agregado em 
+                cada etapa da cadeia produtiva.
+              </li>
+              <li>
+                <strong>Transição gradual</strong>: A implementação será gradativa ao longo dos anos.
+              </li>
+            </ul>
             
             <div className="mt-4">
               <Alert className="bg-amber-50 border-amber-200">
                 <InfoIcon className="h-4 w-4 text-amber-600" />
                 <AlertDescription className="text-amber-800">
-                  <strong>Importante:</strong> O IVA não compõe a base de cálculo do próprio imposto. 
-                  Ele é aplicado por fora do preço sem impostos, diferente do modelo atual onde os impostos são calculados por dentro.
+                  <strong>Importante:</strong> Para produtos com redução de alíquota, o impacto do IVA 
+                  pode ser menor do que os tributos atuais, potencialmente resultando em redução de preços ou 
+                  aumento da competitividade.
                 </AlertDescription>
               </Alert>
             </div>
           </div>
         </div>
-      </div>
-      
-      <div className="bg-white rounded-lg shadow-sm">
-        <h3 className="text-lg font-semibold mb-4 p-4">Gráfico de Margens e Alíquotas</h3>
-        <div className="h-[400px]">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart
-              data={dataFormatted}
-              margin={{
-                top: 5,
-                right: 30,
-                left: 20,
-                bottom: 5,
-              }}
-            >
-              <CartesianGrid strokeDasharray="3 3" />
-              <XAxis dataKey="ano" />
-              <YAxis yAxisId="left" />
-              <YAxis yAxisId="right" orientation="right" />
-              <Tooltip 
-                formatter={(value: number, name: string) => {
-                  if (name === "Margem Líquida (%)" || name === "Alíquota Total (%)") {
-                    return [value.toFixed(2) + "%", name];
-                  }
-                  return [formatCurrency(value), name];
-                }}
-              />
-              <Legend />
-              <Line
-                yAxisId="left"
-                type="monotone"
-                dataKey="margem_liquida"
-                name="Margem Líquida (%)"
-                stroke="#0E76FD"
-                activeDot={{ r: 8 }}
-              />
-              <Line
-                yAxisId="right"
-                type="monotone"
-                dataKey="aliquota_total"
-                name="Alíquota Total (%)"
-                stroke="#FF8042"
-              />
-              <Line
-                yAxisId="left"
-                type="monotone"
-                dataKey="preco_sem_imposto"
-                name="Preço sem Imposto (R$)"
-                stroke="#82ca9d"
-              />
-              <Line
-                yAxisId="left"
-                type="monotone"
-                dataKey="preco_com_iva"
-                name="Preço Final com IVA (R$)"
-                stroke="#8884d8"
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      </div>
-      
-      <div className="overflow-x-auto">
-        <Table>
-          <TableCaption>Resultados da simulação por ano</TableCaption>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Ano</TableHead>
-              <TableHead>Alíquota IBS</TableHead>
-              <TableHead>Alíquota CBS</TableHead>
-              <TableHead>Preço sem Imposto</TableHead>
-              <TableHead>Valor IVA</TableHead>
-              <TableHead>Preço Final</TableHead>
-              <TableHead>Custo Máximo</TableHead>
-              <TableHead>Margem Líquida</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {resultados.map((resultado) => {
-              const valorIva = resultado.preco_sem_imposto * (resultado.aliquota_ibs + resultado.aliquota_cbs);
-              const precoFinal = resultado.preco_sem_imposto + valorIva;
-              
-              return (
-                <TableRow key={resultado.ano}>
-                  <TableCell className="font-medium">{resultado.ano}</TableCell>
-                  <TableCell>{(resultado.aliquota_ibs * 100).toFixed(2)}%</TableCell>
-                  <TableCell>{(resultado.aliquota_cbs * 100).toFixed(2)}%</TableCell>
-                  <TableCell>{formatCurrency(resultado.preco_sem_imposto)}</TableCell>
-                  <TableCell>{formatCurrency(valorIva)}</TableCell>
-                  <TableCell>{formatCurrency(precoFinal)}</TableCell>
-                  <TableCell>{formatCurrency(resultado.custo_maximo)}</TableCell>
-                  <TableCell>{formatPercent(resultado.margem_liquida)}</TableCell>
-                </TableRow>
-              );
-            })}
-          </TableBody>
-        </Table>
       </div>
     </div>
   );

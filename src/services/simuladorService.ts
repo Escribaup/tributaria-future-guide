@@ -44,23 +44,15 @@ export const calcularResultadosSimulacao = (
     dados.impostos_atuais.aliquota_cofins;
   
   // CORREÇÃO: Para impostos "por dentro", a fórmula correta é: 
-  // preço sem imposto = preço com imposto / (1 + taxa) -> ERRADO!
-  // 
-  // A fórmula correta é:
-  // preço sem imposto = preço com imposto * (1 - taxa) -> ERRADO!
-  //
-  // A fórmula realmente correta para "por dentro" é:
-  // preço sem imposto = preço com imposto / (1 + taxa) -> para impostos "por fora"
-  // preço sem imposto = preço com imposto * (1 - taxa) -> ERRADO!
-  //
-  // Para impostos "por dentro":
-  // preço com imposto = preço sem imposto / (1 - taxa)
-  // preço sem imposto = preço com imposto * (1 - taxa)
+  // preço sem imposto = preço com imposto / (1 + taxa)
+  const precoAtualComImpostos = dados.impostos_atuais.preco_atual;
+  const precoAtualSemImpostos = precoAtualComImpostos / (1 + impostoAtualTotal);
   
-  // No caso do Brasil, os impostos são calculados "por dentro", ou seja:
-  // O imposto faz parte do preço do produto
-  // Então, para obter o preço sem imposto a partir do preço com imposto:
-  const precoAtualSemImpostos = dados.impostos_atuais.preco_atual * (1 - impostoAtualTotal);
+  // Calcular lucro atual baseado na margem desejada
+  const lucroAtual = precoAtualSemImpostos * (dados.margem_desejada / 100);
+  
+  // Taxa de redução do IBS (usando o valor padrão de 70% se não for especificado)
+  const reducaoIBS = dados.cenario.reducao_ibs !== undefined ? dados.cenario.reducao_ibs / 100 : 0.7;
   
   const resultadosCalc: ResultadoSimulacao[] = [];
   const precosVenda: number[] = [];
@@ -73,30 +65,56 @@ export const calcularResultadosSimulacao = (
     
     const aliquotaIBS = aliquota.aliquota_ibs;
     const aliquotaCBS = aliquota.aliquota_cbs;
-    const aliquotaTotal = aliquotaIBS + aliquotaCBS;
     
-    // Preço sem imposto mantém-se o mesmo
-    const precoSemImposto = precoAtualSemImpostos;
+    // Aplicar redução na alíquota do IBS
+    const aliquotaIBSEfetiva = aliquotaIBS * (1 - reducaoIBS);
+    const aliquotaEfetivaTotal = aliquotaIBSEfetiva + aliquotaCBS;
     
-    // Custo máximo é calculado como uma percentagem do preço sem imposto
-    // Se a margem desejada é de 30%, então o custo máximo é 70% do preço sem imposto
-    const custoMaximo = precoSemImposto * (1 - dados.margem_desejada/100); 
+    // Cenário 1: Manter preço final e lucro (necessário reduzir custo)
+    // Preço sem impostos futuro (considerando que o preço com impostos será o mesmo)
+    const precoSemImpostosFuturo = precoAtualComImpostos / (1 + aliquotaEfetivaTotal);
     
-    // Margem líquida real baseada no custo total versus o preço sem imposto
-    const margemLiquida = ((precoSemImposto - custoTotal) / precoSemImposto) * 100;
+    // Custo necessário para manter o preço final e o lucro atual
+    const custoNecessario = precoSemImpostosFuturo - lucroAtual;
     
-    precosVenda.push(precoSemImposto);
-    custosMaximos.push(custoMaximo);
-    margensLiquidas.push(margemLiquida);
+    // Percentual de redução de custo necessário
+    const reducaoCustoPct = (custoTotal - custoNecessario) / custoTotal * 100;
+    
+    // Cenário 2: Manter custo e lucro (necessário aumentar preço)
+    // Preço sem impostos fixo (custo + lucro)
+    const precoSemImpostosFixo = custoTotal + lucroAtual;
+    
+    // Novo preço com impostos
+    const precoComImpostosNovo = precoSemImpostosFixo * (1 + aliquotaEfetivaTotal);
+    
+    // Percentual de aumento no preço
+    const aumentoPrecoPct = ((precoComImpostosNovo - precoAtualComImpostos) / precoAtualComImpostos) * 100;
+    
+    precosVenda.push(precoSemImpostosFuturo);
+    custosMaximos.push(custoNecessario);
+    margensLiquidas.push(dados.margem_desejada); // A margem desejada é mantida
     
     resultadosCalc.push({
       ano,
       aliquota_ibs: aliquotaIBS,
       aliquota_cbs: aliquotaCBS,
-      preco_sem_imposto: precoSemImposto,
-      custo_maximo: custoMaximo,
-      margem_liquida: margemLiquida,
-      impostos_atuais: impostoAtualTotal
+      aliquota_ibs_efetiva: aliquotaIBSEfetiva,
+      aliquota_efetiva_total: aliquotaEfetivaTotal,
+      
+      // Valores atuais
+      preco_com_impostos_atual: precoAtualComImpostos,
+      preco_sem_impostos_atual: precoAtualSemImpostos,
+      impostos_atuais: impostoAtualTotal,
+      custo_atual: custoTotal,
+      lucro_atual: lucroAtual,
+      
+      // Cenário 1: Manter preço final e lucro
+      custo_necessario: custoNecessario,
+      reducao_custo_pct: reducaoCustoPct,
+      
+      // Cenário 2: Manter custo e lucro
+      preco_com_impostos_novo: precoComImpostosNovo,
+      aumento_preco_pct: aumentoPrecoPct
     });
   });
 

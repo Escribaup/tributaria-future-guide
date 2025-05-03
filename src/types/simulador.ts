@@ -36,14 +36,28 @@ export type CenarioSimulacao = {
   uf_id?: number;
   ano_inicial?: number;
   ano_final?: number;
+  reducao_ibs?: number; // Novo campo para armazenar o percentual de redução do IBS
 };
 
 export type ResultadoSimulacao = {
   ano: number;
   aliquota_ibs: number;
   aliquota_cbs: number;
-  preco_sem_imposto: number;  // Preço sem imposto
-  custo_maximo: number;
-  margem_liquida: number;
-  impostos_atuais?: number;   // Valor dos impostos atuais
+  aliquota_ibs_efetiva: number; // Alíquota IBS após aplicar redução
+  aliquota_efetiva_total: number; // Soma das alíquotas efetivas (IBS+CBS)
+  
+  // Valores atuais
+  preco_com_impostos_atual: number;  // Preço com impostos atual
+  preco_sem_impostos_atual: number;  // Preço sem impostos atual
+  impostos_atuais: number;           // Taxa total dos impostos atuais
+  custo_atual: number;               // Custo atual
+  lucro_atual: number;               // Lucro atual
+  
+  // Cenário 1: Manter preço final e lucro (necessário reduzir custo)
+  custo_necessario: number;          // Custo necessário para manter preço e lucro
+  reducao_custo_pct: number;         // Percentual de redução de custo necessário
+  
+  // Cenário 2: Manter custo e lucro (necessário aumentar preço)
+  preco_com_impostos_novo: number;   // Novo preço com impostos (IVA) 
+  aumento_preco_pct: number;         // Percentual de aumento no preço
 };
