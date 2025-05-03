@@ -85,6 +85,11 @@ export const ChatbotProvider = ({ children }: ChatbotProviderProps) => {
     setIsLoading(true);
     
     try {
+      console.log("Enviando mensagem para o n8n:", {
+        url: n8nWebhookUrl,
+        message: message
+      });
+      
       // Send message to n8n webhook
       const response = await fetch(n8nWebhookUrl, {
         method: "POST",
@@ -103,11 +108,45 @@ export const ChatbotProvider = ({ children }: ChatbotProviderProps) => {
       }
       
       const data = await response.json();
+      console.log("Resposta bruta recebida do n8n:", data);
       
-      // Add bot response to chat - Handle both "response" and "output" property names
-      const botMessage = data.response || data.output || "Desculpe, não consegui processar sua pergunta.";
-      addMessage(botMessage, "bot");
-      console.log("Resposta recebida do n8n:", data);
+      // Extract the bot message from different possible response formats
+      let botMessage: string | undefined;
+      
+      if (Array.isArray(data) && data.length > 0) {
+        // Array format - get first item's output or response property
+        const firstItem = data[0];
+        botMessage = firstItem.output || firstItem.response || firstItem.message;
+      } else if (typeof data === 'object' && data !== null) {
+        // Object format - get output, response, or message property
+        botMessage = data.output || data.response || data.message;
+        
+        // If we have an object with nested structure
+        if (!botMessage && data.body) {
+          if (typeof data.body === 'string') {
+            try {
+              const bodyObj = JSON.parse(data.body);
+              botMessage = bodyObj.output || bodyObj.response || bodyObj.message;
+            } catch (e) {
+              botMessage = data.body; // Use the body as is if not valid JSON
+            }
+          } else if (typeof data.body === 'object') {
+            botMessage = data.body.output || data.body.response || data.body.message;
+          }
+        }
+      } else if (typeof data === 'string') {
+        // Direct string response
+        botMessage = data;
+      }
+
+      // If we've extracted a valid message, add it to the chat
+      if (botMessage && typeof botMessage === 'string') {
+        addMessage(botMessage, "bot");
+      } else {
+        console.error("Formato de resposta do n8n não reconhecido:", data);
+        addMessage("Desculpe, recebi uma resposta do n8n mas não consegui interpretar o formato. Por favor, verifique a configuração do webhook.", "system");
+      }
+      
     } catch (error) {
       console.error("Erro ao enviar mensagem para n8n:", error);
       addMessage("Desculpe, houve um erro ao processar sua mensagem. Por favor, verifique a configuração do webhook e tente novamente.", "system");
