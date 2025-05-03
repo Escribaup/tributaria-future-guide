@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
@@ -50,12 +49,7 @@ const Header: React.FC<HeaderProps> = () => {
           <Link to="/guia-completo" className={`block py-2 px-3 rounded-md ${isScrolled || isMenuOpen ? 'text-idvl-blue-dark hover:bg-gray-100' : 'text-white hover:bg-white/10'} lg:px-3 lg:py-2`}>
             Guia Completo
           </Link>
-          <a 
-            href="https://wa.me/41996946641" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className={`block py-2 px-3 rounded-md ${isScrolled || isMenuOpen ? 'text-idvl-blue-dark hover:bg-gray-100' : 'text-white hover:bg-white/10'} lg:px-3 lg:py-2`}
-          >
+          <a href="https://wa.me/41996946641" target="_blank" rel="noopener noreferrer" className={`block py-2 px-3 rounded-md ${isScrolled || isMenuOpen ? 'text-idvl-blue-dark hover:bg-gray-100' : 'text-white hover:bg-white/10'} lg:px-3 lg:py-2`}>
             Contato
           </a>
           
@@ -63,9 +57,7 @@ const Header: React.FC<HeaderProps> = () => {
               Administração
             </Link>}
           
-          {!user && <Link to="/auth" className={`block py-2 px-3 rounded-md ${isScrolled || isMenuOpen ? 'bg-idvl-blue-dark text-white hover:bg-idvl-blue-light' : 'bg-white text-idvl-blue-dark hover:bg-opacity-90'} lg:px-3 lg:py-2`}>
-              Login
-            </Link>}
+          {!user}
         </nav>
       </div>
     </header>;
