@@ -22,6 +22,8 @@ import {
   TableRow 
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
+import { InfoIcon, FileTextIcon } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface SimuladorResultadosProps {
   resultados: ResultadoSimulacao[];
@@ -69,14 +71,44 @@ const SimuladorResultados: React.FC<SimuladorResultadosProps> = ({ resultados })
               do preço do produto, sendo adicionado ao valor final.
             </p>
             
+            <Alert variant="default" className="bg-blue-50 mb-4">
+              <InfoIcon className="h-4 w-4" />
+              <AlertDescription>
+                <strong>Por dentro vs. Por fora</strong>: Nos impostos atuais, o imposto faz parte do preço (está "por dentro"). 
+                No modelo do IVA, o imposto é adicionado ao preço (fica "por fora"), como em países europeus.
+              </AlertDescription>
+            </Alert>
+            
             <div className="bg-gray-50 p-4 rounded-md">
-              <p className="text-sm mb-2"><strong>Exemplo:</strong></p>
-              <ul className="text-sm list-disc list-inside space-y-1 text-gray-600">
-                <li>Preço sem impostos: R$ 100,00</li>
-                <li>Alíquota IBS (12,5%) + CBS (10%): 22,5%</li>
-                <li>Valor do IVA: R$ 22,50 (calculado sobre o preço sem imposto)</li>
-                <li>Preço final para o comprador: R$ 122,50</li>
-              </ul>
+              <div className="flex items-center gap-2 mb-2">
+                <FileTextIcon className="h-4 w-4 text-gray-600" />
+                <p className="text-sm font-semibold">Exemplo de cálculo:</p>
+              </div>
+              <div className="grid grid-cols-2 gap-y-2 text-sm">
+                <div className="text-gray-600">Custo do produto:</div>
+                <div>R$ 70,00</div>
+                
+                <div className="text-gray-600">Preço sem impostos:</div>
+                <div>R$ 100,00</div>
+                
+                <div className="text-gray-600">Impostos atuais (21,25%):</div>
+                <div>R$ 26,98 (calculados "por dentro")</div>
+                
+                <div className="text-gray-600">Preço atual com impostos:</div>
+                <div>R$ 126,98</div>
+                
+                <div className="text-gray-600">Preço sem impostos (base IVA):</div>
+                <div>R$ 100,00</div>
+                
+                <div className="text-gray-600">IVA (IBS+CBS = 22,5%):</div>
+                <div>R$ 22,50 (calculado "por fora")</div>
+                
+                <div className="text-gray-600 font-medium">Preço final com IVA:</div>
+                <div className="font-medium">R$ 122,50</div>
+                
+                <div className="text-gray-600">Custo máximo (margem 30%):</div>
+                <div>R$ 70,00 (preço sem imposto × 70%)</div>
+              </div>
             </div>
           </div>
           
@@ -111,6 +143,16 @@ const SimuladorResultados: React.FC<SimuladorResultadosProps> = ({ resultados })
                 </div>
               </div>
             )}
+            
+            <div className="mt-4">
+              <Alert className="bg-amber-50 border-amber-200">
+                <InfoIcon className="h-4 w-4 text-amber-600" />
+                <AlertDescription className="text-amber-800">
+                  <strong>Importante:</strong> O IVA não compõe a base de cálculo do próprio imposto. 
+                  Ele é aplicado por fora do preço sem impostos, diferente do modelo atual onde os impostos são calculados por dentro.
+                </AlertDescription>
+              </Alert>
+            </div>
           </div>
         </div>
       </div>

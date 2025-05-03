@@ -168,7 +168,8 @@ const Simulador = () => {
         dados.impostos_atuais.aliquota_pis + 
         dados.impostos_atuais.aliquota_cofins;
         
-      // Preço atual sem impostos
+      // Preço atual sem impostos - cálculo correto conforme o exemplo
+      // Para um imposto "por dentro", a fórmula é: preço sem imposto = preço com imposto / (1 + taxa)
       const precoAtualSemImpostos = dados.impostos_atuais.preco_atual / (1 + impostoAtualTotal);
       
       const resultadosCalc: ResultadoSimulacao[] = [];
@@ -183,10 +184,15 @@ const Simulador = () => {
         const aliquotaIBS = aliquota.aliquota_ibs;
         const aliquotaCBS = aliquota.aliquota_cbs;
         
-        // Cálculos conforme a nova lógica de IVA por fora
-        const precoSemImposto = precoAtualSemImpostos; // Manter o mesmo preço sem imposto
+        // Preço sem imposto mantém-se o mesmo
+        const precoSemImposto = precoAtualSemImpostos;
+        
+        // Custo máximo é calculado como uma percentagem do preço sem imposto
+        // Se a margem desejada é de 30%, então o custo máximo é 70% do preço sem imposto
         const custoMaximo = precoSemImposto * (1 - dados.margem_desejada/100); 
-        const margemLiquida = (precoSemImposto - custoTotal) / precoSemImposto * 100;
+        
+        // Margem líquida real baseada no custo total versus o preço sem imposto
+        const margemLiquida = ((precoSemImposto - custoTotal) / precoSemImposto) * 100;
         
         precosVenda.push(precoSemImposto);
         custosMaximos.push(custoMaximo);
