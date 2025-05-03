@@ -54,9 +54,10 @@ export type ResultadoSimulacao = {
   ano: number;
   aliquota_ibs: number;
   aliquota_cbs: number;
-  preco_venda: number;
+  preco_sem_imposto: number;  // Preço sem imposto
   custo_maximo: number;
   margem_liquida: number;
+  impostos_atuais?: number;   // Valor dos impostos atuais
 };
 
 const Simulador = () => {
@@ -110,6 +111,13 @@ const Simulador = () => {
       custo_frete: number,
       custo_armazenagem: number
     },
+    impostos_atuais: {
+      aliquota_icms: number,
+      aliquota_iss: number,
+      aliquota_pis: number,
+      aliquota_cofins: number,
+      preco_atual: number
+    },
     margem_desejada: number
   }) => {
     if (!aliquotas || aliquotas.length === 0) {
@@ -154,6 +162,15 @@ const Simulador = () => {
         dados.custos.custo_frete + 
         dados.custos.custo_armazenagem;
         
+      // Extração dos impostos atuais
+      const impostoAtualTotal = dados.impostos_atuais.aliquota_icms + 
+        dados.impostos_atuais.aliquota_iss + 
+        dados.impostos_atuais.aliquota_pis + 
+        dados.impostos_atuais.aliquota_cofins;
+        
+      // Preço atual sem impostos
+      const precoAtualSemImpostos = dados.impostos_atuais.preco_atual / (1 + impostoAtualTotal);
+      
       const resultadosCalc: ResultadoSimulacao[] = [];
       const precosVenda: number[] = [];
       const custosMaximos: number[] = [];
@@ -166,12 +183,12 @@ const Simulador = () => {
         const aliquotaIBS = aliquota.aliquota_ibs;
         const aliquotaCBS = aliquota.aliquota_cbs;
         
-        // Cálculos conforme a lógica fornecida
-        const precoVenda = custoTotal / (1 - dados.margem_desejada/100) / (1 - aliquotaIBS - aliquotaCBS);
-        const custoMaximo = precoVenda * (1 - aliquotaIBS - aliquotaCBS) * (1 - dados.margem_desejada/100);
-        const margemLiquida = (precoVenda - custoTotal * (1 + aliquotaIBS + aliquotaCBS)) / precoVenda * 100;
+        // Cálculos conforme a nova lógica de IVA por fora
+        const precoSemImposto = precoAtualSemImpostos; // Manter o mesmo preço sem imposto
+        const custoMaximo = precoSemImposto * (1 - dados.margem_desejada/100); 
+        const margemLiquida = (precoSemImposto - custoTotal) / precoSemImposto * 100;
         
-        precosVenda.push(precoVenda);
+        precosVenda.push(precoSemImposto);
         custosMaximos.push(custoMaximo);
         margensLiquidas.push(margemLiquida);
         
@@ -179,9 +196,10 @@ const Simulador = () => {
           ano,
           aliquota_ibs: aliquotaIBS,
           aliquota_cbs: aliquotaCBS,
-          preco_venda: precoVenda,
+          preco_sem_imposto: precoSemImposto,
           custo_maximo: custoMaximo,
-          margem_liquida: margemLiquida
+          margem_liquida: margemLiquida,
+          impostos_atuais: impostoAtualTotal
         });
       });
       
@@ -223,7 +241,7 @@ const Simulador = () => {
       <main className="flex-grow">
         <PageHeader 
           title="Simulador da Reforma Tributária" 
-          description="Simule os impactos da reforma tributária para sua empresa"
+          description="Simule os impactos da reforma tributária em seus preços e margens"
         />
         
         <div className="container-custom py-8">

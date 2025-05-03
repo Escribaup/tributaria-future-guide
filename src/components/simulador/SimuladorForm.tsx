@@ -50,7 +50,13 @@ const formularioSchema = z.object({
   custo_compra: z.string().min(1, "Custo de compra é obrigatório"),
   custo_frete: z.string().optional(),
   custo_armazenagem: z.string().optional(),
-  margem_desejada: z.string().min(1, "Margem desejada é obrigatória")
+  margem_desejada: z.string().min(1, "Margem desejada é obrigatória"),
+  // Campos de alíquotas atuais
+  aliquota_icms: z.string().optional(),
+  aliquota_iss: z.string().optional(),
+  aliquota_pis: z.string().optional(),
+  aliquota_cofins: z.string().optional(),
+  preco_atual: z.string().min(1, "Preço atual de venda é obrigatório"),
 });
 
 const SimuladorForm: React.FC<SimuladorFormProps> = ({
@@ -76,7 +82,12 @@ const SimuladorForm: React.FC<SimuladorFormProps> = ({
       custo_compra: "",
       custo_frete: "0",
       custo_armazenagem: "0",
-      margem_desejada: "30"
+      margem_desejada: "30",
+      aliquota_icms: "18",
+      aliquota_iss: "5",
+      aliquota_pis: "1.65",
+      aliquota_cofins: "7.6",
+      preco_atual: "",
     }
   });
   
@@ -119,6 +130,13 @@ const SimuladorForm: React.FC<SimuladorFormProps> = ({
     const custo_frete = values.custo_frete ? parseFloat(values.custo_frete) : 0;
     const custo_armazenagem = values.custo_armazenagem ? parseFloat(values.custo_armazenagem) : 0;
     const margem_desejada = parseFloat(values.margem_desejada);
+    const preco_atual = parseFloat(values.preco_atual);
+    
+    // Alíquotas atuais
+    const aliquota_icms = values.aliquota_icms ? parseFloat(values.aliquota_icms) / 100 : 0;
+    const aliquota_iss = values.aliquota_iss ? parseFloat(values.aliquota_iss) / 100 : 0;
+    const aliquota_pis = values.aliquota_pis ? parseFloat(values.aliquota_pis) / 100 : 0;
+    const aliquota_cofins = values.aliquota_cofins ? parseFloat(values.aliquota_cofins) / 100 : 0;
     
     // Construir o objeto de cenário
     const cenario: CenarioSimulacao = {
@@ -143,6 +161,13 @@ const SimuladorForm: React.FC<SimuladorFormProps> = ({
         custo_compra,
         custo_frete,
         custo_armazenagem
+      },
+      impostos_atuais: {
+        aliquota_icms,
+        aliquota_iss,
+        aliquota_pis,
+        aliquota_cofins,
+        preco_atual
       },
       margem_desejada
     });
@@ -365,7 +390,7 @@ const SimuladorForm: React.FC<SimuladorFormProps> = ({
           
           {/* Dados de custo */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Dados de Custo e Margem</h3>
+            <h3 className="text-lg font-semibold">Dados de Custo e Preço Atual</h3>
             <div className="grid md:grid-cols-3 gap-4">
               <FormField
                 control={form.control}
@@ -431,7 +456,7 @@ const SimuladorForm: React.FC<SimuladorFormProps> = ({
               />
             </div>
             
-            <div className="max-w-md">
+            <div className="grid md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
                 name="margem_desejada"
@@ -453,14 +478,127 @@ const SimuladorForm: React.FC<SimuladorFormProps> = ({
                   </FormItem>
                 )}
               />
+              
+              <FormField
+                control={form.control}
+                name="preco_atual"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Preço de Venda Atual (R$)</FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...field} 
+                        type="number" 
+                        step="0.01" 
+                        min="0" 
+                        placeholder="0.00" 
+                        disabled={submitting}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+          </div>
+          
+          <Separator />
+          
+          {/* Impostos atuais */}
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold">Impostos Atuais (%)</h3>
+            <div className="grid md:grid-cols-4 gap-4">
+              <FormField
+                control={form.control}
+                name="aliquota_icms"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>ICMS (%)</FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...field} 
+                        type="number" 
+                        step="0.01" 
+                        min="0" 
+                        max="100" 
+                        disabled={submitting}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="aliquota_iss"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>ISS (%)</FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...field} 
+                        type="number" 
+                        step="0.01" 
+                        min="0" 
+                        max="100" 
+                        disabled={submitting}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="aliquota_pis"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>PIS (%)</FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...field} 
+                        type="number" 
+                        step="0.01" 
+                        min="0" 
+                        max="100" 
+                        disabled={submitting}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="aliquota_cofins"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>COFINS (%)</FormLabel>
+                    <FormControl>
+                      <Input 
+                        {...field} 
+                        type="number" 
+                        step="0.01" 
+                        min="0" 
+                        max="100" 
+                        disabled={submitting}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
           </div>
           
           <Alert variant="default" className="bg-blue-50">
             <InfoIcon className="h-4 w-4" />
             <AlertDescription>
-              Os cálculos da simulação consideram as alíquotas de transição do IBS e CBS para cada
-              ano conforme a reforma tributária.
+              Os cálculos da simulação consideram o IVA (IBS + CBS) calculado por fora do preço.
+              O preço sem imposto permanece o mesmo, e o comprador paga o IVA adicionalmente.
             </AlertDescription>
           </Alert>
           

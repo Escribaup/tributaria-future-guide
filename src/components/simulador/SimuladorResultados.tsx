@@ -21,6 +21,7 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
+import { Textarea } from "@/components/ui/textarea";
 
 interface SimuladorResultadosProps {
   resultados: ResultadoSimulacao[];
@@ -48,15 +49,74 @@ const SimuladorResultados: React.FC<SimuladorResultadosProps> = ({ resultados })
   
   const dataFormatted = resultados.map(r => ({
     ...r,
-    aliquota_total: Number((r.aliquota_ibs + r.aliquota_cbs).toFixed(4)) * 100
+    aliquota_total: Number((r.aliquota_ibs + r.aliquota_cbs).toFixed(4)) * 100,
+    valor_iva: r.preco_sem_imposto * (r.aliquota_ibs + r.aliquota_cbs),
+    preco_com_iva: r.preco_sem_imposto * (1 + r.aliquota_ibs + r.aliquota_cbs)
   }));
 
   return (
     <div className="space-y-8">
       <h2 className="text-2xl font-bold">Resultados da Simulação</h2>
       
+      <div className="bg-white rounded-lg shadow-sm p-4">
+        <h3 className="text-lg font-semibold mb-4">Visão Geral</h3>
+        <div className="grid md:grid-cols-2 gap-6">
+          <div>
+            <h4 className="font-medium text-gray-700 mb-2">Como funcionará o IVA</h4>
+            <p className="text-sm text-gray-600 mb-4">
+              O novo Imposto sobre Valor Agregado (IVA) é composto pelo IBS (Imposto sobre Bens e Serviços) 
+              e CBS (Contribuição sobre Bens e Serviços). Diferente dos impostos atuais, o IVA é calculado por fora
+              do preço do produto, sendo adicionado ao valor final.
+            </p>
+            
+            <div className="bg-gray-50 p-4 rounded-md">
+              <p className="text-sm mb-2"><strong>Exemplo:</strong></p>
+              <ul className="text-sm list-disc list-inside space-y-1 text-gray-600">
+                <li>Preço sem impostos: R$ 100,00</li>
+                <li>Alíquota IBS (12,5%) + CBS (10%): 22,5%</li>
+                <li>Valor do IVA: R$ 22,50 (calculado sobre o preço sem imposto)</li>
+                <li>Preço final para o comprador: R$ 122,50</li>
+              </ul>
+            </div>
+          </div>
+          
+          <div>
+            <h4 className="font-medium text-gray-700 mb-2">Principais Resultados</h4>
+            {resultados.length > 0 && (
+              <div className="bg-gray-50 p-4 rounded-md">
+                <div className="grid grid-cols-2 gap-y-2">
+                  <div className="text-sm text-gray-600">Alíquota Total (IBS+CBS) em {resultados[0].ano}:</div>
+                  <div className="text-sm font-semibold">
+                    {formatPercent((resultados[0].aliquota_ibs + resultados[0].aliquota_cbs) * 100)}
+                  </div>
+                  
+                  <div className="text-sm text-gray-600">Preço sem imposto:</div>
+                  <div className="text-sm font-semibold">{formatCurrency(resultados[0].preco_sem_imposto)}</div>
+                  
+                  <div className="text-sm text-gray-600">Valor do IVA:</div>
+                  <div className="text-sm font-semibold">
+                    {formatCurrency(resultados[0].preco_sem_imposto * (resultados[0].aliquota_ibs + resultados[0].aliquota_cbs))}
+                  </div>
+                  
+                  <div className="text-sm text-gray-600">Preço final com IVA:</div>
+                  <div className="text-sm font-semibold">
+                    {formatCurrency(resultados[0].preco_sem_imposto * (1 + resultados[0].aliquota_ibs + resultados[0].aliquota_cbs))}
+                  </div>
+                  
+                  <div className="text-sm text-gray-600">Custo máximo:</div>
+                  <div className="text-sm font-semibold">{formatCurrency(resultados[0].custo_maximo)}</div>
+                  
+                  <div className="text-sm text-gray-600">Margem líquida:</div>
+                  <div className="text-sm font-semibold">{formatPercent(resultados[0].margem_liquida)}</div>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+      
       <div className="bg-white rounded-lg shadow-sm">
-        <h3 className="text-lg font-semibold mb-4">Gráfico de Margens e Alíquotas</h3>
+        <h3 className="text-lg font-semibold mb-4 p-4">Gráfico de Margens e Alíquotas</h3>
         <div className="h-[400px]">
           <ResponsiveContainer width="100%" height="100%">
             <LineChart
@@ -72,7 +132,14 @@ const SimuladorResultados: React.FC<SimuladorResultadosProps> = ({ resultados })
               <XAxis dataKey="ano" />
               <YAxis yAxisId="left" />
               <YAxis yAxisId="right" orientation="right" />
-              <Tooltip />
+              <Tooltip 
+                formatter={(value: number, name: string) => {
+                  if (name === "Margem Líquida (%)" || name === "Alíquota Total (%)") {
+                    return [value.toFixed(2) + "%", name];
+                  }
+                  return [formatCurrency(value), name];
+                }}
+              />
               <Legend />
               <Line
                 yAxisId="left"
@@ -89,6 +156,20 @@ const SimuladorResultados: React.FC<SimuladorResultadosProps> = ({ resultados })
                 name="Alíquota Total (%)"
                 stroke="#FF8042"
               />
+              <Line
+                yAxisId="left"
+                type="monotone"
+                dataKey="preco_sem_imposto"
+                name="Preço sem Imposto (R$)"
+                stroke="#82ca9d"
+              />
+              <Line
+                yAxisId="left"
+                type="monotone"
+                dataKey="preco_com_iva"
+                name="Preço Final com IVA (R$)"
+                stroke="#8884d8"
+              />
             </LineChart>
           </ResponsiveContainer>
         </div>
@@ -102,22 +183,31 @@ const SimuladorResultados: React.FC<SimuladorResultadosProps> = ({ resultados })
               <TableHead>Ano</TableHead>
               <TableHead>Alíquota IBS</TableHead>
               <TableHead>Alíquota CBS</TableHead>
-              <TableHead>Preço de Venda</TableHead>
+              <TableHead>Preço sem Imposto</TableHead>
+              <TableHead>Valor IVA</TableHead>
+              <TableHead>Preço Final</TableHead>
               <TableHead>Custo Máximo</TableHead>
               <TableHead>Margem Líquida</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {resultados.map((resultado) => (
-              <TableRow key={resultado.ano}>
-                <TableCell className="font-medium">{resultado.ano}</TableCell>
-                <TableCell>{(resultado.aliquota_ibs * 100).toFixed(2)}%</TableCell>
-                <TableCell>{(resultado.aliquota_cbs * 100).toFixed(2)}%</TableCell>
-                <TableCell>{formatCurrency(resultado.preco_venda)}</TableCell>
-                <TableCell>{formatCurrency(resultado.custo_maximo)}</TableCell>
-                <TableCell>{formatPercent(resultado.margem_liquida)}</TableCell>
-              </TableRow>
-            ))}
+            {resultados.map((resultado) => {
+              const valorIva = resultado.preco_sem_imposto * (resultado.aliquota_ibs + resultado.aliquota_cbs);
+              const precoFinal = resultado.preco_sem_imposto + valorIva;
+              
+              return (
+                <TableRow key={resultado.ano}>
+                  <TableCell className="font-medium">{resultado.ano}</TableCell>
+                  <TableCell>{(resultado.aliquota_ibs * 100).toFixed(2)}%</TableCell>
+                  <TableCell>{(resultado.aliquota_cbs * 100).toFixed(2)}%</TableCell>
+                  <TableCell>{formatCurrency(resultado.preco_sem_imposto)}</TableCell>
+                  <TableCell>{formatCurrency(valorIva)}</TableCell>
+                  <TableCell>{formatCurrency(precoFinal)}</TableCell>
+                  <TableCell>{formatCurrency(resultado.custo_maximo)}</TableCell>
+                  <TableCell>{formatPercent(resultado.margem_liquida)}</TableCell>
+                </TableRow>
+              );
+            })}
           </TableBody>
         </Table>
       </div>
