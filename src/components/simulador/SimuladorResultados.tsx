@@ -85,7 +85,7 @@ const SimuladorResultados: React.FC<SimuladorResultadosProps> = ({ resultados })
                 <div className="text-gray-600">Custo do produto:</div>
                 <div>R$ 70,00</div>
                 
-                <div className="text-gray-600">Preço com impostos (21,25%):</div>
+                <div className="text-gray-600">Preço com impostos atuais (21,25%):</div>
                 <div>R$ 126,98</div>
                 
                 <div className="text-gray-600">Preço sem impostos:</div>

@@ -59,6 +59,7 @@ export const calcularResultadosSimulacao = (
     
     const aliquotaIBS = aliquota.aliquota_ibs;
     const aliquotaCBS = aliquota.aliquota_cbs;
+    const aliquotaTotal = aliquotaIBS + aliquotaCBS;
     
     // Preço sem imposto mantém-se o mesmo
     const precoSemImposto = precoAtualSemImpostos;
