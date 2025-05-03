@@ -10,6 +10,7 @@ import GuideComplete from "./pages/GuideComplete";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
+import Simulador from "./pages/Simulador"; // Nova importação
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import { AuthProvider } from "./hooks/useAuth";
@@ -18,8 +19,8 @@ import { ChatbotProvider } from "./contexts/ChatbotContext";
 import Chatbot from "./components/chatbot/Chatbot";
 import { useAuth } from "./hooks/useAuth";
 
-// Initialize environment variable to hide the Lovable badge
-// Using environment variable properly
+// Inicializar variável de ambiente para esconder o badge da Lovable
+// Usando variável de ambiente corretamente
 declare global {
   interface Window {
     VITE_HIDE_BADGE: boolean;
@@ -60,6 +61,7 @@ const App = () => {
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/guia-completo" element={<GuideComplete />} />
+                <Route path="/simulador" element={<Simulador />} /> {/* Nova rota */}
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/termos" element={<Terms />} />
                 <Route path="/privacidade" element={<Privacy />} />

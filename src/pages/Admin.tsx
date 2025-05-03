@@ -1,14 +1,12 @@
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { toast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
+import GerenciarProdutos from "@/components/admin/GerenciarProdutos";
+import GerenciarFornecedores from "@/components/admin/GerenciarFornecedores";
+import GerenciarAliquotas from "@/components/admin/GerenciarAliquotas";
 
 const Admin = () => {
   const { user, signOut } = useAuth();
@@ -37,6 +35,7 @@ const Admin = () => {
           <TabsList className="mb-6">
             <TabsTrigger value="homepage">Página Inicial</TabsTrigger>
             <TabsTrigger value="features">Recursos</TabsTrigger>
+            <TabsTrigger value="simulador">Simulador</TabsTrigger>
           </TabsList>
           
           <TabsContent value="homepage" className="space-y-6">
@@ -50,6 +49,20 @@ const Admin = () => {
             <div className="bg-white p-6 rounded-lg shadow-md">
               <h2 className="text-2xl font-semibold mb-6">Gerenciar Recursos</h2>
               <FeaturesEditor />
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="simulador" className="space-y-6">
+            <div className="bg-white p-6 rounded-lg shadow-md mb-6">
+              <GerenciarProdutos />
+            </div>
+            
+            <div className="bg-white p-6 rounded-lg shadow-md mb-6">
+              <GerenciarFornecedores />
+            </div>
+            
+            <div className="bg-white p-6 rounded-lg shadow-md">
+              <GerenciarAliquotas />
             </div>
           </TabsContent>
         </Tabs>

@@ -30,6 +30,117 @@ export type Database = {
         }
         Relationships: []
       }
+      aliquotas_transicao: {
+        Row: {
+          aliquota_cbs: number
+          aliquota_ibs: number
+          ano: number
+          id: number
+        }
+        Insert: {
+          aliquota_cbs: number
+          aliquota_ibs: number
+          ano: number
+          id?: number
+        }
+        Update: {
+          aliquota_cbs?: number
+          aliquota_ibs?: number
+          ano?: number
+          id?: number
+        }
+        Relationships: []
+      }
+      cenarios: {
+        Row: {
+          ano_final: number | null
+          ano_inicial: number | null
+          descricao: string | null
+          fornecedor_id: number | null
+          id: number
+          nome: string
+          produto_id: number | null
+          uf_id: number | null
+        }
+        Insert: {
+          ano_final?: number | null
+          ano_inicial?: number | null
+          descricao?: string | null
+          fornecedor_id?: number | null
+          id?: number
+          nome: string
+          produto_id?: number | null
+          uf_id?: number | null
+        }
+        Update: {
+          ano_final?: number | null
+          ano_inicial?: number | null
+          descricao?: string | null
+          fornecedor_id?: number | null
+          id?: number
+          nome?: string
+          produto_id?: number | null
+          uf_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cenarios_fornecedor_id_fkey"
+            columns: ["fornecedor_id"]
+            isOneToOne: false
+            referencedRelation: "fornecedores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cenarios_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cenarios_uf_id_fkey"
+            columns: ["uf_id"]
+            isOneToOne: false
+            referencedRelation: "ufs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      custos: {
+        Row: {
+          custo_armazenagem: number | null
+          custo_compra: number | null
+          custo_frete: number | null
+          data_registro: string | null
+          id: number
+          produto_id: number
+        }
+        Insert: {
+          custo_armazenagem?: number | null
+          custo_compra?: number | null
+          custo_frete?: number | null
+          data_registro?: string | null
+          id?: number
+          produto_id: number
+        }
+        Update: {
+          custo_armazenagem?: number | null
+          custo_compra?: number | null
+          custo_frete?: number | null
+          data_registro?: string | null
+          id?: number
+          produto_id?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "custos_produto_id_fkey"
+            columns: ["produto_id"]
+            isOneToOne: false
+            referencedRelation: "produtos"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       features: {
         Row: {
           description: string
@@ -68,6 +179,35 @@ export type Database = {
           },
         ]
       }
+      fornecedores: {
+        Row: {
+          id: number
+          nome: string
+          perfil: string | null
+          uf_id: number | null
+        }
+        Insert: {
+          id?: number
+          nome: string
+          perfil?: string | null
+          uf_id?: number | null
+        }
+        Update: {
+          id?: number
+          nome?: string
+          perfil?: string | null
+          uf_id?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fornecedores_uf_id_fkey"
+            columns: ["uf_id"]
+            isOneToOne: false
+            referencedRelation: "ufs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       homepage_content: {
         Row: {
           content: string | null
@@ -102,6 +242,86 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      produtos: {
+        Row: {
+          categoria: string | null
+          gtin: string
+          id: number
+          nome: string
+          perfil_fornecedor: string | null
+        }
+        Insert: {
+          categoria?: string | null
+          gtin: string
+          id?: number
+          nome: string
+          perfil_fornecedor?: string | null
+        }
+        Update: {
+          categoria?: string | null
+          gtin?: string
+          id?: number
+          nome?: string
+          perfil_fornecedor?: string | null
+        }
+        Relationships: []
+      }
+      simulacoes: {
+        Row: {
+          cenario_id: number
+          data_execucao: string | null
+          id: number
+          margem_desejada: number | null
+          margem_liquida_ano: number[] | null
+          preco_compra_maximo: number[] | null
+          preco_venda_ano: number[] | null
+        }
+        Insert: {
+          cenario_id: number
+          data_execucao?: string | null
+          id?: number
+          margem_desejada?: number | null
+          margem_liquida_ano?: number[] | null
+          preco_compra_maximo?: number[] | null
+          preco_venda_ano?: number[] | null
+        }
+        Update: {
+          cenario_id?: number
+          data_execucao?: string | null
+          id?: number
+          margem_desejada?: number | null
+          margem_liquida_ano?: number[] | null
+          preco_compra_maximo?: number[] | null
+          preco_venda_ano?: number[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "simulacoes_cenario_id_fkey"
+            columns: ["cenario_id"]
+            isOneToOne: false
+            referencedRelation: "cenarios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ufs: {
+        Row: {
+          id: number
+          nome: string
+          sigla: string
+        }
+        Insert: {
+          id?: number
+          nome: string
+          sigla: string
+        }
+        Update: {
+          id?: number
+          nome?: string
+          sigla?: string
+        }
+        Relationships: []
       }
     }
     Views: {
