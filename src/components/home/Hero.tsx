@@ -48,14 +48,14 @@ const Hero = () => {
 
   return (
     <section className="relative bg-gradient-to-r from-idvl-blue-dark to-idvl-blue-light py-16 md:py-24 overflow-hidden">
-      {/* Background image with overlay effect */}
+      {/* Background image with overlay effect - increased opacity */}
       <div className="absolute inset-0 z-0">
         <img 
           src="https://images.unsplash.com/photo-1573164713988-8665fc963095?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" 
           alt="Background" 
-          className="w-full h-full object-cover opacity-20"
+          className="w-full h-full object-cover opacity-35"
         />
-        <div className="absolute inset-0 bg-gradient-to-r from-idvl-blue-dark via-idvl-blue-dark/90 to-idvl-blue-light/80"></div>
+        <div className="absolute inset-0 bg-gradient-to-r from-idvl-blue-dark/80 via-idvl-blue-dark/70 to-idvl-blue-light/70"></div>
       </div>
 
       <div className="container-custom relative z-10">
@@ -91,16 +91,7 @@ const Hero = () => {
               </a>
             </div>
           </div>
-          <div className="lg:w-1/2 w-full">
-            <div className="relative w-full h-[400px] md:h-[450px] overflow-hidden rounded-xl animate-fade-in" style={{ animationDelay: '0.3s' }}>
-              <div className="absolute inset-0 bg-idvl-blue-light/10 mix-blend-overlay rounded-xl"></div>
-              
-              {/* Elementos decorativos */}
-              <div className="absolute -top-20 -right-20 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
-              <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-idvl-blue-light/10 rounded-full blur-3xl"></div>
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-idvl-blue-dark/20 rounded-full blur-3xl"></div>
-            </div>
-          </div>
+          {/* Removed the right side content box with the frame */}
         </div>
       </div>
 
