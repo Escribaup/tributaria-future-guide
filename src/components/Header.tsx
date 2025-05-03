@@ -63,11 +63,16 @@ const Header = () => {
               </Link>
             </li>
             <li>
-              <Link to="/contato" className={`hover:opacity-80 transition-colors ${
-                isScrolled ? 'text-idvl-text-dark' : 'text-white'
-              }`}>
+              <a 
+                href="https://wa.me/41996946641" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className={`hover:opacity-80 transition-colors ${
+                  isScrolled ? 'text-idvl-text-dark' : 'text-white'
+                }`}
+              >
                 Contato
-              </Link>
+              </a>
             </li>
             {user && (
               <li>
