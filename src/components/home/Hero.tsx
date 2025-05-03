@@ -48,12 +48,12 @@ const Hero = () => {
 
   return (
     <section className="relative bg-gradient-to-r from-idvl-blue-dark to-idvl-blue-light py-16 md:py-24 overflow-hidden">
-      {/* Background image with overlay effect - increased opacity */}
+      {/* Background image with overlay effect - improved positioning for responsive display */}
       <div className="absolute inset-0 z-0">
         <img 
           src="https://images.unsplash.com/photo-1573164713988-8665fc963095?ixlib=rb-4.0.3&auto=format&fit=crop&w=1200&q=80" 
           alt="Background" 
-          className="w-full h-full object-cover opacity-35"
+          className="w-full h-full object-cover opacity-35 object-top"
         />
         <div className="absolute inset-0 bg-gradient-to-r from-idvl-blue-dark/80 via-idvl-blue-dark/70 to-idvl-blue-light/70"></div>
       </div>
