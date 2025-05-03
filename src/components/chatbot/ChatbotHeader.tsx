@@ -18,7 +18,7 @@ interface ChatbotHeaderProps {
 }
 
 const ChatbotHeader: React.FC<ChatbotHeaderProps> = ({ onClose }) => {
-  const { n8nWebhookUrl, setN8nWebhookUrl } = useChatbot();
+  const { n8nWebhookUrl, setN8nWebhookUrl, isAdmin } = useChatbot();
   const [tempUrl, setTempUrl] = React.useState(n8nWebhookUrl);
   const [isSettingsOpen, setIsSettingsOpen] = React.useState(false);
 
@@ -40,36 +40,38 @@ const ChatbotHeader: React.FC<ChatbotHeaderProps> = ({ onClose }) => {
       </div>
 
       <div className="flex gap-1">
-        <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
-          <DialogTrigger asChild>
-            <Button variant="ghost" size="icon">
-              <Settings size={18} />
-              <span className="sr-only">Configurações</span>
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Configurações do Chatbot</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="webhook-url">URL do Webhook n8n</Label>
-                <Input
-                  id="webhook-url"
-                  placeholder="https://n8n.seudominio.com/webhook/..."
-                  value={tempUrl}
-                  onChange={(e) => setTempUrl(e.target.value)}
-                />
-                <p className="text-xs text-muted-foreground">
-                  Insira a URL do webhook do seu fluxo n8n que processa as mensagens do chatbot
-                </p>
+        {isAdmin && (
+          <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
+            <DialogTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <Settings size={18} />
+                <span className="sr-only">Configurações</span>
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Configurações do Chatbot</DialogTitle>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="webhook-url">URL do Webhook n8n</Label>
+                  <Input
+                    id="webhook-url"
+                    placeholder="https://n8n.seudominio.com/webhook/..."
+                    value={tempUrl}
+                    onChange={(e) => setTempUrl(e.target.value)}
+                  />
+                  <p className="text-xs text-muted-foreground">
+                    Insira a URL do webhook do seu fluxo n8n que processa as mensagens do chatbot
+                  </p>
+                </div>
+                <div className="flex justify-end">
+                  <Button onClick={handleSaveSettings}>Salvar</Button>
+                </div>
               </div>
-              <div className="flex justify-end">
-                <Button onClick={handleSaveSettings}>Salvar</Button>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
+            </DialogContent>
+          </Dialog>
+        )}
 
         <Button variant="ghost" size="icon" onClick={onClose}>
           <X size={18} />

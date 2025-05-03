@@ -22,37 +22,55 @@ interface ChatbotContextType {
   clearMessages: () => void;
   n8nWebhookUrl: string;
   setN8nWebhookUrl: (url: string) => void;
+  isAdmin: boolean; // Adicionado para controle de acesso
 }
 
 const ChatbotContext = createContext<ChatbotContextType | undefined>(undefined);
 
 interface ChatbotProviderProps {
   children: ReactNode;
+  defaultWebhookUrl?: string; // URL padrão pode ser fornecida como prop
+  isAdmin?: boolean; // Indica se o usuário é administrador
 }
 
-export const ChatbotProvider = ({ children }: ChatbotProviderProps) => {
+// URL padrão do webhook - pode ser substituída pela prop
+const DEFAULT_WEBHOOK_URL = "https://seu-webhook-padrao-n8n.com/webhook/...";
+
+export const ChatbotProvider = ({ children, defaultWebhookUrl, isAdmin = false }: ChatbotProviderProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [n8nWebhookUrl, setN8nWebhookUrl] = useState<string>("");
 
-  // Load webhook URL from localStorage on component mount
+  // Load webhook URL from localStorage on component mount or use default
   useEffect(() => {
-    const savedUrl = localStorage.getItem("n8nWebhookUrl");
-    if (savedUrl) {
-      setN8nWebhookUrl(savedUrl);
+    // Se for admin, tenta carregar do localStorage
+    if (isAdmin) {
+      const savedUrl = localStorage.getItem("n8nWebhookUrl");
+      if (savedUrl) {
+        setN8nWebhookUrl(savedUrl);
+      } else if (defaultWebhookUrl) {
+        setN8nWebhookUrl(defaultWebhookUrl);
+        localStorage.setItem("n8nWebhookUrl", defaultWebhookUrl);
+      } else if (DEFAULT_WEBHOOK_URL) {
+        setN8nWebhookUrl(DEFAULT_WEBHOOK_URL);
+        localStorage.setItem("n8nWebhookUrl", DEFAULT_WEBHOOK_URL);
+      }
+    } else {
+      // Se não for admin, usa diretamente a URL padrão
+      setN8nWebhookUrl(defaultWebhookUrl || DEFAULT_WEBHOOK_URL);
     }
 
     // Add welcome message when the context is first initialized
     addMessage("Olá! Sou o assistente virtual da IDVL especializado na Reforma Tributária. Como posso ajudá-lo hoje?", "bot");
-  }, []);
+  }, [defaultWebhookUrl, isAdmin]);
 
-  // Save webhook URL to localStorage when it changes
+  // Save webhook URL to localStorage when it changes (apenas para admins)
   useEffect(() => {
-    if (n8nWebhookUrl) {
+    if (isAdmin && n8nWebhookUrl) {
       localStorage.setItem("n8nWebhookUrl", n8nWebhookUrl);
     }
-  }, [n8nWebhookUrl]);
+  }, [n8nWebhookUrl, isAdmin]);
 
   const addMessage = (content: string, type: MessageType) => {
     const newMessage: Message = {
@@ -78,7 +96,12 @@ export const ChatbotProvider = ({ children }: ChatbotProviderProps) => {
     
     // Check if webhook URL is set
     if (!n8nWebhookUrl) {
-      addMessage("É necessário configurar a URL do webhook do n8n para receber respostas. Por favor, clique no ícone de configurações para configurar.", "system");
+      // Mensagem de erro diferente para admins e usuários comuns
+      if (isAdmin) {
+        addMessage("É necessário configurar a URL do webhook do n8n para receber respostas. Por favor, clique no ícone de configurações para configurar.", "system");
+      } else {
+        addMessage("Desculpe, o sistema de chat não está configurado corretamente. Por favor, contate o administrador.", "system");
+      }
       return;
     }
     
@@ -144,12 +167,20 @@ export const ChatbotProvider = ({ children }: ChatbotProviderProps) => {
         addMessage(botMessage, "bot");
       } else {
         console.error("Formato de resposta do n8n não reconhecido:", data);
-        addMessage("Desculpe, recebi uma resposta do n8n mas não consegui interpretar o formato. Por favor, verifique a configuração do webhook.", "system");
+        if (isAdmin) {
+          addMessage("Desculpe, recebi uma resposta do n8n mas não consegui interpretar o formato. Por favor, verifique a configuração do webhook.", "system");
+        } else {
+          addMessage("Desculpe, houve um problema ao processar sua mensagem. Por favor, tente novamente mais tarde.", "system");
+        }
       }
       
     } catch (error) {
       console.error("Erro ao enviar mensagem para n8n:", error);
-      addMessage("Desculpe, houve um erro ao processar sua mensagem. Por favor, verifique a configuração do webhook e tente novamente.", "system");
+      if (isAdmin) {
+        addMessage("Desculpe, houve um erro ao processar sua mensagem. Por favor, verifique a configuração do webhook e tente novamente.", "system");
+      } else {
+        addMessage("Desculpe, houve um erro ao processar sua mensagem. Por favor, tente novamente mais tarde.", "system");
+      }
       toast.error("Erro ao conectar com o serviço do chatbot");
     } finally {
       setIsLoading(false);
@@ -166,6 +197,7 @@ export const ChatbotProvider = ({ children }: ChatbotProviderProps) => {
     clearMessages,
     n8nWebhookUrl,
     setN8nWebhookUrl,
+    isAdmin,
   };
   
   return <ChatbotContext.Provider value={value}>{children}</ChatbotContext.Provider>;
