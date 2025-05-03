@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import Header from '@/components/Header';
@@ -170,7 +169,7 @@ const Simulador = () => {
         
       // CORREÇÃO: Para impostos "por dentro", a fórmula correta é: 
       // preço sem imposto = preço com imposto / (1 - taxa)
-      const precoAtualSemImpostos = dados.impostos_atuais.preco_atual / (1 + impostoAtualTotal);
+      const precoAtualSemImpostos = dados.impostos_atuais.preco_atual / (1 - impostoAtualTotal);
       
       const resultadosCalc: ResultadoSimulacao[] = [];
       const precosVenda: number[] = [];
