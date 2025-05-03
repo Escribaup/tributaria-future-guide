@@ -104,11 +104,13 @@ export const ChatbotProvider = ({ children }: ChatbotProviderProps) => {
       
       const data = await response.json();
       
-      // Add bot response to chat
-      addMessage(data.response || "Desculpe, não consegui processar sua pergunta.", "bot");
+      // Add bot response to chat - Handle both "response" and "output" property names
+      const botMessage = data.response || data.output || "Desculpe, não consegui processar sua pergunta.";
+      addMessage(botMessage, "bot");
+      console.log("Resposta recebida do n8n:", data);
     } catch (error) {
       console.error("Erro ao enviar mensagem para n8n:", error);
-      addMessage("Desculpe, houve um erro ao processar sua mensagem. Por favor, tente novamente mais tarde.", "system");
+      addMessage("Desculpe, houve um erro ao processar sua mensagem. Por favor, verifique a configuração do webhook e tente novamente.", "system");
       toast.error("Erro ao conectar com o serviço do chatbot");
     } finally {
       setIsLoading(false);
