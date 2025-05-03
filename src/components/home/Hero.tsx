@@ -82,12 +82,15 @@ const Hero = () => {
             </div>
           </div>
           <div className="lg:w-1/2 flex justify-center lg:justify-end">
-            <img 
-              src="https://images.unsplash.com/photo-1554224155-6726b3ff858f?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
-              alt="Reforma Tributária" 
-              className="rounded-lg shadow-xl max-w-full h-auto animate-fade-in"
-              style={{ maxHeight: '500px', animationDelay: '0.3s' }}
-            />
+            <div className="relative">
+              <img 
+                src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" 
+                alt="Profissional confiante" 
+                className="rounded-lg shadow-xl max-w-full h-auto animate-fade-in object-cover"
+                style={{ maxHeight: '500px', animationDelay: '0.3s', filter: 'brightness(0.9) saturate(1.1)' }}
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-idvl-blue-dark/70 to-transparent rounded-lg"></div>
+            </div>
           </div>
         </div>
       </div>
