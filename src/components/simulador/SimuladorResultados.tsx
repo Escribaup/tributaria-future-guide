@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import {
   LineChart,
@@ -60,6 +61,9 @@ const SimuladorResultados: React.FC<SimuladorResultadosProps> = ({ resultados })
     ...r,
     ano: r.ano.toString(),
     aliquota_efetiva_pct: Number((r.aliquota_efetiva_total * 100).toFixed(2)),
+    aliquota_ibs_pct: Number((r.aliquota_ibs * 100).toFixed(2)),
+    aliquota_ibs_efetiva_pct: Number((r.aliquota_ibs_efetiva * 100).toFixed(2)),
+    aliquota_cbs_pct: Number((r.aliquota_cbs * 100).toFixed(2)),
     impostos_atuais_pct: Number((r.impostos_atuais * 100).toFixed(2)),
     reducao_custo_pct: Number(r.reducao_custo_pct.toFixed(2)),
     aumento_preco_pct: Number(r.aumento_preco_pct.toFixed(2)),
