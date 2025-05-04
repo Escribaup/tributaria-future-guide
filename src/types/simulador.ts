@@ -33,7 +33,7 @@ export type CenarioSimulacao = {
   descricao?: string;
   ano_inicial?: number;
   ano_final?: number;
-  reducao_ibs?: number; // Percentual de redução do IBS
+  reducao_ibs?: number; // Percentual de redução do IBS ou CBS
 };
 
 export type ResultadoSimulacao = {
@@ -41,6 +41,7 @@ export type ResultadoSimulacao = {
   aliquota_ibs: number;
   aliquota_cbs: number;
   aliquota_ibs_efetiva: number; // Alíquota IBS após aplicar redução
+  aliquota_cbs_efetiva: number; // Alíquota CBS após aplicar redução (quando IBS é 0%)
   aliquota_efetiva_total: number; // Soma das alíquotas efetivas (IBS+CBS)
   
   // Valores atuais

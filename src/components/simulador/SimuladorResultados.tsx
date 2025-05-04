@@ -22,10 +22,16 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
-import { InfoIcon, FileTextIcon, ArrowDown, ArrowUp } from "lucide-react";
+import { InfoIcon, FileTextIcon, ArrowDown, ArrowUp, HelpCircle } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Tooltip as TooltipUI,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface SimuladorResultadosProps {
   resultados: ResultadoSimulacao[];
@@ -64,10 +70,14 @@ const SimuladorResultados: React.FC<SimuladorResultadosProps> = ({ resultados })
     aliquota_ibs_pct: Number((r.aliquota_ibs * 100).toFixed(2)),
     aliquota_ibs_efetiva_pct: Number((r.aliquota_ibs_efetiva * 100).toFixed(2)),
     aliquota_cbs_pct: Number((r.aliquota_cbs * 100).toFixed(2)),
+    aliquota_cbs_efetiva_pct: Number((r.aliquota_cbs_efetiva * 100).toFixed(2)),
     impostos_atuais_pct: Number((r.impostos_atuais * 100).toFixed(2)),
     reducao_custo_pct: Number(r.reducao_custo_pct.toFixed(2)),
     aumento_preco_pct: Number(r.aumento_preco_pct.toFixed(2)),
   }));
+
+  // Determinar se há algum ano com IBS zero para exibir informação específica
+  const temAnoComIBSZero = resultados.some(r => r.aliquota_ibs === 0);
 
   return (
     <div className="space-y-8">
@@ -147,21 +157,79 @@ const SimuladorResultados: React.FC<SimuladorResultadosProps> = ({ resultados })
                   <p className="font-semibold">{formatPercent(primeiroAno.impostos_atuais * 100)}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">IBS Original:</p>
+                  <p className="text-sm text-gray-600">
+                    IBS Original:
+                    <TooltipProvider>
+                      <TooltipUI>
+                        <TooltipTrigger asChild>
+                          <HelpCircle className="inline ml-1 h-3 w-3 text-gray-400" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="w-[200px]">
+                            Alíquota original do IBS no período. Em alguns anos da transição, pode ser 0%.
+                          </p>
+                        </TooltipContent>
+                      </TooltipUI>
+                    </TooltipProvider>
+                  </p>
                   <p className="font-semibold">{formatPercent(primeiroAno.aliquota_ibs * 100)}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">IBS com Redução:</p>
-                  <p className="font-semibold">{formatPercent(primeiroAno.aliquota_ibs_efetiva * 100)}</p>
+                  <p className="text-sm text-gray-600">
+                    CBS Original:
+                    <TooltipProvider>
+                      <TooltipUI>
+                        <TooltipTrigger asChild>
+                          <HelpCircle className="inline ml-1 h-3 w-3 text-gray-400" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="w-[200px]">
+                            Alíquota original do CBS no período.
+                          </p>
+                        </TooltipContent>
+                      </TooltipUI>
+                    </TooltipProvider>
+                  </p>
+                  <p className="font-semibold">{formatPercent(primeiroAno.aliquota_cbs * 100)}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-600">IVA Total:</p>
+                  <p className="text-sm text-gray-600">
+                    IVA Total Efetivo:
+                    <TooltipProvider>
+                      <TooltipUI>
+                        <TooltipTrigger asChild>
+                          <HelpCircle className="inline ml-1 h-3 w-3 text-gray-400" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p className="w-[240px]">
+                            Alíquota efetiva total após aplicar a redução (IBS + CBS). 
+                            {primeiroAno.aliquota_ibs === 0 
+                              ? ' Como o IBS é zero neste período, a redução é aplicada ao CBS.' 
+                              : ' A redução é aplicada apenas ao IBS.'}
+                          </p>
+                        </TooltipContent>
+                      </TooltipUI>
+                    </TooltipProvider>
+                  </p>
                   <p className="font-semibold">{formatPercent(primeiroAno.aliquota_efetiva_total * 100)}</p>
                 </div>
               </div>
             </AlertDescription>
           </Alert>
         </div>
+        
+        {temAnoComIBSZero && (
+          <div className="mt-4">
+            <Alert className="bg-amber-50 border-amber-200">
+              <InfoIcon className="h-4 w-4 text-amber-600" />
+              <AlertDescription className="text-amber-800">
+                <strong>Importante:</strong> Em alguns anos da transição tributária, o IBS tem alíquota zero. 
+                Nesses casos, a redução é aplicada sobre a alíquota do CBS, resultando em 
+                um cálculo diferente do período com IBS.
+              </AlertDescription>
+            </Alert>
+          </div>
+        )}
       </div>
       
       <Tabs value={activeTab} onValueChange={setActiveTab}>
@@ -381,8 +449,57 @@ const SimuladorResultados: React.FC<SimuladorResultadosProps> = ({ resultados })
                   strokeWidth={2}
                   dot={{ r: 4 }}
                 />
+                <Line
+                  type="monotone"
+                  dataKey="aliquota_ibs_pct"
+                  name="IBS Original (%)"
+                  stroke="#38BDF8"
+                  strokeWidth={1.5}
+                  strokeDasharray="5 5"
+                  dot={{ r: 3 }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="aliquota_cbs_pct"
+                  name="CBS Original (%)"
+                  stroke="#F59E0B"
+                  strokeWidth={1.5}
+                  strokeDasharray="5 5"
+                  dot={{ r: 3 }}
+                />
               </LineChart>
             </ResponsiveContainer>
+          </div>
+
+          <div className="mt-6">
+            <Table>
+              <TableCaption>Detalhamento das alíquotas por ano</TableCaption>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Ano</TableHead>
+                  <TableHead>IBS (%)</TableHead>
+                  <TableHead>CBS (%)</TableHead>
+                  <TableHead>Redução Aplicada</TableHead>
+                  <TableHead>Alíquota Efetiva (%)</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {resultados.map((resultado) => (
+                  <TableRow key={`aliquotas-${resultado.ano}`}>
+                    <TableCell className="font-medium">{resultado.ano}</TableCell>
+                    <TableCell>{formatPercent(resultado.aliquota_ibs * 100)}</TableCell>
+                    <TableCell>{formatPercent(resultado.aliquota_cbs * 100)}</TableCell>
+                    <TableCell>
+                      {resultado.aliquota_ibs === 0 
+                        ? `Redução no CBS: ${formatPercent((1 - resultado.aliquota_cbs_efetiva / resultado.aliquota_cbs) * 100)}`
+                        : `Redução no IBS: ${formatPercent((1 - resultado.aliquota_ibs_efetiva / resultado.aliquota_ibs) * 100)}`
+                      }
+                    </TableCell>
+                    <TableCell>{formatPercent(resultado.aliquota_efetiva_total * 100)}</TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           </div>
         </CardContent>
       </Card>
@@ -453,9 +570,9 @@ const SimuladorResultados: React.FC<SimuladorResultadosProps> = ({ resultados })
               <Alert className="bg-amber-50 border-amber-200">
                 <InfoIcon className="h-4 w-4 text-amber-600" />
                 <AlertDescription className="text-amber-800">
-                  <strong>Importante:</strong> Para produtos com redução de alíquota, o impacto do IVA 
-                  pode ser menor do que os tributos atuais, potencialmente resultando em redução de preços ou 
-                  aumento da competitividade.
+                  <strong>Importante:</strong> Durante a transição tributária, o IBS e o CBS são implementados gradualmente.
+                  Em alguns anos, o IBS tem alíquota zero e apenas o CBS está em vigor. Nestas situações,
+                  a redução percentual é aplicada ao CBS.
                 </AlertDescription>
               </Alert>
             </div>

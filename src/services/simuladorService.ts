@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { ResultadoSimulacao, AliquotaTransicao, CenarioSimulacao } from '@/types/simulador';
 
@@ -52,8 +53,9 @@ export const calcularResultadosSimulacao = (
   // Calcular lucro atual baseado na margem desejada
   const lucroAtual = precoAtualSemImpostos * (dados.margem_desejada / 100);
   
-  // Taxa de redução do IBS (usando o valor informado ou padrão de 70%)
-  const reducaoIVA = dados.cenario.reducao_ibs !== undefined ? dados.cenario.reducao_ibs / 100 : 0.7;
+  // Taxa de redução a ser aplicada ao IBS ou CBS
+  // Renomeado para "reducaoTaxa" para clarificar que pode se aplicar a diferentes componentes
+  const reducaoTaxa = dados.cenario.reducao_ibs !== undefined ? dados.cenario.reducao_ibs / 100 : 0.7;
   
   const resultadosCalc: ResultadoSimulacao[] = [];
   const precosVenda: number[] = [];
@@ -64,27 +66,37 @@ export const calcularResultadosSimulacao = (
     const aliquota = aliquotas.find(a => a.ano === ano);
     if (!aliquota) return;
     
-    // Valores das alíquotas do banco de dados
-    const aliquotaIBS = aliquota.aliquota_ibs || 0.177; // 17,7%
-    const aliquotaCBS = aliquota.aliquota_cbs || 0.088; // 8,8%
+    // Pegar valores das alíquotas diretamente do banco sem fallbacks
+    const aliquotaIBS = aliquota.aliquota_ibs;
+    const aliquotaCBS = aliquota.aliquota_cbs;
     
-    // CORREÇÃO: A redução só se aplica ao IBS, não ao CBS
-    const aliquotaIBSEfetiva = aliquotaIBS * (1 - reducaoIVA); // Aplicar redução apenas ao IBS
-    const aliquotaIVAEfetiva = aliquotaIBSEfetiva + aliquotaCBS; // Total do IVA efetivo
+    // Nova lógica para aplicar redução dependendo do cenário
+    let aliquotaIBSEfetiva = 0;
+    let aliquotaCBSEfetiva = aliquotaCBS;
+    
+    // Se o IBS é zero, aplicamos a redução ao CBS
+    if (aliquotaIBS === 0) {
+      aliquotaCBSEfetiva = aliquotaCBS * (1 - reducaoTaxa);
+    } else {
+      // Caso contrário, aplicamos a redução ao IBS
+      aliquotaIBSEfetiva = aliquotaIBS * (1 - reducaoTaxa);
+    }
+    
+    // Total do IVA efetivo após aplicar redução
+    const aliquotaIVAEfetiva = aliquotaIBSEfetiva + aliquotaCBSEfetiva;
     
     // IMPLEMENTAÇÃO DO ALGORITMO FORNECIDO:
     // 1. Soma das alíquotas vigentes - já calculada como impostoAtualTotal
     
     // 2. Preço "sem impostos" originais - já calculada como precoAtualSemImpostos
     
-    // 3. Alíquota efetiva total (IBS reduzido + CBS)
+    // 3. Alíquota efetiva total (IBS reduzido/CBS reduzido)
     // Já calculada como aliquotaIVAEfetiva
     
     // 4. Novo preço com IVA "por fora"
     const precoComNovoIVA = precoAtualSemImpostos * (1 + aliquotaIVAEfetiva);
     
     // Cenário 1: Manter preço final e lucro (necessário reduzir custo)
-    // CORREÇÃO: Fórmula para calcular preço sem impostos no novo sistema
     const precoSemImpostosFuturo = precoAtualComImpostos / (1 + aliquotaIVAEfetiva);
     const custoNecessario = precoSemImpostosFuturo - lucroAtual;
     
@@ -110,8 +122,9 @@ export const calcularResultadosSimulacao = (
       ano,
       aliquota_ibs: aliquotaIBS,
       aliquota_cbs: aliquotaCBS,
-      aliquota_ibs_efetiva: aliquotaIBSEfetiva, // Corrigido: agora é só a alíquota IBS após redução
-      aliquota_efetiva_total: aliquotaIVAEfetiva, // Total efetivo (IBS reduzido + CBS)
+      aliquota_ibs_efetiva: aliquotaIBSEfetiva,
+      aliquota_cbs_efetiva: aliquotaCBSEfetiva, // Nova propriedade para armazenar o CBS efetivo
+      aliquota_efetiva_total: aliquotaIVAEfetiva,
       
       // Valores atuais
       preco_com_impostos_atual: precoAtualComImpostos,
