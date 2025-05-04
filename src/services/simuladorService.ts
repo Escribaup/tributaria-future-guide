@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { ResultadoSimulacao, AliquotaTransicao, CenarioSimulacao } from '@/types/simulador';
 
@@ -46,13 +45,9 @@ export const calcularResultadosSimulacao = (
   
   const impostoAtualTotal = aliquotaICMS + aliquotaISS + aliquotaPIS + aliquotaCOFINS;
   
-  // Correção da fórmula conforme indicado pelo usuário:
-  // Preço sem impostos = preço com impostos * (1 - % total impostos)
-  // Para "por fora"
+  // Para impostos "por dentro", a fórmula correta é: 
+  // preço sem imposto = preço com imposto / (1 + taxa)
   const precoAtualComImpostos = dados.impostos_atuais.preco_atual;
-  
-  // Para impostos "por dentro", que é como funciona o sistema atual
-  // A fórmula correta que estava sendo usada:
   const precoAtualSemImpostos = precoAtualComImpostos / (1 + impostoAtualTotal);
   
   // Calcular lucro atual baseado na margem desejada
