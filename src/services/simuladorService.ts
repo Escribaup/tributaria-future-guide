@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 import { ResultadoSimulacao, AliquotaTransicao, CenarioSimulacao } from '@/types/simulador';
 
@@ -38,10 +37,13 @@ export const calcularResultadosSimulacao = (
     dados.custos.custo_armazenagem;
     
   // Extração dos impostos atuais
-  const impostoAtualTotal = dados.impostos_atuais.aliquota_icms + 
-    dados.impostos_atuais.aliquota_iss + 
-    dados.impostos_atuais.aliquota_pis + 
-    dados.impostos_atuais.aliquota_cofins;
+  // Valores padrão atualizados conforme exemplo fornecido (21,25%)
+  const aliquotaICMS = dados.impostos_atuais.aliquota_icms || 0.12; // 12%
+  const aliquotaISS = dados.impostos_atuais.aliquota_iss || 0;
+  const aliquotaPIS = dados.impostos_atuais.aliquota_pis || 0.0165; // 1.65%
+  const aliquotaCOFINS = dados.impostos_atuais.aliquota_cofins || 0.076; // 7.6%
+  
+  const impostoAtualTotal = aliquotaICMS + aliquotaISS + aliquotaPIS + aliquotaCOFINS;
   
   // Para impostos "por dentro", a fórmula correta é: 
   // preço sem imposto = preço com imposto / (1 + taxa)
@@ -52,7 +54,6 @@ export const calcularResultadosSimulacao = (
   const lucroAtual = precoAtualSemImpostos * (dados.margem_desejada / 100);
   
   // Taxa de redução do IVA (usando o valor informado ou padrão de 70%)
-  // CORREÇÃO: Agora aplicamos a redução ao IVA total (IBS+CBS), não apenas ao IBS
   const reducaoIVA = dados.cenario.reducao_ibs !== undefined ? dados.cenario.reducao_ibs / 100 : 0.7;
   
   const resultadosCalc: ResultadoSimulacao[] = [];
@@ -64,8 +65,10 @@ export const calcularResultadosSimulacao = (
     const aliquota = aliquotas.find(a => a.ano === ano);
     if (!aliquota) return;
     
-    const aliquotaIBS = aliquota.aliquota_ibs;
-    const aliquotaCBS = aliquota.aliquota_cbs;
+    // Valores atualizados para IBS e CBS conforme o exemplo (26,50% total)
+    // Se estiver no supabase, usamos os valores do banco, caso contrário, usamos valores padrão
+    const aliquotaIBS = aliquota.aliquota_ibs || 0.177; // 17,7%
+    const aliquotaCBS = aliquota.aliquota_cbs || 0.088; // 8,8%
     const aliquotaIVA = aliquotaIBS + aliquotaCBS;
     
     // IMPLEMENTAÇÃO DO ALGORITMO FORNECIDO:

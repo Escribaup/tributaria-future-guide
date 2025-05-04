@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import {
   LineChart,
@@ -412,17 +411,17 @@ const SimuladorResultados: React.FC<SimuladorResultadosProps> = ({ resultados })
                 <div className="text-gray-600">Custo do produto:</div>
                 <div>R$ 70,00</div>
                 
-                <div className="text-gray-600">Preço com impostos atuais (32,25%):</div>
+                <div className="text-gray-600">Preço com impostos atuais (21,25%):</div>
                 <div>R$ 100,00</div>
                 
                 <div className="text-gray-600">Preço sem impostos:</div>
-                <div>R$ 75,61 (100,00 ÷ 1,3225)</div>
+                <div>R$ 75,61 (100,00 ÷ 1,2125)</div>
                 
-                <div className="text-gray-600">IVA (IBS+CBS = 8,8%):</div>
-                <div>R$ 6,65 (75,61 × 8,8%)</div>
+                <div className="text-gray-600">IVA (IBS+CBS = 26,50%):</div>
+                <div>R$ 20,04 (75,61 × 26,50%)</div>
                 
                 <div className="text-gray-600 font-medium">Preço final com IVA:</div>
-                <div className="font-medium">R$ 82,26 (75,61 + 6,65)</div>
+                <div className="font-medium">R$ 95,65 (75,61 + 20,04)</div>
               </div>
             </div>
           </div>
