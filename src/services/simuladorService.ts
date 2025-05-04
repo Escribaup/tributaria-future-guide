@@ -83,8 +83,9 @@ export const calcularResultadosSimulacao = (
     const precoComNovoIVA = precoAtualSemImpostos * (1 + aliquotaIVAEfetiva);
     
     // Cenário 1: Manter preço final e lucro (necessário reduzir custo)
-    // Se queremos manter o preço final com impostos igual ao atual,
-    // precisamos encontrar o custo necessário
+    // Se queremos manter o preço final igual ao atual, precisamos calcular o custo necessário
+    // Partindo do preço com impostos atual, calculamos o preço sem impostos futuro
+    // usando o mesmo valor de preço com impostos mas dividindo pela nova taxa IVA efetiva
     const precoSemImpostosFuturo = precoAtualComImpostos / (1 + aliquotaIVAEfetiva);
     const custoNecessario = precoSemImpostosFuturo - lucroAtual;
     
