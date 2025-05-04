@@ -37,11 +37,11 @@ export const calcularResultadosSimulacao = (
     dados.custos.custo_frete + 
     dados.custos.custo_armazenagem;
     
-  // Extração dos impostos atuais
-  const aliquotaICMS = dados.impostos_atuais.aliquota_icms || 0.12; // 12%
-  const aliquotaISS = dados.impostos_atuais.aliquota_iss || 0;
-  const aliquotaPIS = dados.impostos_atuais.aliquota_pis || 0.0165; // 1.65%
-  const aliquotaCOFINS = dados.impostos_atuais.aliquota_cofins || 0.076; // 7.6%
+  // Extração dos impostos atuais - CORRIGIDO para respeitar valores zero
+  const aliquotaICMS = dados.impostos_atuais.aliquota_icms !== undefined ? dados.impostos_atuais.aliquota_icms : 0.12;
+  const aliquotaISS = dados.impostos_atuais.aliquota_iss !== undefined ? dados.impostos_atuais.aliquota_iss : 0;
+  const aliquotaPIS = dados.impostos_atuais.aliquota_pis !== undefined ? dados.impostos_atuais.aliquota_pis : 0.0165;
+  const aliquotaCOFINS = dados.impostos_atuais.aliquota_cofins !== undefined ? dados.impostos_atuais.aliquota_cofins : 0.076;
   
   const impostoAtualTotal = aliquotaICMS + aliquotaISS + aliquotaPIS + aliquotaCOFINS;
   
