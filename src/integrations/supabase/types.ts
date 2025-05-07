@@ -270,30 +270,36 @@ export type Database = {
       simulacoes: {
         Row: {
           cenario_id: number
+          dados_enviados_n8n: Json | null
           data_execucao: string | null
           id: number
           margem_desejada: number | null
           margem_liquida_ano: number[] | null
           preco_compra_maximo: number[] | null
           preco_venda_ano: number[] | null
+          resultados_n8n: Json | null
         }
         Insert: {
           cenario_id: number
+          dados_enviados_n8n?: Json | null
           data_execucao?: string | null
           id?: number
           margem_desejada?: number | null
           margem_liquida_ano?: number[] | null
           preco_compra_maximo?: number[] | null
           preco_venda_ano?: number[] | null
+          resultados_n8n?: Json | null
         }
         Update: {
           cenario_id?: number
+          dados_enviados_n8n?: Json | null
           data_execucao?: string | null
           id?: number
           margem_desejada?: number | null
           margem_liquida_ano?: number[] | null
           preco_compra_maximo?: number[] | null
           preco_venda_ano?: number[] | null
+          resultados_n8n?: Json | null
         }
         Relationships: [
           {

@@ -14,6 +14,7 @@ import { enviarDadosParaN8n } from '@/services/simuladorService';
 const Index = () => {
   const { aliquotas, loading } = useSimuladorData(undefined);
   const [enviandoDados, setEnviandoDados] = React.useState(false);
+  const [resultadoN8n, setResultadoN8n] = React.useState<any>(null);
 
   // Função para testar o webhook com dados de exemplo
   const testarWebhook = async () => {
@@ -52,11 +53,12 @@ const Index = () => {
         margem_desejada: 30
       };
 
-      await enviarDadosParaN8n(dadosTeste, aliquotas);
+      const response = await enviarDadosParaN8n(dadosTeste, aliquotas);
+      setResultadoN8n(response);
 
       toast({
         title: "Teste realizado com sucesso",
-        description: "Os dados de teste foram enviados para o webhook do n8n."
+        description: "Os dados de teste foram enviados para o webhook do n8n e a resposta foi recebida."
       });
     } catch (error) {
       console.error('Erro ao testar webhook:', error);
@@ -73,7 +75,7 @@ const Index = () => {
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
-      <main className="flex-grow pt-16 md:pt-16"> {/* Adjusted padding for mobile */}
+      <main className="flex-grow pt-16 md:pt-16">
         <Hero />
         <Features />
         <Timeline />
@@ -90,6 +92,15 @@ const Index = () => {
             >
               {enviandoDados ? "Enviando..." : "Testar Webhook do n8n"}
             </Button>
+            
+            {resultadoN8n && (
+              <div className="mt-4 p-4 bg-white rounded-lg">
+                <h4 className="font-medium mb-2">Resposta do Webhook:</h4>
+                <pre className="text-xs overflow-auto max-h-40 bg-gray-50 p-2 rounded">
+                  {JSON.stringify(resultadoN8n, null, 2)}
+                </pre>
+              </div>
+            )}
           </div>
         )}
       </main>

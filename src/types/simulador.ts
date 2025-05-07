@@ -59,3 +59,9 @@ export type ResultadoSimulacao = {
   preco_com_impostos_novo: number;   // Novo preço com impostos (IVA) 
   aumento_preco_pct: number;         // Percentual de aumento no preço
 };
+
+export type ResultadoWebhookN8n = {
+  dadosEnviados: any;
+  resultados: any;
+  success: boolean;
+};

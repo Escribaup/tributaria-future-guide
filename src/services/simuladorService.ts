@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { ResultadoSimulacao, AliquotaTransicao, CenarioSimulacao } from '@/types/simulador';
 
@@ -152,7 +153,9 @@ export const salvarSimulacao = async (
   margem_desejada: number,
   precosVenda: number[],
   custosMaximos: number[],
-  margensLiquidas: number[]
+  margensLiquidas: number[],
+  dadosEnviados?: any,
+  resultadosN8n?: any
 ) => {
   if (!userId || cenarioId <= 0) return;
   
@@ -163,7 +166,9 @@ export const salvarSimulacao = async (
       margem_desejada,
       preco_venda_ano: precosVenda,
       preco_compra_maximo: custosMaximos,
-      margem_liquida_ano: margensLiquidas
+      margem_liquida_ano: margensLiquidas,
+      dados_enviados_n8n: dadosEnviados,
+      resultados_n8n: resultadosN8n
     }]);
 };
 
@@ -180,7 +185,7 @@ export const salvarCenario = async (
     .single();
 };
 
-// Nova função para enviar dados para o webhook do n8n
+// Função atualizada para enviar dados para o webhook do n8n e retornar a resposta
 export const enviarDadosParaN8n = async (
   dados: {
     cenario: CenarioSimulacao,
@@ -259,13 +264,22 @@ export const enviarDadosParaN8n = async (
       throw new Error(`Erro ao enviar dados para o webhook: ${response.status} ${response.statusText}`);
     }
     
-    // Tentar processar a resposta
+    // Processar a resposta
     try {
       const responseData = await response.json();
-      return responseData;
+      console.log("Resposta do webhook:", responseData);
+      return { 
+        success: true, 
+        dadosEnviados: dadosWebhook, 
+        resultados: responseData 
+      };
     } catch (jsonError) {
       console.log("O webhook não retornou um JSON válido, mas os dados foram enviados com sucesso");
-      return { success: true };
+      return { 
+        success: true,
+        dadosEnviados: dadosWebhook,
+        resultados: { mensagem: "Resposta não contém JSON válido" } 
+      };
     }
   } catch (error) {
     console.error("Erro ao enviar dados para o webhook:", error);
