@@ -11,7 +11,7 @@ const Index = () => {
   return (
     <div className="flex flex-col min-h-screen">
       <Header />
-      <main className="flex-grow pt-16"> {/* Added padding-top to account for fixed header */}
+      <main className="flex-grow pt-16 md:pt-16"> {/* Adjusted padding for mobile */}
         <Hero />
         <Features />
         <Timeline />

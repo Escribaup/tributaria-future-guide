@@ -3,9 +3,12 @@ import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Separator } from '@/components/ui/separator';
 import { ChevronRight } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const Timeline = () => {
   const [activeYear, setActiveYear] = useState("2023");
+  const isMobile = useIsMobile();
+  
   const timelineData = [
     {
       year: "2023",
@@ -72,6 +75,7 @@ const Timeline = () => {
 
   const activeData = timelineData.find(item => item.year === activeYear) || timelineData[0];
 
+  // Render a horizontal timeline for desktop and a vertical timeline for mobile
   return (
     <section className="section-padding bg-idvl-gray">
       <div className="container-custom">
@@ -84,43 +88,63 @@ const Timeline = () => {
           </p>
         </div>
 
-        {/* Timeline visualization */}
-        <div className="relative mb-12 max-w-5xl mx-auto">
-          {/* Timeline line */}
-          <div className="absolute top-4 left-0 right-0 h-1 bg-idvl-blue-light" />
-          
-          {/* Timeline dots and years */}
-          <div className="flex justify-between relative">
-            {timelineData.map((item, index) => (
-              <div key={index} className="flex flex-col items-center">
-                <button 
-                  onClick={() => setActiveYear(item.year)}
-                  className={cn(
-                    "w-8 h-8 rounded-full z-10 transition-all duration-300 flex items-center justify-center border-2",
-                    activeYear === item.year 
-                      ? "bg-idvl-blue-dark border-white" 
-                      : "bg-idvl-blue-light border-idvl-blue-light hover:bg-idvl-blue-dark"
-                  )}
-                >
-                  <span className="sr-only">{item.year}</span>
-                </button>
-                <div className={cn(
-                  "mt-3 bg-idvl-blue-dark text-white font-semibold py-2 px-3 rounded-md transition-all",
-                  activeYear === item.year ? "scale-110" : ""
-                )}>
-                  {item.year}
+        {!isMobile ? (
+          // Desktop timeline (horizontal)
+          <div className="relative mb-12 max-w-5xl mx-auto">
+            {/* Timeline line */}
+            <div className="absolute top-4 left-0 right-0 h-1 bg-idvl-blue-light" />
+            
+            {/* Timeline dots and years */}
+            <div className="flex justify-between relative">
+              {timelineData.map((item, index) => (
+                <div key={index} className="flex flex-col items-center">
+                  <button 
+                    onClick={() => setActiveYear(item.year)}
+                    className={cn(
+                      "w-8 h-8 rounded-full z-10 transition-all duration-300 flex items-center justify-center border-2",
+                      activeYear === item.year 
+                        ? "bg-idvl-blue-dark border-white" 
+                        : "bg-idvl-blue-light border-idvl-blue-light hover:bg-idvl-blue-dark"
+                    )}
+                  >
+                    <span className="sr-only">{item.year}</span>
+                  </button>
+                  <div className={cn(
+                    "mt-3 bg-idvl-blue-dark text-white font-semibold py-2 px-3 rounded-md transition-all",
+                    activeYear === item.year ? "scale-110" : ""
+                  )}>
+                    {item.year}
+                  </div>
                 </div>
-              </div>
+              ))}
+            </div>
+          </div>
+        ) : (
+          // Mobile timeline (vertical selector)
+          <div className="mb-8 flex flex-wrap justify-center gap-2">
+            {timelineData.map((item, index) => (
+              <button
+                key={index}
+                onClick={() => setActiveYear(item.year)}
+                className={cn(
+                  "py-2 px-4 rounded-full text-sm font-medium transition-all",
+                  activeYear === item.year
+                    ? "bg-idvl-blue-dark text-white"
+                    : "bg-white border border-idvl-blue-light text-idvl-blue-dark"
+                )}
+              >
+                {item.year}
+              </button>
             ))}
           </div>
-        </div>
+        )}
 
         {/* Timeline Content */}
-        <div className="bg-white rounded-xl shadow-lg p-6 md:p-8 animate-fade-in">
-          <h3 className="text-2xl font-bold text-idvl-blue-dark mb-3">
+        <div className="bg-white rounded-xl shadow-lg p-4 md:p-8 animate-fade-in">
+          <h3 className="text-xl md:text-2xl font-bold text-idvl-blue-dark mb-3">
             {activeData.title}
           </h3>
-          <p className="text-idvl-text-light mb-6 text-lg">
+          <p className="text-idvl-text-light mb-6">
             {activeData.description}
           </p>
           

@@ -20,7 +20,7 @@ const Footer = () => {
               e maximizando oportunidades.
             </p>
             <div className="flex space-x-4">
-              {/* Social Media Icons - Atualizados com links corretos */}
+              {/* Social Media Icons */}
               <a href="https://www.facebook.com/idvlcontabil/" target="_blank" rel="noopener noreferrer" className="hover:opacity-80 transition-opacity">
                 <Facebook className="w-5 h-5" />
               </a>
@@ -37,23 +37,14 @@ const Footer = () => {
           </div>
 
           {/* Links */}
-          <div>
+          <div className="mt-6 md:mt-0">
             <h3 className="text-lg font-bold mb-4">Links Rápidos</h3>
             <ul className="space-y-2">
               <li>
                 <Link to="/guia-completo" className="hover:text-idvl-blue-light transition-colors">Guia Completo da Reforma</Link>
               </li>
               <li>
-                
-              </li>
-              <li>
-                
-              </li>
-              <li>
-                
-              </li>
-              <li>
-                
+                <Link to="/simulador" className="hover:text-idvl-blue-light transition-colors">Simulador</Link>
               </li>
               <li>
                 <a href="https://wa.me/41996946641" target="_blank" rel="noopener noreferrer" className="hover:text-idvl-blue-light transition-colors flex items-center gap-1">
@@ -65,7 +56,7 @@ const Footer = () => {
           </div>
 
           {/* Contact */}
-          <div>
+          <div className="mt-6 lg:mt-0">
             <h3 className="text-lg font-bold mb-4">Contato</h3>
             <ul className="space-y-3">
               <li className="flex items-start">
@@ -84,7 +75,7 @@ const Footer = () => {
           </div>
 
           {/* Newsletter */}
-          <div>
+          <div className="mt-6 lg:mt-0">
             <h3 className="text-lg font-bold mb-4">Newsletter</h3>
             <p className="text-sm mb-4 opacity-80">
               Receba atualizações sobre a reforma tributária e novidades da IDVL:
