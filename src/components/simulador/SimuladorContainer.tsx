@@ -8,7 +8,8 @@ import SimuladorResultados from './SimuladorResultados';
 import { 
   calcularResultadosSimulacao,
   salvarCenario, 
-  salvarSimulacao 
+  salvarSimulacao,
+  enviarDadosParaN8n
 } from '@/services/simuladorService';
 import { 
   AliquotaTransicao, 
@@ -96,6 +97,15 @@ const SimuladorContainer: React.FC<SimuladorContainerProps> = ({
       
       setResultados(resultadosCalc);
       setActiveTab('resultados');
+      
+      // Enviar dados para o webhook do n8n
+      try {
+        await enviarDadosParaN8n(dados, aliquotas);
+        console.log('Dados enviados para o n8n com sucesso');
+      } catch (webhookError) {
+        console.error('Erro ao enviar dados para o n8n:', webhookError);
+        // Não interrompemos o fluxo principal em caso de erro no webhook
+      }
       
       toast({
         title: "Simulação realizada com sucesso",

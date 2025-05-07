@@ -179,3 +179,96 @@ export const salvarCenario = async (
     .select('id')
     .single();
 };
+
+// Nova função para enviar dados para o webhook do n8n
+export const enviarDadosParaN8n = async (
+  dados: {
+    cenario: CenarioSimulacao,
+    custos: {
+      custo_compra: number,
+      custo_frete: number,
+      custo_armazenagem: number
+    },
+    impostos_atuais: {
+      aliquota_icms: number,
+      aliquota_iss: number,
+      aliquota_pis: number,
+      aliquota_cofins: number,
+      preco_atual: number
+    },
+    margem_desejada: number
+  },
+  aliquotas: AliquotaTransicao[]
+) => {
+  // URL do webhook do n8n
+  const webhookUrl = "https://webhook.idvl.com.br/webhook/simulador";
+  
+  // Anos para a simulação - usando 2026 a 2033 conforme solicitado
+  const anosSimulacao = [2026, 2027, 2028, 2029, 2030, 2031, 2032, 2033];
+  
+  // Filtrar as alíquotas apenas para os anos solicitados
+  const aliquotasFiltradas = aliquotas.filter(a => 
+    anosSimulacao.includes(a.ano)
+  );
+  
+  // Preparar dados para enviar para o webhook
+  const dadosWebhook = {
+    // Informações do cenário
+    cenario: {
+      nome: dados.cenario.nome,
+      descricao: dados.cenario.descricao || "",
+      ano_inicial: dados.cenario.ano_inicial || 2026,
+      ano_final: dados.cenario.ano_final || 2033,
+      reducao_ibs: dados.cenario.reducao_ibs || 70
+    },
+    // Dados de custos
+    custos: {
+      custo_compra: dados.custos.custo_compra,
+      custo_frete: dados.custos.custo_frete,
+      custo_armazenagem: dados.custos.custo_armazenagem,
+      custo_total: dados.custos.custo_compra + dados.custos.custo_frete + dados.custos.custo_armazenagem
+    },
+    // Dados de impostos atuais
+    impostos_atuais: {
+      aliquota_icms: dados.impostos_atuais.aliquota_icms,
+      aliquota_iss: dados.impostos_atuais.aliquota_iss,
+      aliquota_pis: dados.impostos_atuais.aliquota_pis,
+      aliquota_cofins: dados.impostos_atuais.aliquota_cofins,
+      preco_atual: dados.impostos_atuais.preco_atual
+    },
+    // Margem desejada
+    margem_desejada: dados.margem_desejada,
+    // Alíquotas de transição para os anos selecionados
+    aliquotas_transicao: aliquotasFiltradas.map(a => ({
+      ano: a.ano,
+      aliquota_ibs: a.aliquota_ibs,
+      aliquota_cbs: a.aliquota_cbs
+    }))
+  };
+
+  try {
+    const response = await fetch(webhookUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(dadosWebhook),
+    });
+
+    if (!response.ok) {
+      throw new Error(`Erro ao enviar dados para o webhook: ${response.status} ${response.statusText}`);
+    }
+    
+    // Tentar processar a resposta
+    try {
+      const responseData = await response.json();
+      return responseData;
+    } catch (jsonError) {
+      console.log("O webhook não retornou um JSON válido, mas os dados foram enviados com sucesso");
+      return { success: true };
+    }
+  } catch (error) {
+    console.error("Erro ao enviar dados para o webhook:", error);
+    throw error;
+  }
+};
