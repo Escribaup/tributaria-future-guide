@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import {
   Form,
@@ -26,7 +25,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { AliquotaTransicao, CenarioSimulacao } from '@/types/simulador';
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { InfoIcon } from "lucide-react";
+import { InfoIcon, AlertTriangleIcon } from "lucide-react";
 
 interface SimuladorFormProps {
   aliquotas: AliquotaTransicao[];
@@ -34,6 +33,7 @@ interface SimuladorFormProps {
   onSubmit: (data: any) => void;
   loading: boolean;
   submitting: boolean;
+  error?: string | null;  // Adicionando a propriedade error como opcional
 }
 
 const formularioSchema = z.object({
@@ -59,7 +59,8 @@ const SimuladorForm: React.FC<SimuladorFormProps> = ({
   cenarios,
   onSubmit,
   loading,
-  submitting
+  submitting,
+  error
 }) => {
   const form = useForm<z.infer<typeof formularioSchema>>({
     resolver: zodResolver(formularioSchema),
@@ -161,6 +162,16 @@ const SimuladorForm: React.FC<SimuladorFormProps> = ({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmitForm)}>
         <div className="space-y-6">
+          {/* Exibir mensagem de erro, se houver */}
+          {error && (
+            <Alert variant="destructive" className="mb-4">
+              <AlertTriangleIcon className="h-4 w-4" />
+              <AlertDescription>
+                {error}
+              </AlertDescription>
+            </Alert>
+          )}
+          
           {/* Seleção de cenário existente */}
           {cenarios.length > 0 && (
             <div className="flex flex-wrap gap-4 items-end mb-6">
