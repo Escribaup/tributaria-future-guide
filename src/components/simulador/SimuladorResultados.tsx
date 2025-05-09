@@ -44,18 +44,24 @@ interface SimuladorResultadosProps {
   erro?: string | null;
 }
 
-const formatCurrency = (valor: number) => {
+const formatCurrency = (valor: number | undefined | null) => {
+  if (valor === undefined || valor === null) {
+    return 'N/A';
+  }
   return valor.toLocaleString('pt-BR', {
     style: 'currency',
     currency: 'BRL'
   });
 };
 
-const formatPercent = (valor: number) => {
+const formatPercent = (valor: number | undefined | null) => {
+  if (valor === undefined || valor === null) {
+    return 'N/A';
+  }
   return valor.toFixed(2) + '%';
 };
 
-const SimuladorResultados: React.FC<SimuladorResultadosProps> = ({ 
+const SimuladorResultados: React.FC<SimululadorResultadosProps> = ({ 
   resultados, 
   resultadosN8n,
   dadosEnviadosN8n,
