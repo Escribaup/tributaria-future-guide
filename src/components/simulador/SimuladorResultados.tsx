@@ -79,19 +79,40 @@ const SimuladorResultados: React.FC<SimuladorResultadosProps> = ({
     
     console.log("Processando resultados para gráficos:", resultados);
     
-    // Formatar dados para os gráficos
-    const dadosFormatados = resultados.map(r => ({
-      ...r,
-      ano: r.ano.toString(),
-      aliquota_efetiva_pct: Number((r.aliquota_efetiva_total * 100).toFixed(2)),
-      aliquota_ibs_pct: Number((r.aliquota_ibs * 100).toFixed(2)),
-      aliquota_ibs_efetiva_pct: Number((r.aliquota_ibs_efetiva * 100).toFixed(2)),
-      aliquota_cbs_pct: Number((r.aliquota_cbs * 100).toFixed(2)),
-      aliquota_cbs_efetiva_pct: Number((r.aliquota_cbs_efetiva * 100).toFixed(2)),
-      impostos_atuais_pct: Number((r.impostos_atuais * 100).toFixed(2)),
-      reducao_custo_pct: Number(r.reducao_custo_pct.toFixed(2)),
-      aumento_preco_pct: Number(r.aumento_preco_pct.toFixed(2)),
-    }));
+    // Formatar dados para os gráficos - adicionando validação para evitar erros com valores undefined
+    const dadosFormatados = resultados.map(r => {
+      // Check if each property exists before accessing it
+      const ano = r.ano !== undefined ? String(r.ano) : "N/A";
+      const aliquota_efetiva_total = r.aliquota_efetiva_total !== undefined ? 
+        Number((r.aliquota_efetiva_total * 100).toFixed(2)) : 0;
+      const aliquota_ibs = r.aliquota_ibs !== undefined ? 
+        Number((r.aliquota_ibs * 100).toFixed(2)) : 0;
+      const aliquota_ibs_efetiva = r.aliquota_ibs_efetiva !== undefined ? 
+        Number((r.aliquota_ibs_efetiva * 100).toFixed(2)) : 0;
+      const aliquota_cbs = r.aliquota_cbs !== undefined ? 
+        Number((r.aliquota_cbs * 100).toFixed(2)) : 0;
+      const aliquota_cbs_efetiva = r.aliquota_cbs_efetiva !== undefined ? 
+        Number((r.aliquota_cbs_efetiva * 100).toFixed(2)) : 0;
+      const impostos_atuais = r.impostos_atuais !== undefined ? 
+        Number((r.impostos_atuais * 100).toFixed(2)) : 0;
+      const reducao_custo_pct = r.reducao_custo_pct !== undefined ? 
+        Number(r.reducao_custo_pct.toFixed(2)) : 0;
+      const aumento_preco_pct = r.aumento_preco_pct !== undefined ? 
+        Number(r.aumento_preco_pct.toFixed(2)) : 0;
+      
+      return {
+        ...r,
+        ano,
+        aliquota_efetiva_pct: aliquota_efetiva_total,
+        aliquota_ibs_pct: aliquota_ibs,
+        aliquota_ibs_efetiva_pct: aliquota_ibs_efetiva,
+        aliquota_cbs_pct: aliquota_cbs,
+        aliquota_cbs_efetiva_pct: aliquota_cbs_efetiva,
+        impostos_atuais_pct: impostos_atuais,
+        reducao_custo_pct,
+        aumento_preco_pct,
+      };
+    });
     
     setDadosGrafico(dadosFormatados);
   }, [resultados]);
@@ -185,7 +206,7 @@ const SimuladorResultados: React.FC<SimuladorResultadosProps> = ({
                       <AccordionContent className="px-4">
                         {typeof resultadosN8n[key] === 'object' ? 
                           renderPrettyJson(resultadosN8n[key]) : 
-                          <p className="py-2">{resultadosN8n[key].toString()}</p>
+                          <p className="py-2">{String(resultadosN8n[key])}</p>
                         }
                       </AccordionContent>
                     </AccordionItem>

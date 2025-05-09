@@ -16,14 +16,23 @@ export const useSimuladorData = (userId: string | undefined) => {
     const fetchDados = async () => {
       setLoading(true);
       try {
-        const [aliquotasRes, cenariosRes] = await Promise.all([
-          supabase.from('aliquotas_transicao').select('*').order('ano'),
-          userId ? supabase.from('cenarios').select('*') : { data: [] }
-        ]);
+        // Add error handling for supabase queries
+        const aliquotasRes = await supabase.from('aliquotas_transicao').select('*').order('ano');
+        if (aliquotasRes.error) {
+          throw new Error(`Erro ao buscar alíquotas: ${aliquotasRes.error.message}`);
+        }
+        
+        let cenariosRes = { data: [] };
+        if (userId) {
+          cenariosRes = await supabase.from('cenarios').select('*');
+          if (cenariosRes.error) {
+            throw new Error(`Erro ao buscar cenários: ${cenariosRes.error.message}`);
+          }
+        }
         
         setAliquotas(aliquotasRes.data || []);
         setCenarios(cenariosRes.data || []);
-      } catch (error) {
+      } catch (error: any) {
         console.error('Erro ao buscar dados:', error);
         toast({
           variant: "destructive",
