@@ -61,7 +61,7 @@ const formatPercent = (valor: number | undefined | null) => {
   return valor.toFixed(2) + '%';
 };
 
-const SimuladorResultados: React.FC<SimululadorResultadosProps> = ({ 
+const SimuladorResultados: React.FC<SimuladorResultadosProps> = ({ 
   resultados, 
   resultadosN8n,
   dadosEnviadosN8n,
@@ -252,7 +252,6 @@ const SimuladorResultados: React.FC<SimululadorResultadosProps> = ({
         <TabsContent value="local-results">
           {/* Se temos primeiroAno, podemos exibir o resumo */}
           {primeiroAno ? (
-            // ... keep existing code (resumo dos resultados para o primeiro ano)
             <div className="bg-white rounded-lg shadow-sm p-4">
               <h3 className="text-lg font-semibold mb-4">Resumo dos Resultados para {primeiroAno.ano}</h3>
               
@@ -739,37 +738,3 @@ const SimuladorResultados: React.FC<SimululadorResultadosProps> = ({
                   </li>
                   <li>
                     <strong>Simplicidade</strong>: Substituição de diversos tributos por um único imposto.
-                  </li>
-                  <li>
-                    <strong>Não-cumulatividade</strong>: O imposto incide apenas sobre o valor agregado em 
-                    cada etapa da cadeia produtiva.
-                  </li>
-                  <li>
-                    <strong>Transição gradual</strong>: A implementação será gradativa ao longo dos anos.
-                  </li>
-                </ul>
-                
-                <div className="mt-4">
-                  <Alert className="bg-amber-50 border-amber-200">
-                    <InfoIcon className="h-4 w-4 text-amber-600" />
-                    <AlertDescription className="text-amber-800">
-                      <strong>Importante:</strong> Durante a transição tributária, o IBS e o CBS são implementados gradualmente.
-                      Em alguns anos, o IBS tem alíquota zero e apenas o CBS está em vigor. Nestas situações,
-                      a redução percentual é aplicada ao CBS.
-                    </AlertDescription>
-                  </Alert>
-                </div>
-              </div>
-            </div>
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="n8n-results">
-          {renderN8nResults()}
-        </TabsContent>
-      </Tabs>
-    </div>
-  );
-};
-
-export default SimuladorResultados;
