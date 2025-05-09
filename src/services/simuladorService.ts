@@ -261,9 +261,9 @@ export const enviarDadosParaN8n = async (
     cenario: {
       nome: dados.cenario.nome,
       descricao: dados.cenario.descricao || "",
-      ano_inicial: dados.cenario.ano_inicial || 2026,
-      ano_final: dados.cenario.ano_final || 2033,
-      reducao_ibs: dados.cenario.reducao_ibs || 70
+      ano_inicial: dados.cenario.ano_inicial !== undefined && dados.cenario.ano_inicial !== null ? dados.cenario.ano_inicial : 2026,
+      ano_final: dados.cenario.ano_final !== undefined && dados.cenario.ano_final !== null ? dados.cenario.ano_final : 2033,
+      reducao_ibs: dados.cenario.reducao_ibs !== undefined && dados.cenario.reducao_ibs !== null ? dados.cenario.reducao_ibs : 70
     },
     // Dados de custos
     custos: {

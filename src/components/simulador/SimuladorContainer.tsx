@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -99,6 +98,26 @@ const SimuladorContainer: React.FC<SimuladorContainerProps> = ({
     if (typeof response === 'object' && response.ano !== undefined) {
       console.log('A resposta parece ser um único objeto de resultado. Convertendo para array.');
       return [response];
+    }
+
+    // NOVO: Busca recursiva por arrays de objetos com campo 'ano'
+    const buscarArrayComAno = (obj: any): ResultadoSimulacao[] => {
+      if (!obj || typeof obj !== 'object') return [];
+      for (const key of Object.keys(obj)) {
+        const val = obj[key];
+        if (Array.isArray(val) && val.length > 0 && typeof val[0] === 'object' && 'ano' in val[0]) {
+          console.log(`Extraindo de campo recursivo '${key}' com`, val.length, 'elementos');
+          return val;
+        } else if (typeof val === 'object') {
+          const found = buscarArrayComAno(val);
+          if (found.length > 0) return found;
+        }
+      }
+      return [];
+    };
+    const encontrados = buscarArrayComAno(response);
+    if (encontrados.length > 0) {
+      return encontrados;
     }
     
     // Se chegamos até aqui, não conseguimos extrair de maneira conhecida
