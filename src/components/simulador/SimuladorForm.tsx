@@ -109,22 +109,21 @@ const SimuladorForm: React.FC<SimuladorFormProps> = ({
   };
   
   const handleSubmitForm = (values: z.infer<typeof formularioSchema>) => {
-    // Converter strings para números onde aplicável
+    // Converter strings para números, aceitando vírgula ou ponto como separador decimal
+    const toNumber = (v: string | undefined) => v ? parseFloat(v.replace(',', '.')) : 0;
     const ano_inicial = parseInt(values.ano_inicial);
     const ano_final = parseInt(values.ano_final);
-    const custo_compra = parseFloat(values.custo_compra);
-    const custo_frete = values.custo_frete ? parseFloat(values.custo_frete) : 0;
-    const custo_armazenagem = values.custo_armazenagem ? parseFloat(values.custo_armazenagem) : 0;
-    const margem_desejada = parseFloat(values.margem_desejada);
-    const preco_atual = parseFloat(values.preco_atual);
-    const reducao_ibs = values.reducao_ibs ? parseFloat(values.reducao_ibs) : 70;
-    
-    // Alíquotas atuais
-    const aliquota_icms = values.aliquota_icms ? parseFloat(values.aliquota_icms) / 100 : 0;
-    const aliquota_iss = values.aliquota_iss ? parseFloat(values.aliquota_iss) / 100 : 0;
-    const aliquota_pis = values.aliquota_pis ? parseFloat(values.aliquota_pis) / 100 : 0;
-    const aliquota_cofins = values.aliquota_cofins ? parseFloat(values.aliquota_cofins) / 100 : 0;
-    
+    const custo_compra = toNumber(values.custo_compra);
+    const custo_frete = toNumber(values.custo_frete);
+    const custo_armazenagem = toNumber(values.custo_armazenagem);
+    const margem_desejada = toNumber(values.margem_desejada);
+    const preco_atual = toNumber(values.preco_atual);
+    const reducao_ibs = values.reducao_ibs ? toNumber(values.reducao_ibs) : 70;
+    // Alíquotas atuais - dividir por 100, sem arredondar
+    const aliquota_icms = values.aliquota_icms ? toNumber(values.aliquota_icms) / 100 : 0;
+    const aliquota_iss = values.aliquota_iss ? toNumber(values.aliquota_iss) / 100 : 0;
+    const aliquota_pis = values.aliquota_pis ? toNumber(values.aliquota_pis) / 100 : 0;
+    const aliquota_cofins = values.aliquota_cofins ? toNumber(values.aliquota_cofins) / 100 : 0;
     // Construir o objeto de cenário
     const cenario: CenarioSimulacao = {
       nome: values.nome_cenario,
@@ -133,13 +132,9 @@ const SimuladorForm: React.FC<SimuladorFormProps> = ({
       ano_final,
       reducao_ibs
     };
-    
-    // Se um cenário existente foi selecionado, incluir o ID
     if (cenarioSelecionado) {
       cenario.id = parseInt(cenarioSelecionado);
     }
-    
-    // Chamar o callback de submit com os dados formatados
     onSubmit({
       cenario,
       custos: {
@@ -161,7 +156,7 @@ const SimuladorForm: React.FC<SimuladorFormProps> = ({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmitForm)}>
-        <div className="space-y-6">
+        <div className="space-y-8">
           {/* Exibir mensagem de erro, se houver */}
           {error && (
             <Alert variant="destructive" className="mb-4">
@@ -178,7 +173,7 @@ const SimuladorForm: React.FC<SimuladorFormProps> = ({
               <div className="flex-grow">
                 <Label htmlFor="cenario_id">Selecionar cenário existente</Label>
                 <Select value={cenarioSelecionado} onValueChange={handleCenarioChange}>
-                  <SelectTrigger id="cenario_id" className="w-full">
+                  <SelectTrigger id="cenario_id" className="w-full rounded-lg border-gray-300 bg-white h-12 text-base">
                     <SelectValue placeholder="Selecione um cenário..." />
                   </SelectTrigger>
                   <SelectContent>
@@ -197,6 +192,7 @@ const SimuladorForm: React.FC<SimuladorFormProps> = ({
                 type="button" 
                 onClick={handleNovoClick}
                 variant="outline"
+                className="h-12 rounded-lg"
               >
                 Novo Cenário
               </Button>
@@ -204,8 +200,8 @@ const SimuladorForm: React.FC<SimuladorFormProps> = ({
           )}
           
           {/* Dados do cenário */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Dados do Cenário</h3>
+          <div className="rounded-xl bg-[#f2f2f2] p-6 shadow-sm space-y-6 mb-2">
+            <h3 className="text-xl font-bold text-[#232d42] mb-2">Dados do Cenário</h3>
             <div className="grid md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -214,13 +210,12 @@ const SimuladorForm: React.FC<SimuladorFormProps> = ({
                   <FormItem>
                     <FormLabel>Nome do Cenário</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Ex: Produto X em 2025" disabled={submitting} />
+                      <Input {...field} className="h-12 rounded-lg text-base" placeholder="Ex: Produto X em 2025" disabled={submitting} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              
               <FormField
                 control={form.control}
                 name="descricao_cenario"
@@ -228,14 +223,13 @@ const SimuladorForm: React.FC<SimuladorFormProps> = ({
                   <FormItem>
                     <FormLabel>Descrição (opcional)</FormLabel>
                     <FormControl>
-                      <Input {...field} placeholder="Descrição do cenário" disabled={submitting} />
+                      <Input {...field} className="h-12 rounded-lg text-base" placeholder="Descrição do cenário" disabled={submitting} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
-            
             <div className="grid md:grid-cols-3 gap-4">
               <FormField
                 control={form.control}
@@ -245,7 +239,7 @@ const SimuladorForm: React.FC<SimuladorFormProps> = ({
                     <FormLabel>Ano Inicial</FormLabel>
                     <Select value={field.value} onValueChange={field.onChange} disabled={submitting}>
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="h-12 rounded-lg text-base">
                           <SelectValue placeholder="Selecione o ano inicial" />
                         </SelectTrigger>
                       </FormControl>
@@ -264,7 +258,6 @@ const SimuladorForm: React.FC<SimuladorFormProps> = ({
                   </FormItem>
                 )}
               />
-              
               <FormField
                 control={form.control}
                 name="ano_final"
@@ -273,7 +266,7 @@ const SimuladorForm: React.FC<SimuladorFormProps> = ({
                     <FormLabel>Ano Final</FormLabel>
                     <Select value={field.value} onValueChange={field.onChange} disabled={submitting}>
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger className="h-12 rounded-lg text-base">
                           <SelectValue placeholder="Selecione o ano final" />
                         </SelectTrigger>
                       </FormControl>
@@ -292,7 +285,6 @@ const SimuladorForm: React.FC<SimuladorFormProps> = ({
                   </FormItem>
                 )}
               />
-              
               <FormField
                 control={form.control}
                 name="reducao_ibs"
@@ -300,15 +292,7 @@ const SimuladorForm: React.FC<SimuladorFormProps> = ({
                   <FormItem>
                     <FormLabel>Redução do IBS (%)</FormLabel>
                     <FormControl>
-                      <Input 
-                        {...field} 
-                        type="number" 
-                        step="1" 
-                        min="0" 
-                        max="100" 
-                        placeholder="70" 
-                        disabled={submitting}
-                      />
+                      <Input {...field} className="h-12 rounded-lg text-base" type="number" step="1" min="0" max="100" placeholder="70" disabled={submitting} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -319,9 +303,9 @@ const SimuladorForm: React.FC<SimuladorFormProps> = ({
           
           <Separator />
           
-          {/* Dados de custo */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Dados de Custo e Preço Atual</h3>
+          {/* Dados de Custo e Preço Atual */}
+          <div className="rounded-xl bg-[#f2f2f2] p-6 shadow-sm space-y-6">
+            <h3 className="text-xl font-bold text-[#232d42] mb-2">Dados de Custo e Preço Atual</h3>
             <div className="grid md:grid-cols-3 gap-4">
               <FormField
                 control={form.control}
@@ -330,20 +314,12 @@ const SimuladorForm: React.FC<SimuladorFormProps> = ({
                   <FormItem>
                     <FormLabel>Custo de Compra (R$)</FormLabel>
                     <FormControl>
-                      <Input 
-                        {...field} 
-                        type="number" 
-                        step="0.01" 
-                        min="0" 
-                        placeholder="0.00"
-                        disabled={submitting} 
-                      />
+                      <Input {...field} className="h-12 rounded-lg text-base" placeholder="0.00" disabled={submitting} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              
               <FormField
                 control={form.control}
                 name="custo_frete"
@@ -351,20 +327,12 @@ const SimuladorForm: React.FC<SimuladorFormProps> = ({
                   <FormItem>
                     <FormLabel>Custo de Frete (R$)</FormLabel>
                     <FormControl>
-                      <Input 
-                        {...field} 
-                        type="number" 
-                        step="0.01" 
-                        min="0" 
-                        placeholder="0.00" 
-                        disabled={submitting}
-                      />
+                      <Input {...field} className="h-12 rounded-lg text-base" placeholder="0.00" disabled={submitting} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              
               <FormField
                 control={form.control}
                 name="custo_armazenagem"
@@ -372,21 +340,13 @@ const SimuladorForm: React.FC<SimuladorFormProps> = ({
                   <FormItem>
                     <FormLabel>Custo de Armazenagem (R$)</FormLabel>
                     <FormControl>
-                      <Input 
-                        {...field} 
-                        type="number" 
-                        step="0.01" 
-                        min="0" 
-                        placeholder="0.00" 
-                        disabled={submitting}
-                      />
+                      <Input {...field} className="h-12 rounded-lg text-base" placeholder="0.00" disabled={submitting} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
-            
             <div className="grid md:grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -395,21 +355,12 @@ const SimuladorForm: React.FC<SimuladorFormProps> = ({
                   <FormItem>
                     <FormLabel>Margem Desejada (%)</FormLabel>
                     <FormControl>
-                      <Input 
-                        {...field} 
-                        type="number" 
-                        step="0.01" 
-                        min="0" 
-                        max="100" 
-                        placeholder="30.00" 
-                        disabled={submitting}
-                      />
+                      <Input {...field} className="h-12 rounded-lg text-base" placeholder="30" disabled={submitting} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              
               <FormField
                 control={form.control}
                 name="preco_atual"
@@ -417,25 +368,17 @@ const SimuladorForm: React.FC<SimuladorFormProps> = ({
                   <FormItem>
                     <FormLabel>Preço de Venda Atual (com impostos)</FormLabel>
                     <FormControl>
-                      <Input 
-                        {...field} 
-                        type="number" 
-                        step="0.01" 
-                        min="0" 
-                        placeholder="0.00" 
-                        disabled={submitting}
-                      />
+                      <Input {...field} className="h-12 rounded-lg text-base" placeholder="0.00" disabled={submitting} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
-            
-            <Alert variant="default" className="bg-blue-50">
+            <Alert variant="default" className="bg-blue-50 border-blue-200 text-[#232d42]">
               <InfoIcon className="h-4 w-4" />
               <AlertDescription>
-                <strong>Importante:</strong> O preço de venda atual deve incluir todos os impostos (ICMS, ISS, PIS, COFINS).
+                <strong>Importante:</strong> O preço de venda atual deve incluir todos os impostos (ICMS, ISS, PIS, COFINS).<br />
                 Este valor será usado como base para calcular o preço sem impostos para a simulação do IVA.
               </AlertDescription>
             </Alert>
@@ -443,9 +386,9 @@ const SimuladorForm: React.FC<SimuladorFormProps> = ({
           
           <Separator />
           
-          {/* Impostos atuais */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Impostos Atuais (%)</h3>
+          {/* Impostos Atuais */}
+          <div className="rounded-xl bg-[#f2f2f2] p-6 shadow-sm space-y-6">
+            <h3 className="text-xl font-bold text-[#232d42] mb-2">Impostos Atuais (%)</h3>
             <div className="grid md:grid-cols-4 gap-4">
               <FormField
                 control={form.control}
@@ -454,20 +397,12 @@ const SimuladorForm: React.FC<SimuladorFormProps> = ({
                   <FormItem>
                     <FormLabel>ICMS (%)</FormLabel>
                     <FormControl>
-                      <Input 
-                        {...field} 
-                        type="number" 
-                        step="0.01" 
-                        min="0" 
-                        max="100" 
-                        disabled={submitting}
-                      />
+                      <Input {...field} className="h-12 rounded-lg text-base" placeholder="18" disabled={submitting} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              
               <FormField
                 control={form.control}
                 name="aliquota_iss"
@@ -475,20 +410,12 @@ const SimuladorForm: React.FC<SimuladorFormProps> = ({
                   <FormItem>
                     <FormLabel>ISS (%)</FormLabel>
                     <FormControl>
-                      <Input 
-                        {...field} 
-                        type="number" 
-                        step="0.01" 
-                        min="0" 
-                        max="100" 
-                        disabled={submitting}
-                      />
+                      <Input {...field} className="h-12 rounded-lg text-base" placeholder="5" disabled={submitting} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              
               <FormField
                 control={form.control}
                 name="aliquota_pis"
@@ -496,20 +423,12 @@ const SimuladorForm: React.FC<SimuladorFormProps> = ({
                   <FormItem>
                     <FormLabel>PIS (%)</FormLabel>
                     <FormControl>
-                      <Input 
-                        {...field} 
-                        type="number" 
-                        step="0.01" 
-                        min="0" 
-                        max="100" 
-                        disabled={submitting}
-                      />
+                      <Input {...field} className="h-12 rounded-lg text-base" placeholder="1.65" disabled={submitting} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              
               <FormField
                 control={form.control}
                 name="aliquota_cofins"
@@ -517,40 +436,30 @@ const SimuladorForm: React.FC<SimuladorFormProps> = ({
                   <FormItem>
                     <FormLabel>COFINS (%)</FormLabel>
                     <FormControl>
-                      <Input 
-                        {...field} 
-                        type="number" 
-                        step="0.01" 
-                        min="0" 
-                        max="100" 
-                        disabled={submitting}
-                      />
+                      <Input {...field} className="h-12 rounded-lg text-base" placeholder="7.6" disabled={submitting} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
             </div>
+            <Alert variant="default" className="bg-blue-50 border-blue-200 text-[#232d42]">
+              <InfoIcon className="h-4 w-4" />
+              <AlertDescription>
+                <strong>Simulação simplificada:</strong> O simulador calculará dois cenários importantes:<br />
+                • Quanto você precisa reduzir seus custos para manter o mesmo preço final e lucro.<br />
+                • Quanto você precisará aumentar o preço para manter o mesmo custo e lucro.
+              </AlertDescription>
+            </Alert>
           </div>
           
-          <Alert variant="default" className="bg-blue-50">
-            <InfoIcon className="h-4 w-4" />
-            <AlertDescription>
-              <strong>Simulação simplificada:</strong> O simulador calculará dois cenários importantes:
-              <ul className="mt-2 list-disc pl-4">
-                <li>Quanto você precisa reduzir seus custos para manter o mesmo preço final e lucro.</li> 
-                <li>Quanto você precisará aumentar o preço para manter o mesmo custo e lucro.</li>
-              </ul>
-            </AlertDescription>
-          </Alert>
-          
-          <div className="flex justify-end mt-6">
+          <div className="flex justify-end pt-4">
             <Button 
               type="submit" 
-              className="bg-idvl-blue-dark hover:bg-idvl-blue-light"
+              className="h-12 px-8 rounded-lg text-base font-bold bg-[#1e6efb] hover:bg-[#232d42] text-white shadow-md transition-colors"
               disabled={submitting || loading}
             >
-              {submitting ? "Processando..." : "Realizar Simulação"}
+              {submitting || loading ? 'Processando...' : 'Realizar Simulação'}
             </Button>
           </div>
         </div>
