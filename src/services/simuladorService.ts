@@ -1,6 +1,5 @@
-
 import { supabase } from '@/integrations/supabase/client';
-import { ResultadoSimulacao, AliquotaTransicao, CenarioSimulacao } from '@/types/simulador';
+import { ResultadoSimulacao, AliquotaTransicao, CenarioSimulacao, ResultadoWebhookN8n } from '@/types/simulador';
 
 export const calcularResultadosSimulacao = (
   dados: {
@@ -157,32 +156,72 @@ export const salvarSimulacao = async (
   dadosEnviados?: any,
   resultadosN8n?: any
 ) => {
-  if (!userId || cenarioId <= 0) return;
+  if (!userId || cenarioId <= 0) {
+    console.log('Não é possível salvar: usuário não autenticado ou cenário inválido');
+    return { error: { message: 'Usuário não autenticado ou cenário inválido' } };
+  }
   
-  return await supabase
-    .from('simulacoes')
-    .insert([{
+  try {
+    const simulacaoData = {
       cenario_id: cenarioId,
       margem_desejada,
       preco_venda_ano: precosVenda,
       preco_compra_maximo: custosMaximos,
       margem_liquida_ano: margensLiquidas,
       dados_enviados_n8n: dadosEnviados,
-      resultados_n8n: resultadosN8n
-    }]);
+      resultados_n8n: resultadosN8n,
+      data_execucao: new Date().toISOString()
+    };
+
+    console.log('Salvando dados na tabela simulacoes:', simulacaoData);
+    
+    const { data, error } = await supabase
+      .from('simulacoes')
+      .insert([simulacaoData])
+      .select('id');
+    
+    if (error) {
+      console.error('Erro ao salvar simulação:', error);
+      return { error };
+    }
+    
+    console.log('Simulação salva com sucesso:', data);
+    return { data };
+  } catch (error) {
+    console.error('Exceção ao salvar simulação:', error);
+    return { error };
+  }
 };
 
 export const salvarCenario = async (
   cenario: CenarioSimulacao,
   userId: string | undefined
 ) => {
-  if (!userId) return { data: { id: -1 }, error: null };
+  if (!userId) {
+    console.log('Usuário não autenticado, não é possível salvar cenário');
+    return { data: { id: -1 }, error: null };
+  }
   
-  return await supabase
-    .from('cenarios')
-    .insert([cenario])
-    .select('id')
-    .single();
+  try {
+    console.log('Salvando cenário:', cenario);
+    
+    const { data, error } = await supabase
+      .from('cenarios')
+      .insert([cenario])
+      .select('id')
+      .single();
+    
+    if (error) {
+      console.error('Erro ao salvar cenário:', error);
+      return { error };
+    }
+    
+    console.log('Cenário salvo com sucesso:', data);
+    return { data, error: null };
+  } catch (error) {
+    console.error('Exceção ao salvar cenário:', error);
+    return { error };
+  }
 };
 
 // Função atualizada para enviar dados para o webhook do n8n e retornar a resposta
@@ -204,7 +243,7 @@ export const enviarDadosParaN8n = async (
     margem_desejada: number
   },
   aliquotas: AliquotaTransicao[]
-) => {
+): Promise<ResultadoWebhookN8n> => {
   // URL do webhook do n8n
   const webhookUrl = "https://webhook.idvl.com.br/webhook/simulador";
   
@@ -248,19 +287,34 @@ export const enviarDadosParaN8n = async (
       ano: a.ano,
       aliquota_ibs: a.aliquota_ibs,
       aliquota_cbs: a.aliquota_cbs
-    }))
+    })),
+    // Data e hora da solicitação para rastreabilidade
+    timestamp: new Date().toISOString(),
+    // ID de solicitação para correlação
+    request_id: `sim-${Date.now()}-${Math.floor(Math.random() * 1000)}`
   };
+  
+  console.log('Enviando dados para webhook:', webhookUrl);
+  console.log('Payload:', JSON.stringify(dadosWebhook, null, 2));
 
   try {
+    // Configuração do timeout para 30 segundos
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 30000);
+    
     const response = await fetch(webhookUrl, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(dadosWebhook),
+      signal: controller.signal
     });
+    
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
+      console.error(`Erro na resposta do webhook: ${response.status} ${response.statusText}`);
       throw new Error(`Erro ao enviar dados para o webhook: ${response.status} ${response.statusText}`);
     }
     
@@ -274,15 +328,51 @@ export const enviarDadosParaN8n = async (
         resultados: responseData 
       };
     } catch (jsonError) {
-      console.log("O webhook não retornou um JSON válido, mas os dados foram enviados com sucesso");
+      console.error("O webhook não retornou um JSON válido:", jsonError);
       return { 
         success: true,
         dadosEnviados: dadosWebhook,
         resultados: { mensagem: "Resposta não contém JSON válido" } 
       };
     }
-  } catch (error) {
+  } catch (error: any) {
     console.error("Erro ao enviar dados para o webhook:", error);
+    
+    // Verificar se foi um erro de timeout
+    if (error.name === 'AbortError') {
+      throw new Error("O serviço demorou muito para responder. Tente novamente mais tarde.");
+    }
+    
     throw error;
+  }
+};
+
+// Adicionar uma função para recuperar simulações anteriores
+export const obterSimulacoesAnteriores = async (userId?: string, limit = 5) => {
+  if (!userId) return { data: null, error: 'Usuário não autenticado' };
+  
+  try {
+    const { data, error } = await supabase
+      .from('simulacoes')
+      .select(`
+        id,
+        data_execucao,
+        margem_desejada,
+        dados_enviados_n8n,
+        resultados_n8n,
+        cenario_id,
+        cenarios (
+          nome,
+          descricao
+        )
+      `)
+      .order('data_execucao', { ascending: false })
+      .limit(limit);
+      
+    if (error) throw error;
+    return { data, error: null };
+  } catch (error) {
+    console.error('Erro ao obter simulações anteriores:', error);
+    return { data: null, error };
   }
 };

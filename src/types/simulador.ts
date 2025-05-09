@@ -61,7 +61,8 @@ export type ResultadoSimulacao = {
 };
 
 export type ResultadoWebhookN8n = {
-  dadosEnviados: any;  // Dados enviados para o webhook
-  resultados: any;     // Resultados retornados pelo webhook
-  success: boolean;    // Indica se a operação foi bem-sucedida
+  success: boolean;            // Indica se a operação foi bem-sucedida
+  dadosEnviados: any;          // Dados enviados para o webhook
+  resultados: any;             // Resultados retornados pelo webhook
+  erro?: string;               // Mensagem de erro, se houver
 };
