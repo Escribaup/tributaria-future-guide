@@ -1,6 +1,8 @@
 import React from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Table, TableHeader, TableRow, TableHead, TableBody, TableCell } from '@/components/ui/table';
+import { ArrowDownIcon, ArrowUpIcon, InfoIcon } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface SimuladorResultadosProps {
   resultados: any;
@@ -93,6 +95,7 @@ const TabelaCenario: React.FC<{ titulo: string; dados: ResultadoAno[]; tipo: 're
               <TableHead>Preço sem Impostos</TableHead>
               <TableHead>Custo</TableHead>
               <TableHead>Lucro</TableHead>
+              <TableHead className="text-center">Ajuste Necessário</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -100,6 +103,26 @@ const TabelaCenario: React.FC<{ titulo: string; dados: ResultadoAno[]; tipo: 're
               const precoComImpostos = tipo === 'reducao' ? r.preco_com_impostos_atual : r.preco_com_impostos_novo;
               const impostosValor = tipo === 'reducao' ? r.impostos_cenario1 : r.impostos_cenario2;
               const precoSemImpostos = tipo === 'reducao' ? r.preco_sem_impostos_cenario1 : r.preco_sem_impostos_atual;
+              // Badge visual para ajuste necessário
+              let ajuste = null;
+              let tooltipText = '';
+              if (tipo === 'reducao') {
+                ajuste = (
+                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700">
+                    <ArrowDownIcon className="w-4 h-4 mr-1" />
+                    -{formatPercent(r.reducao_custo_pct)}
+                  </span>
+                );
+                tooltipText = 'Percentual de redução de custos necessário para manter o preço final e lucro.';
+              } else {
+                ajuste = (
+                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-orange-50 text-amber-700">
+                    <ArrowUpIcon className="w-4 h-4 mr-1" />
+                    +{formatPercent(r.aumento_preco_pct)}
+                  </span>
+                );
+                tooltipText = 'Percentual de reajuste de preço necessário para manter o custo e lucro.';
+              }
               return (
                 <TableRow key={r.ano}>
                   <TableCell>{r.ano}</TableCell>
@@ -112,6 +135,18 @@ const TabelaCenario: React.FC<{ titulo: string; dados: ResultadoAno[]; tipo: 're
                       : formatCurrency(r.custo_atual)
                   }</TableCell>
                   <TableCell>{formatCurrency(r.lucro_atual)}</TableCell>
+                  <TableCell className="text-center">
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <span>{ajuste}</span>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <span className="flex items-center gap-2"><InfoIcon className="w-4 h-4" />{tooltipText}</span>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </TableCell>
                 </TableRow>
               );
             })}
