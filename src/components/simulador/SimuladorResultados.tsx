@@ -21,6 +21,9 @@ interface ResultadoAno {
   lucro_atual: number;
   preco_com_impostos_novo: number;
   aumento_preco_pct: number;
+  impostos_cenario1: number;
+  impostos_cenario2: number;
+  preco_sem_impostos_cenario1: number;
 }
 
 const formatCurrency = (valor: number | undefined) => {
@@ -95,13 +98,14 @@ const TabelaCenario: React.FC<{ titulo: string; dados: ResultadoAno[]; tipo: 're
           <TableBody>
             {dados.map((r) => {
               const precoComImpostos = tipo === 'reducao' ? r.preco_com_impostos_atual : r.preco_com_impostos_novo;
-              const impostosValor = precoComImpostos - r.preco_sem_impostos_atual;
+              const impostosValor = tipo === 'reducao' ? r.impostos_cenario1 : r.impostos_cenario2;
+              const precoSemImpostos = tipo === 'reducao' ? r.preco_sem_impostos_cenario1 : r.preco_sem_impostos_atual;
               return (
                 <TableRow key={r.ano}>
                   <TableCell>{r.ano}</TableCell>
                   <TableCell>{formatCurrency(precoComImpostos)}</TableCell>
                   <TableCell>{formatCurrency(impostosValor)}</TableCell>
-                  <TableCell>{formatCurrency(r.preco_sem_impostos_atual)}</TableCell>
+                  <TableCell>{formatCurrency(precoSemImpostos)}</TableCell>
                   <TableCell>{
                     tipo === 'reducao'
                       ? formatCurrency(r.custo_necessario)
