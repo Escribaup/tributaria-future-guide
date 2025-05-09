@@ -72,10 +72,32 @@ const SimuladorResultados: React.FC<SimuladorResultadosProps> = ({
   const [activeTab, setActiveTab] = useState<string>("reduzir-custo");
   const [activeMainTab, setActiveMainTab] = useState<string>(resultadosN8n ? "n8n-results" : "local-results");
   const [dadosGrafico, setDadosGrafico] = useState<any[]>([]);
+  const [dadosProcessados, setDadosProcessados] = useState<boolean>(false);
+  const [erroProcessamento, setErroProcessamento] = useState<string | null>(null);
+  
+  // Log da estrutura dos resultados recebidos
+  useEffect(() => {
+    console.log('SimuladorResultados recebeu resultados:', resultados);
+    console.log('Quantidade de resultados:', resultados?.length || 0);
+    console.log('Tipo dos resultados:', Array.isArray(resultados) ? 'Array' : typeof resultados);
+    
+    if (resultadosN8n) {
+      console.log('Resultados N8n disponíveis, estrutura:', JSON.stringify(resultadosN8n, null, 2));
+      // Definir a aba principal para mostrar os dados formatados ao invés dos dados brutos
+      setActiveMainTab("local-results");
+    }
+    
+    if (resultados?.length > 0) {
+      console.log('Primeiro objeto de resultado:', resultados[0]);
+    }
+  }, [resultados, resultadosN8n]);
 
   // Efeito para processar os resultados quando mudarem
   useEffect(() => {
-    if (!resultados || resultados.length === 0) return;
+    if (!resultados || resultados.length === 0) {
+      setDadosProcessados(false);
+      return;
+    }
     
     console.log("Processando resultados para gráficos:", resultados);
     
@@ -158,9 +180,13 @@ const SimuladorResultados: React.FC<SimuladorResultadosProps> = ({
       
       console.log('Dados formatados para gráficos:', dadosFormatados);
       setDadosGrafico(dadosFormatados);
-    } catch (error) {
+      setDadosProcessados(true);
+      setErroProcessamento(null);
+    } catch (error: any) {
       console.error("Erro ao processar resultados para gráficos:", error);
       setDadosGrafico([]);
+      setDadosProcessados(false);
+      setErroProcessamento(error.message || "Erro ao processar os dados para visualização");
     }
   }, [resultados]);
 
@@ -188,7 +214,7 @@ const SimuladorResultados: React.FC<SimuladorResultadosProps> = ({
   }
 
   // Verifica se não há resultados
-  if (!resultados.length && !resultadosN8n) {
+  if (!resultados?.length && !resultadosN8n) {
     return (
       <div className="text-center py-8">
         <p className="text-gray-500">Nenhum resultado disponível. Realize uma simulação para ver os resultados.</p>
@@ -199,16 +225,18 @@ const SimuladorResultados: React.FC<SimuladorResultadosProps> = ({
   // Tentar extrair os dados do primeiro ano para o resumo inicial
   let primeiroAno: ResultadoSimulacao | undefined;
   
-  if (resultados.length > 0) {
+  if (resultados?.length > 0) {
     primeiroAno = resultados[0];
     console.log("Primeiro ano extraído:", primeiroAno);
+  } else {
+    console.warn("Não foi possível extrair o primeiro ano dos resultados");
   }
   
   // Verificar se há anos com IBS zero para exibir informação específica
-  const temAnoComIBSZero = resultados.some(r => {
+  const temAnoComIBSZero = resultados?.some(r => {
     // Verificar se r e r.aliquota_ibs são válidos antes de comparar
     return r && r.aliquota_ibs !== undefined && r.aliquota_ibs === 0;
-  });
+  }) || false;
 
   // Renderizar o JSON de forma bonita
   const renderPrettyJson = (data: any) => {
@@ -295,6 +323,58 @@ const SimuladorResultados: React.FC<SimuladorResultadosProps> = ({
       </div>
     );
   };
+
+  // Se temos dados brutos mas não conseguimos processar para exibição
+  if (resultadosN8n && (!dadosProcessados || erroProcessamento)) {
+    return (
+      <div className="space-y-8">
+        <div className="flex justify-between items-center">
+          <h2 className="text-2xl font-bold">Resultados da Simulação</h2>
+          
+          <Badge variant="outline" className="bg-blue-50 text-blue-700 hover:bg-blue-100 border-blue-200">
+            <ServerIcon className="h-3 w-3 mr-1" />
+            Processamento Externo Disponível
+          </Badge>
+        </div>
+        
+        <Alert className="bg-amber-50 border-amber-200 mb-4">
+          <InfoIcon className="h-4 w-4 text-amber-600" />
+          <AlertDescription className="text-amber-800">
+            <strong>Atenção:</strong> Os dados foram recebidos do serviço externo, mas não puderam ser 
+            processados para visualização detalhada. {erroProcessamento ? `Erro: ${erroProcessamento}` : ''}
+            Você pode ver os dados brutos na aba "Dados Brutos do Processamento".
+          </AlertDescription>
+        </Alert>
+        
+        <Tabs value="n8n-results" onValueChange={setActiveMainTab} className="w-full">
+          <TabsList className="w-full">
+            <TabsTrigger value="local-results" className="flex-1">
+              Resultados Detalhados
+            </TabsTrigger>
+            <TabsTrigger value="n8n-results" className="flex-1">
+              Dados Brutos do Processamento
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="local-results">
+            <div className="text-center py-8">
+              <Alert className="bg-blue-50 border-blue-200 mb-4">
+                <InfoIcon className="h-4 w-4 text-blue-600" />
+                <AlertDescription className="text-blue-800">
+                  <strong>Aviso:</strong> Não foi possível processar os dados para visualização detalhada.
+                  Verifique os dados brutos na aba "Dados Brutos do Processamento".
+                </AlertDescription>
+              </Alert>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="n8n-results">
+            {renderN8nResults()}
+          </TabsContent>
+        </Tabs>
+      </div>
+    );
+  }
 
   // Agora podemos renderizar os resultados
   return (

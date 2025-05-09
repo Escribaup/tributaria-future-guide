@@ -16,17 +16,21 @@ export const useSimuladorData = (userId: string | undefined) => {
     const fetchDados = async () => {
       setLoading(true);
       try {
+        console.log('Buscando dados do simulador para usuário:', userId || 'anônimo');
         // Add error handling for supabase queries
         const aliquotasRes = await supabase.from('aliquotas_transicao').select('*').order('ano');
         if (aliquotasRes.error) {
           throw new Error(`Erro ao buscar alíquotas: ${aliquotasRes.error.message}`);
         }
         
+        console.log('Alíquotas obtidas:', aliquotasRes.data?.length || 0);
+        
         if (userId) {
           const cenariosRes = await supabase.from('cenarios').select('*');
           if (cenariosRes.error) {
             throw new Error(`Erro ao buscar cenários: ${cenariosRes.error.message}`);
           }
+          console.log('Cenários obtidos:', cenariosRes.data?.length || 0);
           setCenarios(cenariosRes.data || []);
         } else {
           console.log('Usuário não autenticado, cenários não serão carregados');

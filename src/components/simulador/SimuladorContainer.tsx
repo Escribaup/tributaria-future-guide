@@ -39,6 +39,73 @@ const SimuladorContainer: React.FC<SimuladorContainerProps> = ({
   const [dadosEnviadosN8n, setDadosEnviadosN8n] = useState<any>(null);
   const [erro, setErro] = useState<string | null>(null);
 
+  // Função auxiliar para extrair dados da resposta do webhook n8n em diferentes formatos possíveis
+  const extrairResultadosDaResposta = (response: any): ResultadoSimulacao[] => {
+    console.log('Extraindo resultados da resposta com estrutura:', JSON.stringify(response, null, 2));
+    
+    if (!response) {
+      console.warn('Resposta do webhook está vazia');
+      return [];
+    }
+    
+    // Verificar se a resposta é um array (caso mais simples)
+    if (Array.isArray(response)) {
+      console.log('Resposta já é um array com', response.length, 'elementos');
+      return response;
+    }
+    
+    // Caso: A resposta tem um campo 'simulacao' que é um array
+    if (response.simulacao && Array.isArray(response.simulacao)) {
+      console.log('Extraindo do campo .simulacao com', response.simulacao.length, 'elementos');
+      return response.simulacao;
+    }
+    
+    // Caso: A resposta tem um campo 'response' que é um array
+    if (response.response && Array.isArray(response.response)) {
+      console.log('Extraindo do campo .response com', response.response.length, 'elementos');
+      return response.response;
+    }
+    
+    // Caso: A resposta tem uma estrutura aninhada com .response[0].response como array
+    if (response.response && 
+        Array.isArray(response.response[0]?.response)) {
+      console.log('Extraindo do campo .response[0].response com', response.response[0].response.length, 'elementos');
+      return response.response[0].response;
+    }
+    
+    // Caso: A resposta tem um campo data que é um array ou objeto
+    if (response.data) {
+      if (Array.isArray(response.data)) {
+        console.log('Extraindo do campo .data (array) com', response.data.length, 'elementos');
+        return response.data;
+      } else if (response.data.simulacao && Array.isArray(response.data.simulacao)) {
+        console.log('Extraindo do campo .data.simulacao com', response.data.simulacao.length, 'elementos');
+        return response.data.simulacao;
+      }
+    }
+    
+    // Caso: A resposta tem um campo result ou results
+    if (response.result && Array.isArray(response.result)) {
+      console.log('Extraindo do campo .result com', response.result.length, 'elementos');
+      return response.result;
+    }
+    
+    if (response.results && Array.isArray(response.results)) {
+      console.log('Extraindo do campo .results com', response.results.length, 'elementos');
+      return response.results;
+    }
+    
+    // Caso: A resposta é um objeto único e não um array
+    if (typeof response === 'object' && response.ano !== undefined) {
+      console.log('A resposta parece ser um único objeto de resultado. Convertendo para array.');
+      return [response];
+    }
+    
+    // Se chegamos até aqui, não conseguimos extrair de maneira conhecida
+    console.warn('Formato de resposta não reconhecido:', response);
+    return [];
+  };
+
   const handleSubmitSimulacao = async (dados: {
     cenario: CenarioSimulacao,
     custos: {
@@ -113,42 +180,10 @@ const SimuladorContainer: React.FC<SimuladorContainerProps> = ({
           setResultadosN8n(webhookResponse.resultados);
           
           console.log('Dados enviados para processamento:', webhookResponse.dadosEnviados);
-          console.log('Resultados recebidos:', webhookResponse.resultados);
+          console.log('Resultados recebidos:', JSON.stringify(webhookResponse.resultados, null, 2));
           
           // Extrair os resultados da simulação da resposta do webhook
-          let simulacaoResults: ResultadoSimulacao[] = [];
-          
-          // Verificar e extrair os resultados da estrutura de resposta
-          if (webhookResponse.resultados) {
-            console.log('Estrutura completa da resposta:', JSON.stringify(webhookResponse.resultados));
-            
-            // Tratamento para diferentes estruturas de resposta possíveis
-            if (Array.isArray(webhookResponse.resultados) && webhookResponse.resultados.length > 0) {
-              // Caso 1: A resposta já é um array
-              simulacaoResults = webhookResponse.resultados;
-              console.log('Usando resposta diretamente como array');
-            } 
-            else if (webhookResponse.resultados.simulacao && Array.isArray(webhookResponse.resultados.simulacao)) {
-              // Caso 2: A resposta tem um campo 'simulacao' que é um array
-              simulacaoResults = webhookResponse.resultados.simulacao;
-              console.log('Extraindo do campo .simulacao');
-            }
-            else if (webhookResponse.resultados.response && Array.isArray(webhookResponse.resultados.response)) {
-              // Caso 3: A resposta tem um campo 'response' que é um array
-              simulacaoResults = webhookResponse.resultados.response;
-              console.log('Extraindo do campo .response');
-            }
-            else if (webhookResponse.resultados.response && 
-                    Array.isArray(webhookResponse.resultados.response[0]?.response)) {
-              // Caso 4: A resposta tem uma estrutura aninhada com .response[0].response como array
-              simulacaoResults = webhookResponse.resultados.response[0].response;
-              console.log('Extraindo do campo .response[0].response');
-            }
-            else {
-              console.warn('Formato de resposta não reconhecido:', webhookResponse.resultados);
-              simulacaoResults = [];
-            }
-          }
+          const simulacaoResults = extrairResultadosDaResposta(webhookResponse.resultados);
           
           console.log('Resultados extraídos para exibição:', simulacaoResults);
           setResultados(simulacaoResults);
