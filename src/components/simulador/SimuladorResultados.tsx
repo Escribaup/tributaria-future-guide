@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import {
   LineChart,
@@ -691,7 +692,6 @@ const SimuladorResultados: React.FC<SimuladorResultadosProps> = ({
             </Alert>
           )}
           
-          
           <Card className="mt-6">
             <CardHeader>
               <CardTitle>Comparativo de Alíquotas</CardTitle>
@@ -751,4 +751,39 @@ const SimuladorResultados: React.FC<SimuladorResultadosProps> = ({
 
               <div className="mt-6">
                 <Table>
-                  <TableCaption>Detalhamento das alíquotas por ano</Table
+                  <TableCaption>Detalhamento das alíquotas por ano</TableCaption>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Ano</TableHead>
+                      <TableHead>Impostos Atuais</TableHead>
+                      <TableHead>IBS</TableHead>
+                      <TableHead>CBS</TableHead>
+                      <TableHead>IVA Efetiva</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {resultados.map((resultado) => (
+                      <TableRow key={`aliquota-${resultado.ano}`}>
+                        <TableCell className="font-medium">{resultado.ano}</TableCell>
+                        <TableCell>{formatPercent(resultado.impostos_atuais ? resultado.impostos_atuais * 100 : null)}</TableCell>
+                        <TableCell>{formatPercent(resultado.aliquota_ibs ? resultado.aliquota_ibs * 100 : null)}</TableCell>
+                        <TableCell>{formatPercent(resultado.aliquota_cbs ? resultado.aliquota_cbs * 100 : null)}</TableCell>
+                        <TableCell>{formatPercent(resultado.aliquota_efetiva_total ? resultado.aliquota_efetiva_total * 100 : null)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="n8n-results">
+          {renderN8nResults()}
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+};
+
+export default SimuladorResultados;
