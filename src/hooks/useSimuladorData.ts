@@ -22,16 +22,18 @@ export const useSimuladorData = (userId: string | undefined) => {
           throw new Error(`Erro ao buscar alíquotas: ${aliquotasRes.error.message}`);
         }
         
-        let cenariosRes = { data: [] };
+        let cenariosRes;
         if (userId) {
           cenariosRes = await supabase.from('cenarios').select('*');
           if (cenariosRes.error) {
             throw new Error(`Erro ao buscar cenários: ${cenariosRes.error.message}`);
           }
+          setCenarios(cenariosRes.data || []);
+        } else {
+          setCenarios([]);
         }
         
         setAliquotas(aliquotasRes.data || []);
-        setCenarios(cenariosRes.data || []);
       } catch (error: any) {
         console.error('Erro ao buscar dados:', error);
         toast({
