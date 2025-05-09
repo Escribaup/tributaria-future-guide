@@ -22,14 +22,14 @@ export const useSimuladorData = (userId: string | undefined) => {
           throw new Error(`Erro ao buscar alíquotas: ${aliquotasRes.error.message}`);
         }
         
-        let cenariosRes;
         if (userId) {
-          cenariosRes = await supabase.from('cenarios').select('*');
+          const cenariosRes = await supabase.from('cenarios').select('*');
           if (cenariosRes.error) {
             throw new Error(`Erro ao buscar cenários: ${cenariosRes.error.message}`);
           }
           setCenarios(cenariosRes.data || []);
         } else {
+          console.log('Usuário não autenticado, cenários não serão carregados');
           setCenarios([]);
         }
         

@@ -115,22 +115,48 @@ const SimuladorContainer: React.FC<SimuladorContainerProps> = ({
           console.log('Dados enviados para processamento:', webhookResponse.dadosEnviados);
           console.log('Resultados recebidos:', webhookResponse.resultados);
           
-          // Se houver um formato específico nos resultados do n8n que corresponde ao ResultadoSimulacao,
-          // usamos isso para exibição
-          if (webhookResponse.resultados && Array.isArray(webhookResponse.resultados.simulacao)) {
-            setResultados(webhookResponse.resultados.simulacao);
-          } else if (webhookResponse.resultados && Array.isArray(webhookResponse.resultados)) {
-            // Alguns webhooks podem retornar um array diretamente
-            setResultados(webhookResponse.resultados);
-          } else {
-            // Se não houver um array de simulação específico, passamos um array vazio
-            console.warn('Formato de resposta não reconhecido:', webhookResponse.resultados);
-            setResultados([]);
+          // Extrair os resultados da simulação da resposta do webhook
+          let simulacaoResults: ResultadoSimulacao[] = [];
+          
+          // Verificar e extrair os resultados da estrutura de resposta
+          if (webhookResponse.resultados) {
+            console.log('Estrutura completa da resposta:', JSON.stringify(webhookResponse.resultados));
+            
+            // Tratamento para diferentes estruturas de resposta possíveis
+            if (Array.isArray(webhookResponse.resultados) && webhookResponse.resultados.length > 0) {
+              // Caso 1: A resposta já é um array
+              simulacaoResults = webhookResponse.resultados;
+              console.log('Usando resposta diretamente como array');
+            } 
+            else if (webhookResponse.resultados.simulacao && Array.isArray(webhookResponse.resultados.simulacao)) {
+              // Caso 2: A resposta tem um campo 'simulacao' que é um array
+              simulacaoResults = webhookResponse.resultados.simulacao;
+              console.log('Extraindo do campo .simulacao');
+            }
+            else if (webhookResponse.resultados.response && Array.isArray(webhookResponse.resultados.response)) {
+              // Caso 3: A resposta tem um campo 'response' que é um array
+              simulacaoResults = webhookResponse.resultados.response;
+              console.log('Extraindo do campo .response');
+            }
+            else if (webhookResponse.resultados.response && 
+                    Array.isArray(webhookResponse.resultados.response[0]?.response)) {
+              // Caso 4: A resposta tem uma estrutura aninhada com .response[0].response como array
+              simulacaoResults = webhookResponse.resultados.response[0].response;
+              console.log('Extraindo do campo .response[0].response');
+            }
+            else {
+              console.warn('Formato de resposta não reconhecido:', webhookResponse.resultados);
+              simulacaoResults = [];
+            }
           }
+          
+          console.log('Resultados extraídos para exibição:', simulacaoResults);
+          setResultados(simulacaoResults);
           
           // Salvar no banco se o usuário estiver autenticado e o cenário for válido
           if (userId && cenarioId > 0) {
             console.log('Salvando simulação no banco de dados...');
+            console.log('userId:', userId, 'cenarioId:', cenarioId);
             
             const saveResponse = await salvarSimulacao(
               userId, 
@@ -151,10 +177,23 @@ const SimuladorContainer: React.FC<SimuladorContainerProps> = ({
                 description: "Os dados foram processados, mas não puderam ser salvos no histórico."
               });
             } else {
-              console.log('Simulação salva com sucesso!');
+              console.log('Simulação salva com sucesso!', saveResponse);
+              toast({
+                title: "Dados salvos",
+                description: "A simulação foi salva com sucesso no seu histórico.",
+                duration: 3000,
+              });
             }
           } else {
-            console.log('Usuário não autenticado ou cenário inválido, não salvando no banco');
+            console.warn('Usuário não autenticado ou cenário inválido, não salvando no banco');
+            if (!userId) {
+              toast({
+                variant: "default",
+                title: "Simulação sem salvar",
+                description: "Faça login para salvar suas simulações no histórico.",
+                duration: 5000,
+              });
+            }
           }
           
           // Mudar para a aba de resultados

@@ -173,7 +173,7 @@ export const salvarSimulacao = async (
       data_execucao: new Date().toISOString()
     };
 
-    console.log('Salvando dados na tabela simulacoes:', simulacaoData);
+    console.log('Salvando dados na tabela simulacoes:', JSON.stringify(simulacaoData));
     
     const { data, error } = await supabase
       .from('simulacoes')

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import {
   LineChart,
@@ -79,42 +78,89 @@ const SimuladorResultados: React.FC<SimuladorResultadosProps> = ({
     
     console.log("Processando resultados para gráficos:", resultados);
     
-    // Formatar dados para os gráficos - adicionando validação para evitar erros com valores undefined
-    const dadosFormatados = resultados.map(r => {
-      // Check if each property exists before accessing it
-      const ano = r.ano !== undefined ? String(r.ano) : "N/A";
-      const aliquota_efetiva_total = r.aliquota_efetiva_total !== undefined ? 
-        Number((r.aliquota_efetiva_total * 100).toFixed(2)) : 0;
-      const aliquota_ibs = r.aliquota_ibs !== undefined ? 
-        Number((r.aliquota_ibs * 100).toFixed(2)) : 0;
-      const aliquota_ibs_efetiva = r.aliquota_ibs_efetiva !== undefined ? 
-        Number((r.aliquota_ibs_efetiva * 100).toFixed(2)) : 0;
-      const aliquota_cbs = r.aliquota_cbs !== undefined ? 
-        Number((r.aliquota_cbs * 100).toFixed(2)) : 0;
-      const aliquota_cbs_efetiva = r.aliquota_cbs_efetiva !== undefined ? 
-        Number((r.aliquota_cbs_efetiva * 100).toFixed(2)) : 0;
-      const impostos_atuais = r.impostos_atuais !== undefined ? 
-        Number((r.impostos_atuais * 100).toFixed(2)) : 0;
-      const reducao_custo_pct = r.reducao_custo_pct !== undefined ? 
-        Number(r.reducao_custo_pct.toFixed(2)) : 0;
-      const aumento_preco_pct = r.aumento_preco_pct !== undefined ? 
-        Number(r.aumento_preco_pct.toFixed(2)) : 0;
+    try {
+      // Formatar dados para os gráficos - adicionando validação para evitar erros com valores undefined
+      const dadosFormatados = resultados.map(r => {
+        // Antes de acessar qualquer propriedade, verificar se r é um objeto válido
+        if (!r || typeof r !== 'object') {
+          console.warn("Resultado inválido encontrado:", r);
+          return {
+            ano: "N/A",
+            aliquota_efetiva_pct: 0,
+            aliquota_ibs_pct: 0,
+            aliquota_ibs_efetiva_pct: 0,
+            aliquota_cbs_pct: 0,
+            aliquota_cbs_efetiva_pct: 0,
+            impostos_atuais_pct: 0,
+            reducao_custo_pct: 0,
+            aumento_preco_pct: 0,
+          };
+        }
+        
+        // Verificar cada propriedade individualmente e fornecer valores padrão seguros
+        const ano = r.ano !== undefined ? String(r.ano) : "N/A";
+        
+        // Para valores numéricos, garantir que são números válidos antes de chamar toFixed
+        let aliquota_efetiva_total = 0;
+        if (r.aliquota_efetiva_total !== undefined && r.aliquota_efetiva_total !== null) {
+          aliquota_efetiva_total = Number((r.aliquota_efetiva_total * 100).toFixed(2));
+        }
+        
+        let aliquota_ibs = 0;
+        if (r.aliquota_ibs !== undefined && r.aliquota_ibs !== null) {
+          aliquota_ibs = Number((r.aliquota_ibs * 100).toFixed(2));
+        }
+        
+        let aliquota_ibs_efetiva = 0;
+        if (r.aliquota_ibs_efetiva !== undefined && r.aliquota_ibs_efetiva !== null) {
+          aliquota_ibs_efetiva = Number((r.aliquota_ibs_efetiva * 100).toFixed(2));
+        }
+        
+        let aliquota_cbs = 0;
+        if (r.aliquota_cbs !== undefined && r.aliquota_cbs !== null) {
+          aliquota_cbs = Number((r.aliquota_cbs * 100).toFixed(2));
+        }
+        
+        let aliquota_cbs_efetiva = 0;
+        if (r.aliquota_cbs_efetiva !== undefined && r.aliquota_cbs_efetiva !== null) {
+          aliquota_cbs_efetiva = Number((r.aliquota_cbs_efetiva * 100).toFixed(2));
+        }
+        
+        let impostos_atuais = 0;
+        if (r.impostos_atuais !== undefined && r.impostos_atuais !== null) {
+          impostos_atuais = Number((r.impostos_atuais * 100).toFixed(2));
+        }
+        
+        let reducao_custo_pct = 0;
+        if (r.reducao_custo_pct !== undefined && r.reducao_custo_pct !== null) {
+          reducao_custo_pct = Number(r.reducao_custo_pct.toFixed(2));
+        }
+        
+        let aumento_preco_pct = 0;
+        if (r.aumento_preco_pct !== undefined && r.aumento_preco_pct !== null) {
+          aumento_preco_pct = Number(r.aumento_preco_pct.toFixed(2));
+        }
+        
+        return {
+          ...r,
+          ano,
+          aliquota_efetiva_pct: aliquota_efetiva_total,
+          aliquota_ibs_pct: aliquota_ibs,
+          aliquota_ibs_efetiva_pct: aliquota_ibs_efetiva,
+          aliquota_cbs_pct: aliquota_cbs,
+          aliquota_cbs_efetiva_pct: aliquota_cbs_efetiva,
+          impostos_atuais_pct: impostos_atuais,
+          reducao_custo_pct,
+          aumento_preco_pct,
+        };
+      });
       
-      return {
-        ...r,
-        ano,
-        aliquota_efetiva_pct: aliquota_efetiva_total,
-        aliquota_ibs_pct: aliquota_ibs,
-        aliquota_ibs_efetiva_pct: aliquota_ibs_efetiva,
-        aliquota_cbs_pct: aliquota_cbs,
-        aliquota_cbs_efetiva_pct: aliquota_cbs_efetiva,
-        impostos_atuais_pct: impostos_atuais,
-        reducao_custo_pct,
-        aumento_preco_pct,
-      };
-    });
-    
-    setDadosGrafico(dadosFormatados);
+      console.log('Dados formatados para gráficos:', dadosFormatados);
+      setDadosGrafico(dadosFormatados);
+    } catch (error) {
+      console.error("Erro ao processar resultados para gráficos:", error);
+      setDadosGrafico([]);
+    }
   }, [resultados]);
 
   // Verifica se há erro para exibir
@@ -154,10 +200,14 @@ const SimuladorResultados: React.FC<SimuladorResultadosProps> = ({
   
   if (resultados.length > 0) {
     primeiroAno = resultados[0];
+    console.log("Primeiro ano extraído:", primeiroAno);
   }
   
   // Verificar se há anos com IBS zero para exibir informação específica
-  const temAnoComIBSZero = resultados.some(r => r.aliquota_ibs === 0);
+  const temAnoComIBSZero = resultados.some(r => {
+    // Verificar se r e r.aliquota_ibs são válidos antes de comparar
+    return r && r.aliquota_ibs !== undefined && r.aliquota_ibs === 0;
+  });
 
   // Renderizar o JSON de forma bonita
   const renderPrettyJson = (data: any) => {
@@ -272,10 +322,12 @@ const SimuladorResultados: React.FC<SimuladorResultadosProps> = ({
         </TabsList>
         
         <TabsContent value="local-results">
-          {/* Se temos primeiroAno, podemos exibir o resumo */}
-          {primeiroAno ? (
+          {/* Se temos primeiroAno e é um objeto válido, podemos exibir o resumo */}
+          {primeiroAno && typeof primeiroAno === 'object' ? (
             <div className="bg-white rounded-lg shadow-sm p-4">
-              <h3 className="text-lg font-semibold mb-4">Resumo dos Resultados para {primeiroAno.ano}</h3>
+              <h3 className="text-lg font-semibold mb-4">
+                Resumo dos Resultados para {primeiroAno.ano ? primeiroAno.ano : "Simulação"}
+              </h3>
               
               <div className="grid md:grid-cols-2 gap-8">
                 <Card className="bg-blue-50 border-blue-200">
@@ -302,7 +354,11 @@ const SimuladorResultados: React.FC<SimuladorResultadosProps> = ({
                       <div className="font-semibold">{formatCurrency(primeiroAno.custo_necessario)}</div>
                       
                       <div className="text-sm text-gray-600">Diferença:</div>
-                      <div className="font-semibold">{formatCurrency(primeiroAno.custo_atual - primeiroAno.custo_necessario)}</div>
+                      <div className="font-semibold">
+                        {primeiroAno.custo_atual !== undefined && primeiroAno.custo_necessario !== undefined 
+                          ? formatCurrency(primeiroAno.custo_atual - primeiroAno.custo_necessario)
+                          : 'N/A'}
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -331,7 +387,12 @@ const SimuladorResultados: React.FC<SimuladorResultadosProps> = ({
                       <div className="font-semibold">{formatCurrency(primeiroAno.preco_com_impostos_novo)}</div>
                       
                       <div className="text-sm text-gray-600">Diferença:</div>
-                      <div className="font-semibold">{formatCurrency(primeiroAno.preco_com_impostos_novo - primeiroAno.preco_com_impostos_atual)}</div>
+                      <div className="font-semibold">
+                        {primeiroAno.preco_com_impostos_novo !== undefined && 
+                         primeiroAno.preco_com_impostos_atual !== undefined 
+                          ? formatCurrency(primeiroAno.preco_com_impostos_novo - primeiroAno.preco_com_impostos_atual)
+                          : 'N/A'}
+                      </div>
                     </div>
                   </CardContent>
                 </Card>
@@ -341,11 +402,15 @@ const SimuladorResultados: React.FC<SimuladorResultadosProps> = ({
                 <Alert className="bg-gray-50 border-gray-200">
                   <InfoIcon className="h-4 w-4" />
                   <AlertDescription>
-                    <p className="font-medium">Alíquotas em {primeiroAno.ano}:</p>
+                    <p className="font-medium">Alíquotas em {primeiroAno.ano || "Simulação"}:</p>
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-2">
                       <div>
                         <p className="text-sm text-gray-600">Impostos Atuais:</p>
-                        <p className="font-semibold">{formatPercent(primeiroAno.impostos_atuais * 100)}</p>
+                        <p className="font-semibold">
+                          {primeiroAno.impostos_atuais !== undefined && primeiroAno.impostos_atuais !== null
+                            ? formatPercent(primeiroAno.impostos_atuais * 100)
+                            : 'N/A'}
+                        </p>
                       </div>
                       <div>
                         <p className="text-sm text-gray-600">
@@ -434,7 +499,7 @@ const SimuladorResultados: React.FC<SimuladorResultadosProps> = ({
           )}
           
           {/* Se temos dados para o gráfico, podemos exibir as abas de cenários */}
-          {dadosGrafico.length > 0 && (
+          {dadosGrafico.length > 0 ? (
             <Tabs value={activeTab} onValueChange={setActiveTab} className="mt-6">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="reduzir-custo">Cenário: Reduzir Custo</TabsTrigger>
@@ -616,7 +681,16 @@ const SimuladorResultados: React.FC<SimuladorResultadosProps> = ({
                 </div>
               </TabsContent>
             </Tabs>
+          ) : (
+            <Alert className="bg-blue-50 border-blue-200 mb-4">
+              <InfoIcon className="h-4 w-4 text-blue-600" />
+              <AlertDescription className="text-blue-800">
+                <strong>Aviso:</strong> Não foi possível gerar os gráficos com os dados recebidos.
+                Verifique os dados brutos na aba "Dados Brutos do Processamento".
+              </AlertDescription>
+            </Alert>
           )}
+          
           
           <Card className="mt-6">
             <CardHeader>
@@ -677,120 +751,4 @@ const SimuladorResultados: React.FC<SimuladorResultadosProps> = ({
 
               <div className="mt-6">
                 <Table>
-                  <TableCaption>Detalhamento das alíquotas por ano</TableCaption>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Ano</TableHead>
-                      <TableHead>IBS (%)</TableHead>
-                      <TableHead>CBS (%)</TableHead>
-                      <TableHead>Redução Aplicada</TableHead>
-                      <TableHead>Alíquota Efetiva (%)</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {resultados.map((resultado) => (
-                      <TableRow key={`aliquotas-${resultado.ano}`}>
-                        <TableCell className="font-medium">{resultado.ano}</TableCell>
-                        <TableCell>{formatPercent(resultado.aliquota_ibs * 100)}</TableCell>
-                        <TableCell>{formatPercent(resultado.aliquota_cbs * 100)}</TableCell>
-                        <TableCell>
-                          {resultado.aliquota_ibs === 0 
-                            ? `Redução no CBS: ${formatPercent((1 - resultado.aliquota_cbs_efetiva / resultado.aliquota_cbs) * 100)}`
-                            : `Redução no IBS: ${formatPercent((1 - resultado.aliquota_ibs_efetiva / resultado.aliquota_ibs) * 100)}`
-                          }
-                        </TableCell>
-                        <TableCell>{formatPercent(resultado.aliquota_efetiva_total * 100)}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <div className="bg-white rounded-lg shadow-sm p-4 mt-6">
-            <h3 className="text-lg font-semibold mb-4">Como Funciona o IVA</h3>
-            <div className="grid md:grid-cols-2 gap-6">
-              <div>
-                <h4 className="font-medium text-gray-700 mb-2">Como funciona o novo sistema</h4>
-                <p className="text-sm text-gray-600 mb-4">
-                  O novo Imposto sobre Valor Agregado (IVA) é composto pelo IBS (Imposto sobre Bens e Serviços) 
-                  e CBS (Contribuição sobre Bens e Serviços). Diferente dos impostos atuais, o IVA é calculado por fora
-                  do preço do produto, sendo adicionado ao valor final.
-                </p>
-                
-                <Alert variant="default" className="bg-blue-50 mb-4">
-                  <InfoIcon className="h-4 w-4" />
-                  <AlertDescription>
-                    <strong>Por dentro vs. Por fora</strong>: Nos impostos atuais, o imposto faz parte do preço (está "por dentro"). 
-                    No modelo do IVA, o imposto é adicionado ao preço (fica "por fora"), como em países europeus.
-                  </AlertDescription>
-                </Alert>
-                
-                <div className="bg-gray-50 p-4 rounded-md">
-                  <div className="flex items-center gap-2 mb-2">
-                    <FileTextIcon className="h-4 w-4 text-gray-600" />
-                    <p className="text-sm font-semibold">Exemplo de cálculo:</p>
-                  </div>
-                  <div className="grid grid-cols-2 gap-y-2 text-sm">
-                    <div className="text-gray-600">Custo do produto:</div>
-                    <div>R$ 70,00</div>
-                    
-                    <div className="text-gray-600">Preço com impostos atuais (21,25%):</div>
-                    <div>R$ 100,00</div>
-                    
-                    <div className="text-gray-600">Preço sem impostos:</div>
-                    <div>R$ 75,61 (100,00 ÷ 1,2125)</div>
-                    
-                    <div className="text-gray-600">IVA (IBS+CBS = 26,50%):</div>
-                    <div>R$ 20,04 (75,61 × 26,50%)</div>
-                    
-                    <div className="text-gray-600 font-medium">Preço final com IVA:</div>
-                    <div className="font-medium">R$ 95,65 (75,61 + 20,04)</div>
-                  </div>
-                </div>
-              </div>
-              
-              <div>
-                <h4 className="font-medium text-gray-700 mb-2">Impactos da Reforma</h4>
-                <ul className="text-sm text-gray-600 list-disc pl-5 space-y-2 mb-4">
-                  <li>
-                    <strong>Transparência tributária</strong>: O consumidor saberá exatamente quanto está 
-                    pagando de imposto.
-                  </li>
-                  <li>
-                    <strong>Simplicidade</strong>: Substituição de diversos tributos por um único imposto.
-                  </li>
-                  <li>
-                    <strong>Não-cumulatividade</strong>: O imposto incide apenas sobre o valor agregado em 
-                    cada etapa da cadeia produtiva.
-                  </li>
-                  <li>
-                    <strong>Transição gradual</strong>: A implementação será gradativa ao longo dos anos.
-                  </li>
-                </ul>
-                
-                <div className="mt-4">
-                  <Alert className="bg-amber-50 border-amber-200">
-                    <InfoIcon className="h-4 w-4 text-amber-600" />
-                    <AlertDescription className="text-amber-800">
-                      <strong>Importante:</strong> Durante a transição tributária, o IBS e o CBS são implementados gradualmente.
-                      Em alguns anos, o IBS tem alíquota zero e apenas o CBS está em vigor. Nestas situações,
-                      a redução percentual é aplicada ao CBS.
-                    </AlertDescription>
-                  </Alert>
-                </div>
-              </div>
-            </div>
-          </div>
-        </TabsContent>
-        
-        <TabsContent value="n8n-results">
-          {renderN8nResults()}
-        </TabsContent>
-      </Tabs>
-    </div>
-  );
-};
-
-export default SimuladorResultados;
+                  <TableCaption>Detalhamento das alíquotas por ano</Table
