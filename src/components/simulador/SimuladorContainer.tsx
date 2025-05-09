@@ -6,7 +6,6 @@ import { Card } from '@/components/ui/card';
 import SimuladorForm from './SimuladorForm';
 import SimuladorResultados from './SimuladorResultados';
 import { 
-  calcularResultadosSimulacao,
   salvarCenario, 
   salvarSimulacao,
   enviarDadosParaN8n
@@ -14,7 +13,8 @@ import {
 import { 
   AliquotaTransicao, 
   CenarioSimulacao, 
-  ResultadoSimulacao 
+  ResultadoSimulacao, 
+  ResultadoWebhookN8n
 } from '@/types/simulador';
 
 interface SimuladorContainerProps {
@@ -78,58 +78,61 @@ const SimuladorContainer: React.FC<SimuladorContainerProps> = ({
         cenarioId = -1;
       }
       
-      const { 
-        resultados: resultadosCalc, 
-        precosVenda, 
-        custosMaximos, 
-        margensLiquidas 
-      } = calcularResultadosSimulacao(dados, aliquotas);
-      
-      // Enviar dados para o webhook do n8n
-      let dadosWebhook = null;
-      let resultadosWebhook = null;
+      // Enviar dados para o webhook do n8n e usar o resultado retornado
+      let webhookResponse: ResultadoWebhookN8n | null = null;
       
       try {
-        const webhookResponse = await enviarDadosParaN8n(dados, aliquotas);
+        // Enviar dados para o n8n e obter resultados
+        webhookResponse = await enviarDadosParaN8n(dados, aliquotas);
         console.log('Resposta do webhook n8n:', webhookResponse);
         
         if (webhookResponse.success) {
-          dadosWebhook = webhookResponse.dadosEnviados;
-          resultadosWebhook = webhookResponse.resultados;
+          // Usar os resultados do n8n
+          setDadosEnviadosN8n(webhookResponse.dadosEnviados);
+          setResultadosN8n(webhookResponse.resultados);
           
-          setDadosEnviadosN8n(dadosWebhook);
-          setResultadosN8n(resultadosWebhook);
+          // Se houver um formato específico nos resultados do n8n que corresponde ao ResultadoSimulacao, 
+          // usamos isso para exibição. Caso contrário, dependeremos apenas da interface de exibição do resultadosN8n
+          if (Array.isArray(webhookResponse.resultados?.simulacao)) {
+            setResultados(webhookResponse.resultados.simulacao);
+          } else {
+            // Se não houver um array de simulação específico, passamos um array vazio para garantir que a interface
+            // se concentre em exibir os resultados do n8n diretamente
+            setResultados([]);
+          }
+          
+          // Salvar no banco se o usuário estiver autenticado e o cenário for válido
+          if (userId && cenarioId > 0) {
+            await salvarSimulacao(
+              userId, 
+              cenarioId, 
+              dados.margem_desejada, 
+              [], // Não salvamos mais os preços calculados localmente
+              [], // Não salvamos mais os custos calculados localmente
+              [], // Não salvamos mais as margens calculadas localmente
+              webhookResponse.dadosEnviados,
+              webhookResponse.resultados
+            );
+          }
+          
+          setActiveTab('resultados');
+          
+          toast({
+            title: "Simulação realizada com sucesso",
+            description: "Os resultados da simulação foram calculados pelo serviço externo e estão disponíveis para visualização."
+          });
+        } else {
+          throw new Error('O serviço externo retornou um erro.');
         }
       } catch (webhookError) {
         console.error('Erro ao enviar dados para o n8n:', webhookError);
         toast({
-          variant: "warning",
+          variant: "default", // Corrigido de "warning" para "default"
           title: "Alerta",
-          description: "Os cálculos foram realizados, mas houve um problema ao comunicar com o serviço externo."
+          description: "Não foi possível obter os resultados do serviço externo. Verifique sua conexão e tente novamente."
         });
+        throw webhookError; // Repropagamos o erro para interromper o fluxo
       }
-      
-      // Se o usuário estiver autenticado, salvamos a simulação no banco
-      if (userId && cenarioId > 0) {
-        await salvarSimulacao(
-          userId, 
-          cenarioId, 
-          dados.margem_desejada, 
-          precosVenda, 
-          custosMaximos, 
-          margensLiquidas,
-          dadosWebhook,
-          resultadosWebhook
-        );
-      }
-      
-      setResultados(resultadosCalc);
-      setActiveTab('resultados');
-      
-      toast({
-        title: "Simulação realizada com sucesso",
-        description: "Os resultados da simulação foram calculados e estão disponíveis para visualização."
-      });
     } catch (error) {
       console.error('Erro ao realizar simulação:', error);
       toast({
@@ -147,7 +150,7 @@ const SimuladorContainer: React.FC<SimuladorContainerProps> = ({
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="simulador">Simulador</TabsTrigger>
-          <TabsTrigger value="resultados" disabled={resultados.length === 0}>
+          <TabsTrigger value="resultados" disabled={!resultadosN8n}>
             Resultados
           </TabsTrigger>
         </TabsList>
