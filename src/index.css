@@ -254,6 +254,106 @@
   .prose-sm h3 {
     font-size: 0.9375rem;
   }
+
+  /* Utility classes for white text */
+  .text-white-force {
+    color: white !important;
+  }
+
+  .text-white-force h1,
+  .text-white-force h2,
+  .text-white-force h3,
+  .text-white-force h4,
+  .text-white-force h5,
+  .text-white-force h6 {
+    color: white !important;
+  }
+
+  .text-white-force p {
+    color: white !important;
+  }
+
+  .text-white-force strong {
+    color: white !important;
+  }
+
+  .text-white-force li {
+    color: white !important;
+  }
+
+  /* HTML content styling for chat with white text option */
+  .html-message-container {
+    line-height: 1.6;
+  }
+  
+  .html-message-container .prose h1, 
+  .html-message-container .prose h2, 
+  .html-message-container .prose h3 {
+    color: #1e40af;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+  }
+  
+  .html-message-container .prose h1 {
+    font-size: 1.25rem;
+  }
+  
+  .html-message-container .prose h2 {
+    font-size: 1.125rem;
+  }
+  
+  .html-message-container .prose h3 {
+    font-size: 1rem;
+  }
+  
+  .html-message-container .prose p {
+    margin-bottom: 0.75rem;
+    color: #374151;
+  }
+  
+  .html-message-container .prose ul, 
+  .html-message-container .prose ol {
+    margin: 0.5rem 0;
+    padding-left: 1.25rem;
+  }
+  
+  .html-message-container .prose li {
+    margin-bottom: 0.25rem;
+    color: #374151;
+  }
+  
+  .html-message-container .prose strong {
+    font-weight: 600;
+    color: #1f2937;
+  }
+  
+  .html-message-container .prose em {
+    font-style: italic;
+    color: #6b7280;
+  }
+  
+  .html-message-container .prose a {
+    color: #2563eb;
+    text-decoration: underline;
+  }
+  
+  .html-message-container .prose a:hover {
+    color: #1d4ed8;
+  }
+  
+  .html-message-container .prose footer {
+    margin-top: 1rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid #e5e7eb;
+    font-size: 0.75rem;
+    color: #6b7280;
+  }
+  
+  .html-message-container .prose small {
+    font-size: 0.75rem;
+    color: #6b7280;
+  }
 }
 
 /* Add a class for the initial transparent header */
