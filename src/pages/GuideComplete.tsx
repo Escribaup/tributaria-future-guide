@@ -650,7 +650,7 @@ const GuideComplete = () => {
                       
                       <div className="mt-10 p-6 bg-idvl-blue-dark text-white rounded-lg">
                         <h3 className="text-xl font-bold mb-3 text-slate-50">Ainda tem dúvidas?</h3>
-                        <p className="mb-4 text-slate-50">
+                        <p className="mb-4 font-normal text-slate-50">
                           Entre em contato com nossa equipe de especialistas para obter respostas personalizadas 
                           sobre como a reforma tributária afetará seu negócio.
                         </p>
