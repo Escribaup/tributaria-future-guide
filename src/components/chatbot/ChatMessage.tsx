@@ -2,12 +2,24 @@
 import React from "react";
 import { Message } from "@/contexts/ChatbotContext";
 import { cn } from "@/lib/utils";
+import HtmlMessage from "./HtmlMessage";
 
 interface ChatMessageProps {
   message: Message;
 }
 
 const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
+  // Check if the message content is HTML
+  const isHtmlContent = (content: string): boolean => {
+    return content.trim().startsWith('<!DOCTYPE html>') || 
+           content.trim().startsWith('<html') ||
+           (content.includes('<h1>') || content.includes('<h2>') || content.includes('<h3>')) ||
+           (content.includes('<p>') && content.includes('</p>')) ||
+           (content.includes('<ul>') && content.includes('</ul>'));
+  };
+
+  const shouldRenderAsHtml = message.type === "bot" && isHtmlContent(message.content);
+
   return (
     <div
       className={cn(
@@ -29,10 +41,15 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
               : "bg-white border border-gray-200"
           )}
         >
-          <p className="whitespace-pre-wrap break-words">{message.content}</p>
+          {shouldRenderAsHtml ? (
+            <HtmlMessage content={message.content} />
+          ) : (
+            <p className="whitespace-pre-wrap break-words">{message.content}</p>
+          )}
+          
           <div
             className={cn(
-              "text-xs mt-1",
+              "text-xs mt-2",
               message.type === "user" ? "text-white/70" : "text-gray-400"
             )}
           >

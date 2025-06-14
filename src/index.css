@@ -163,6 +163,97 @@
   .px-mobile {
     @apply px-3 md:px-4 lg:px-6;
   }
+
+  /* HTML Message Styling for Chat */
+  .prose {
+    color: inherit;
+    max-width: none;
+  }
+  
+  .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 {
+    color: #1e40af;
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    line-height: 1.25;
+  }
+  
+  .prose h1 {
+    font-size: 1.25rem;
+  }
+  
+  .prose h2 {
+    font-size: 1.125rem;
+  }
+  
+  .prose h3 {
+    font-size: 1rem;
+  }
+  
+  .prose p {
+    margin-bottom: 0.75rem;
+    color: #374151;
+    line-height: 1.6;
+  }
+  
+  .prose ul, .prose ol {
+    margin: 0.5rem 0;
+    padding-left: 1.25rem;
+  }
+  
+  .prose li {
+    margin-bottom: 0.25rem;
+    color: #374151;
+  }
+  
+  .prose strong {
+    font-weight: 600;
+    color: #1f2937;
+  }
+  
+  .prose em {
+    font-style: italic;
+    color: #6b7280;
+  }
+  
+  .prose a {
+    color: #2563eb;
+    text-decoration: underline;
+  }
+  
+  .prose a:hover {
+    color: #1d4ed8;
+  }
+  
+  .prose footer {
+    margin-top: 1rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid #e5e7eb;
+    font-size: 0.75rem;
+    color: #6b7280;
+  }
+  
+  .prose small {
+    font-size: 0.75rem;
+    color: #6b7280;
+  }
+
+  .prose-sm {
+    font-size: 0.875rem;
+    line-height: 1.5;
+  }
+
+  .prose-sm h1 {
+    font-size: 1.125rem;
+  }
+  
+  .prose-sm h2 {
+    font-size: 1rem;
+  }
+  
+  .prose-sm h3 {
+    font-size: 0.9375rem;
+  }
 }
 
 /* Add a class for the initial transparent header */
