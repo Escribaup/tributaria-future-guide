@@ -7,81 +7,45 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { MessageSquarePlus, ArrowRight, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
-
 const GuideComplete = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [activeYear, setActiveYear] = useState("2023");
-  
-  const timelineData = [
-    {
-      year: "2023",
-      title: "Emenda Constitucional",
-      description: "Aprovação da Emenda Constitucional da Reforma Tributária.",
-      events: [
-        "Aprovação da Emenda Constitucional da Reforma Tributária"
-      ]
-    },
-    {
-      year: "2024-2025",
-      title: "Leis Complementares",
-      description: "Leis Complementares que regulamentam o novo sistema tributário.",
-      events: [
-        "Leis Complementares que regulamentam:",
-        "O IBS e a CBS",
-        "O Conselho Federativo do IBS",
-        "O Fundo de Desenvolvimento Regional",
-        "O ressarcimento dos saldos credores acumulados do ICMS",
-        "Lei ordinária do Imposto Seletivo",
-        "Desenvolvimento do sistema de cobrança da CBS e do IBS"
-      ]
-    },
-    {
-      year: "2026",
-      title: "Ano teste dos novos tributos",
-      description: "Implementação inicial com alíquotas teste dos novos tributos.",
-      events: [
-        "Ano teste da CBS, à alíquota de 0,9%, e do IBS, à alíquota de 0,1%, compensáveis com PIS/Cofins e com outros tributos federais"
-      ]
-    },
-    {
-      year: "2027",
-      title: "Início da transição",
-      description: "Cobrança da CBS e início da redução gradual de tributos.",
-      events: [
-        "Cobrança da CBS e extinção do PIS e da Cofins",
-        "Redução a zero das alíquotas do IPI (exceto ZFM)",
-        "Instituição do Imposto Seletivo"
-      ]
-    },
-    {
-      year: "2029-2032",
-      title: "Transição Gradual",
-      description: "Transição gradual entre o antigo e o novo sistema tributário.",
-      events: [
-        "Transição ICMS e do ISS para o IBS via aumento gradual da alíquota do IBS e redução gradual das alíquotas do ICMS e do ISS:",
-        "10% em 2029",
-        "20% em 2030",
-        "30% em 2031",
-        "40% em 2032",
-        "100% em 2033"
-      ]
-    },
-    {
-      year: "2033",
-      title: "Vigência Integral",
-      description: "Implementação completa do novo modelo tributário.",
-      events: [
-        "Vigência integral do novo modelo e extinção do ICMS, do ISS e do IPI"
-      ]
-    }
-  ];
-  
+  const timelineData = [{
+    year: "2023",
+    title: "Emenda Constitucional",
+    description: "Aprovação da Emenda Constitucional da Reforma Tributária.",
+    events: ["Aprovação da Emenda Constitucional da Reforma Tributária"]
+  }, {
+    year: "2024-2025",
+    title: "Leis Complementares",
+    description: "Leis Complementares que regulamentam o novo sistema tributário.",
+    events: ["Leis Complementares que regulamentam:", "O IBS e a CBS", "O Conselho Federativo do IBS", "O Fundo de Desenvolvimento Regional", "O ressarcimento dos saldos credores acumulados do ICMS", "Lei ordinária do Imposto Seletivo", "Desenvolvimento do sistema de cobrança da CBS e do IBS"]
+  }, {
+    year: "2026",
+    title: "Ano teste dos novos tributos",
+    description: "Implementação inicial com alíquotas teste dos novos tributos.",
+    events: ["Ano teste da CBS, à alíquota de 0,9%, e do IBS, à alíquota de 0,1%, compensáveis com PIS/Cofins e com outros tributos federais"]
+  }, {
+    year: "2027",
+    title: "Início da transição",
+    description: "Cobrança da CBS e início da redução gradual de tributos.",
+    events: ["Cobrança da CBS e extinção do PIS e da Cofins", "Redução a zero das alíquotas do IPI (exceto ZFM)", "Instituição do Imposto Seletivo"]
+  }, {
+    year: "2029-2032",
+    title: "Transição Gradual",
+    description: "Transição gradual entre o antigo e o novo sistema tributário.",
+    events: ["Transição ICMS e do ISS para o IBS via aumento gradual da alíquota do IBS e redução gradual das alíquotas do ICMS e do ISS:", "10% em 2029", "20% em 2030", "30% em 2031", "40% em 2032", "100% em 2033"]
+  }, {
+    year: "2033",
+    title: "Vigência Integral",
+    description: "Implementação completa do novo modelo tributário.",
+    events: ["Vigência integral do novo modelo e extinção do ICMS, do ISS e do IPI"]
+  }];
   const activeData = timelineData.find(item => item.year === activeYear) || timelineData[0];
   const breadcrumbs = [{
     text: "Guia Completo",
     href: "/guia-completo"
   }];
-  
   return <div className="flex flex-col min-h-screen">
       <Header />
       <main className="flex-grow">
@@ -409,27 +373,14 @@ const GuideComplete = () => {
                         
                         {/* Timeline dots and years */}
                         <div className="flex justify-between relative">
-                          {timelineData.map((item, index) => (
-                            <div key={index} className="flex flex-col items-center">
-                              <button 
-                                onClick={() => setActiveYear(item.year)}
-                                className={cn(
-                                  "w-8 h-8 rounded-full z-10 transition-all duration-300 flex items-center justify-center border-2",
-                                  activeYear === item.year 
-                                    ? "bg-idvl-blue-dark border-white" 
-                                    : "bg-idvl-blue-light border-idvl-blue-light hover:bg-idvl-blue-dark"
-                                )}
-                              >
+                          {timelineData.map((item, index) => <div key={index} className="flex flex-col items-center">
+                              <button onClick={() => setActiveYear(item.year)} className={cn("w-8 h-8 rounded-full z-10 transition-all duration-300 flex items-center justify-center border-2", activeYear === item.year ? "bg-idvl-blue-dark border-white" : "bg-idvl-blue-light border-idvl-blue-light hover:bg-idvl-blue-dark")}>
                                 <span className="sr-only">{item.year}</span>
                               </button>
-                              <div className={cn(
-                                "mt-3 bg-idvl-blue-dark text-white font-semibold py-2 px-3 rounded-md transition-all",
-                                activeYear === item.year ? "scale-110" : ""
-                              )}>
+                              <div className={cn("mt-3 bg-idvl-blue-dark text-white font-semibold py-2 px-3 rounded-md transition-all", activeYear === item.year ? "scale-110" : "")}>
                                 {item.year}
                               </div>
-                            </div>
-                          ))}
+                            </div>)}
                         </div>
                       </div>
 
@@ -444,25 +395,19 @@ const GuideComplete = () => {
                         
                         <h4 className="font-semibold text-idvl-blue-dark mb-4">Principais eventos:</h4>
                         <ul className="space-y-3">
-                          {activeData.events.map((event, index) => (
-                            <li key={index} className="flex items-start">
-                              {event.startsWith("O ") || event.startsWith("10%") || event.startsWith("20%") || event.startsWith("30%") || event.startsWith("40%") || event.startsWith("100%") ? (
-                                <>
+                          {activeData.events.map((event, index) => <li key={index} className="flex items-start">
+                              {event.startsWith("O ") || event.startsWith("10%") || event.startsWith("20%") || event.startsWith("30%") || event.startsWith("40%") || event.startsWith("100%") ? <>
                                   <span className="text-idvl-blue-light mr-2">
                                     <ChevronRight className="h-5 w-5" />
                                   </span>
                                   <span className="ml-2">{event}</span>
-                                </>
-                              ) : (
-                                <>
+                                </> : <>
                                   <span className="bg-idvl-blue-light text-white rounded-full w-6 h-6 flex items-center justify-center text-sm mr-3 flex-shrink-0 mt-0.5">
                                     {index + 1}
                                   </span>
                                   <span>{event}</span>
-                                </>
-                              )}
-                            </li>
-                          ))}
+                                </>}
+                            </li>)}
                         </ul>
                       </div>
 
@@ -704,8 +649,8 @@ const GuideComplete = () => {
                       </Accordion>
                       
                       <div className="mt-10 p-6 bg-idvl-blue-dark text-white rounded-lg">
-                        <h3 className="text-xl font-bold mb-3">Ainda tem dúvidas?</h3>
-                        <p className="mb-4">
+                        <h3 className="text-xl font-bold mb-3 text-slate-50">Ainda tem dúvidas?</h3>
+                        <p className="mb-4 text-slate-50">
                           Entre em contato com nossa equipe de especialistas para obter respostas personalizadas 
                           sobre como a reforma tributária afetará seu negócio.
                         </p>
