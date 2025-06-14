@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { MessageSquarePlus, ArrowRight, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
+
 const GuideComplete = () => {
   const [activeTab, setActiveTab] = useState("overview");
   const [activeYear, setActiveYear] = useState("2023");
@@ -648,9 +649,9 @@ const GuideComplete = () => {
                         </AccordionItem>
                       </Accordion>
                       
-                      <div className="mt-10 p-6 bg-idvl-blue-dark text-white rounded-lg">
-                        <h3 className="text-xl font-bold mb-3 text-slate-50">Ainda tem dúvidas?</h3>
-                        <p className="mb-4 font-normal text-slate-50">
+                      <div className="mt-10 p-6 bg-idvl-blue-dark text-white rounded-lg text-white-force">
+                        <h3 className="text-xl font-bold mb-3 text-white">Ainda tem dúvidas?</h3>
+                        <p className="mb-4 font-normal text-white">
                           Entre em contato com nossa equipe de especialistas para obter respostas personalizadas 
                           sobre como a reforma tributária afetará seu negócio.
                         </p>
