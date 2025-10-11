@@ -163,14 +163,18 @@ const SimuladorContainer: React.FC<SimuladorContainerProps> = ({
         
         if (cenarioResponse.error) {
           console.error('Erro ao salvar cenário:', cenarioResponse.error);
-          throw new Error('Erro ao salvar cenário');
-        }
-        
-        if (cenarioResponse.data && cenarioResponse.data.id) {
+          toast({
+            variant: "default",
+            title: "Cenário não salvo",
+            description: "Não foi possível salvar o cenário, mas continuaremos a simulação."
+          });
+          cenarioId = -1;
+        } else if (cenarioResponse.data && cenarioResponse.data.id) {
           cenarioId = cenarioResponse.data.id;
           console.log('Cenário salvo com sucesso, ID:', cenarioId);
         } else {
           console.warn('Cenário salvo sem retornar ID');
+          cenarioId = -1;
         }
       }
       

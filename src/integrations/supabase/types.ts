@@ -80,6 +80,7 @@ export type Database = {
           id: number
           nome: string
           produto_id: number | null
+          reducao_ibs: number | null
           uf_id: number | null
         }
         Insert: {
@@ -90,6 +91,7 @@ export type Database = {
           id?: number
           nome: string
           produto_id?: number | null
+          reducao_ibs?: number | null
           uf_id?: number | null
         }
         Update: {
@@ -100,6 +102,7 @@ export type Database = {
           id?: number
           nome?: string
           produto_id?: number | null
+          reducao_ibs?: number | null
           uf_id?: number | null
         }
         Relationships: [
