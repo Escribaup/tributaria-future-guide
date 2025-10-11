@@ -2,26 +2,24 @@ export const WHATSAPP_NUMBER = '5541996946641';
 export const EMAIL = 'comercial@idvl.com.br';
 export const PHONE = '+55 41 99694-6641';
 
-export function getWhatsAppUrl(customMessage?: string): string {
-  // Sanitize the number (remove non-digits)
-  const sanitizedNumber = WHATSAPP_NUMBER.replace(/\D/g, '');
-  
-  // Get current page path for context
+function sanitizeNumber(number: string): string {
+  return number.replace(/\D/g, '');
+}
+
+function buildMessage(customMessage?: string): string {
   const currentPath = typeof window !== 'undefined' ? window.location.pathname : '';
-  
-  // Default message with page context
   const defaultMessage = `Olá! Vim pelo site${currentPath ? ` (página: ${currentPath})` : ''} e gostaria de falar com um especialista sobre a Reforma Tributária.`;
-  
-  const message = customMessage || defaultMessage;
-  const encodedMessage = encodeURIComponent(message);
-  
-  // Detect iOS devices
-  const isIOS = typeof window !== 'undefined' && /iPad|iPhone|iPod/.test(navigator.userAgent);
-  
-  // Use appropriate URL format
-  if (isIOS) {
-    return `https://api.whatsapp.com/send?phone=${sanitizedNumber}&text=${encodedMessage}`;
-  }
-  
+  return encodeURIComponent(customMessage || defaultMessage);
+}
+
+export function getWhatsAppUrl(customMessage?: string): string {
+  const sanitizedNumber = sanitizeNumber(WHATSAPP_NUMBER);
+  const encodedMessage = buildMessage(customMessage);
   return `https://wa.me/${sanitizedNumber}?text=${encodedMessage}`;
+}
+
+export function getWhatsAppDeepLink(customMessage?: string): string {
+  const sanitizedNumber = sanitizeNumber(WHATSAPP_NUMBER);
+  const encodedMessage = buildMessage(customMessage);
+  return `whatsapp://send?phone=${sanitizedNumber}&text=${encodedMessage}`;
 }

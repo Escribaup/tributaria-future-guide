@@ -7,7 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { MessageSquarePlus, ArrowRight, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { getWhatsAppUrl } from '@/config/contact';
+import ContactButton from '@/components/ContactButton';
 
 const GuideComplete = () => {
   const [activeTab, setActiveTab] = useState("overview");
@@ -85,10 +85,10 @@ const GuideComplete = () => {
                   <p className="text-sm text-idvl-text-light mb-3">
                     Nossa equipe está pronta para esclarecer suas dúvidas sobre a reforma tributária.
                   </p>
-                  <a href={getWhatsAppUrl('Olá! Vim pelo Guia Completo e gostaria de falar com um especialista sobre a Reforma Tributária.')} target="_blank" rel="noopener noreferrer nofollow" className="btn-primary text-sm w-full text-center block flex items-center justify-center gap-2">
+                  <ContactButton prefillText='Olá! Vim pelo Guia Completo e gostaria de falar com um especialista sobre a Reforma Tributária.' className="btn-primary text-sm w-full text-center block flex items-center justify-center gap-2">
                     <MessageSquarePlus className="w-4 h-4" />
                     Fale com um especialista
-                  </a>
+                  </ContactButton>
                 </div>
               </div>
             </aside>
@@ -656,10 +656,10 @@ const GuideComplete = () => {
                           Entre em contato com nossa equipe de especialistas para obter respostas personalizadas 
                           sobre como a reforma tributária afetará seu negócio.
                         </p>
-                        <a href={getWhatsAppUrl('Olá! Vim do FAQ do Guia Completo e tenho dúvidas sobre a Reforma Tributária e como ela afetará meu negócio.')} target="_blank" rel="noopener noreferrer nofollow" className="bg-white text-idvl-blue-dark hover:bg-opacity-90 transition-all px-6 py-3 rounded-md font-semibold inline-flex items-center">
+                        <ContactButton prefillText='Olá! Vim do FAQ do Guia Completo e tenho dúvidas sobre a Reforma Tributária e como ela afetará meu negócio.' className="bg-white text-idvl-blue-dark hover:bg-opacity-90 transition-all px-6 py-3 rounded-md font-semibold inline-flex items-center">
                           Falar com um especialista
                           <ArrowRight className="w-4 h-4 ml-2" />
-                        </a>
+                        </ContactButton>
                       </div>
                     </div>
                   </div>

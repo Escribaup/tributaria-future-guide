@@ -1,7 +1,7 @@
 
 import { Link } from 'react-router-dom';
 import { MapPin, Phone, Mail, Linkedin, Facebook, Instagram, Youtube, MessageSquare } from 'lucide-react';
-import { getWhatsAppUrl } from '@/config/contact';
+import ContactButton from '@/components/ContactButton';
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -48,10 +48,10 @@ const Footer = () => {
                 <Link to="/simulador" className="hover:text-idvl-blue-light transition-colors">Simulador</Link>
               </li>
               <li>
-                <a href={getWhatsAppUrl('Olá! Gostaria de falar com um especialista.')} target="_blank" rel="noopener noreferrer nofollow" className="hover:text-idvl-blue-light transition-colors flex items-center gap-1">
+                <ContactButton prefillText='Olá! Gostaria de falar com um especialista.' className="hover:text-idvl-blue-light transition-colors flex items-center gap-1">
                   <MessageSquare className="w-4 h-4" />
                   Contato
-                </a>
+                </ContactButton>
               </li>
             </ul>
           </div>

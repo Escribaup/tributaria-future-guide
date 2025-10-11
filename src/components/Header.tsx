@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from "@/components/ui/button";
 import { Menu, X } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { getWhatsAppUrl } from '@/config/contact';
+import ContactButton from '@/components/ContactButton';
 import {
   Sheet,
   SheetContent,
@@ -65,14 +65,12 @@ const Header = () => {
         </Link>
       </li>
       <li>
-        <a 
-          href={getWhatsAppUrl('Olá! Gostaria de falar com um especialista sobre a Reforma Tributária.')} 
-          target="_blank" 
-          rel="noopener noreferrer nofollow" 
+        <ContactButton 
+          prefillText='Olá! Gostaria de falar com um especialista sobre a Reforma Tributária.'
           className={`hover:opacity-80 transition-colors ${isScrolled && !isMobile ? 'text-idvl-text-dark' : 'text-white'} ${isMobile ? 'text-lg' : ''}`}
         >
           Contato
-        </a>
+        </ContactButton>
       </li>
       {isAdmin && (
         <li>

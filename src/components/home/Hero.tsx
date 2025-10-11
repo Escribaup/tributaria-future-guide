@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { getWhatsAppUrl } from '@/config/contact';
+import ContactButton from '@/components/ContactButton';
 
 const Hero = () => {
   const isMobile = useIsMobile();
@@ -85,14 +85,12 @@ const Hero = () => {
               <Link to="/guia-completo" className="bg-white text-idvl-blue-dark hover:bg-opacity-90 transition-all px-6 md:px-8 py-3 md:py-4 rounded-md font-semibold text-base md:text-lg w-full sm:w-auto text-center">
                 Comece Aqui
               </Link>
-              <a 
-                href={getWhatsAppUrl('Olá! Vim pela página inicial e gostaria de falar com um especialista sobre a Reforma Tributária.')} 
-                target="_blank" 
-                rel="noopener noreferrer nofollow" 
+              <ContactButton 
+                prefillText='Olá! Vim pela página inicial e gostaria de falar com um especialista sobre a Reforma Tributária.'
                 className="bg-transparent border-2 border-white text-white hover:bg-white hover:bg-opacity-10 transition-all px-6 md:px-8 py-3 md:py-4 rounded-md font-semibold text-base md:text-lg w-full sm:w-auto text-center"
               >
                 Fale Conosco
-              </a>
+              </ContactButton>
             </div>
           </div>
         </div>
