@@ -76,7 +76,7 @@ const CallToAction = () => {
               Acessar o Guia Completo
             </Link>
             <a
-              href="https://wa.me/41996946641"
+              href="https://wa.me/5541996946641"
               target="_blank"
               rel="noopener noreferrer"
               className="bg-transparent border-2 border-white text-white hover:bg-white hover:bg-opacity-10 transition-all px-8 py-4 rounded-md font-semibold text-lg flex items-center gap-2"

@@ -47,7 +47,7 @@ const Footer = () => {
                 <Link to="/simulador" className="hover:text-idvl-blue-light transition-colors">Simulador</Link>
               </li>
               <li>
-                <a href="https://wa.me/41996946641" target="_blank" rel="noopener noreferrer" className="hover:text-idvl-blue-light transition-colors flex items-center gap-1">
+                <a href="https://wa.me/5541996946641" target="_blank" rel="noopener noreferrer" className="hover:text-idvl-blue-light transition-colors flex items-center gap-1">
                   <MessageSquare className="w-4 h-4" />
                   Contato
                 </a>

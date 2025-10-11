@@ -85,7 +85,7 @@ const Hero = () => {
                 Comece Aqui
               </Link>
               <a 
-                href="https://wa.me/41996946641" 
+                href="https://wa.me/5541996946641" 
                 target="_blank" 
                 rel="noopener noreferrer" 
                 className="bg-transparent border-2 border-white text-white hover:bg-white hover:bg-opacity-10 transition-all px-6 md:px-8 py-3 md:py-4 rounded-md font-semibold text-base md:text-lg w-full sm:w-auto text-center"

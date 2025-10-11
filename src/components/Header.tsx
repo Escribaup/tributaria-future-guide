@@ -65,7 +65,7 @@ const Header = () => {
       </li>
       <li>
         <a 
-          href="https://wa.me/41996946641" 
+          href="https://wa.me/5541996946641" 
           target="_blank" 
           rel="noopener noreferrer" 
           className={`hover:opacity-80 transition-colors ${isScrolled && !isMobile ? 'text-idvl-text-dark' : 'text-white'} ${isMobile ? 'text-lg' : ''}`}

@@ -84,7 +84,7 @@ const GuideComplete = () => {
                   <p className="text-sm text-idvl-text-light mb-3">
                     Nossa equipe está pronta para esclarecer suas dúvidas sobre a reforma tributária.
                   </p>
-                  <a href="https://wa.me/41996946641" target="_blank" rel="noopener noreferrer" className="btn-primary text-sm w-full text-center block flex items-center justify-center gap-2">
+                  <a href="https://wa.me/5541996946641" target="_blank" rel="noopener noreferrer" className="btn-primary text-sm w-full text-center block flex items-center justify-center gap-2">
                     <MessageSquarePlus className="w-4 h-4" />
                     Fale com um especialista
                   </a>
@@ -655,7 +655,7 @@ const GuideComplete = () => {
                           Entre em contato com nossa equipe de especialistas para obter respostas personalizadas 
                           sobre como a reforma tributária afetará seu negócio.
                         </p>
-                        <a href="https://wa.me/41996946641" target="_blank" rel="noopener noreferrer" className="bg-white text-idvl-blue-dark hover:bg-opacity-90 transition-all px-6 py-3 rounded-md font-semibold inline-flex items-center">
+                        <a href="https://wa.me/5541996946641" target="_blank" rel="noopener noreferrer" className="bg-white text-idvl-blue-dark hover:bg-opacity-90 transition-all px-6 py-3 rounded-md font-semibold inline-flex items-center">
                           Falar com um especialista
                           <ArrowRight className="w-4 h-4 ml-2" />
                         </a>
