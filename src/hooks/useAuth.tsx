@@ -91,10 +91,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return Promise.reject(error);
       }
 
-      navigate('/admin');
       toast({
         title: "Login realizado com sucesso",
-        description: "Bem-vindo ao painel administrativo.",
+        description: "Bem-vindo!",
       });
     } catch (error) {
       console.error('Erro ao fazer login:', error);
@@ -146,7 +145,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function signOut() {
     try {
       await supabase.auth.signOut();
-      navigate('/auth');
+      navigate('/');
       toast({
         title: "Logout realizado",
         description: "Você foi desconectado com sucesso.",

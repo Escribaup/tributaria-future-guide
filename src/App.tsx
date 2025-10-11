@@ -15,6 +15,7 @@ import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import { AuthProvider } from "./hooks/useAuth";
 import AdminRoute from "./components/AdminRoute";
+import ProtectedRoute from "./components/ProtectedRoute";
 import { ChatbotProvider } from "./contexts/ChatbotContext";
 import Chatbot from "./components/chatbot/Chatbot";
 import { useAuth } from "./hooks/useAuth";
@@ -61,12 +62,17 @@ const App = () => {
               <Routes>
                 <Route path="/" element={<Index />} />
                 <Route path="/guia-completo" element={<GuideComplete />} />
-                <Route path="/simulador" element={<Simulador />} /> {/* Nova rota */}
                 <Route path="/auth" element={<Auth />} />
                 <Route path="/termos" element={<Terms />} />
                 <Route path="/privacidade" element={<Privacy />} />
                 
                 {/* Rotas protegidas */}
+                <Route path="/simulador" element={
+                  <ProtectedRoute>
+                    <Simulador />
+                  </ProtectedRoute>
+                } />
+                
                 <Route path="/admin" element={
                   <AdminRoute>
                     <Admin />

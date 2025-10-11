@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/sheet";
 
 const Header = () => {
-  const { user } = useAuth();
+  const { user, isAdmin, signOut } = useAuth();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const isMobile = useIsMobile();
@@ -73,7 +73,7 @@ const Header = () => {
           Contato
         </a>
       </li>
-      {user && (
+      {isAdmin && (
         <li>
           <Link 
             to="/admin" 
@@ -84,13 +84,26 @@ const Header = () => {
           </Link>
         </li>
       )}
-      {user && isMobile && (
-        <li className="mt-2">
-          <Button asChild variant="secondary" className="w-full">
-            <Link to="/admin" onClick={() => setIsMenuOpen(false)}>
-              Painel Admin
-            </Link>
-          </Button>
+      {isMobile && (
+        <li className="mt-4 pt-4 border-t border-white/20">
+          {user ? (
+            <Button 
+              onClick={() => {
+                signOut();
+                setIsMenuOpen(false);
+              }}
+              variant="outline" 
+              className="w-full bg-transparent border-white text-white hover:bg-white/10"
+            >
+              Sair
+            </Button>
+          ) : (
+            <Button asChild variant="secondary" className="w-full">
+              <Link to="/auth" onClick={() => setIsMenuOpen(false)}>
+                Entrar
+              </Link>
+            </Button>
+          )}
         </li>
       )}
     </ul>
@@ -133,13 +146,28 @@ const Header = () => {
             <nav className="hidden md:block">
               <NavLinks />
             </nav>
-            {user && (
-              <div className="hidden md:block">
+            <div className="hidden md:flex items-center gap-3">
+              {user ? (
+                <>
+                  {isAdmin && (
+                    <Button asChild variant="secondary">
+                      <Link to="/admin">Painel Admin</Link>
+                    </Button>
+                  )}
+                  <Button 
+                    onClick={signOut}
+                    variant="outline"
+                    className={`${isScrolled ? 'border-idvl-blue-dark text-idvl-blue-dark hover:bg-idvl-blue-dark hover:text-white' : 'border-white text-white hover:bg-white hover:text-idvl-blue-dark'}`}
+                  >
+                    Sair
+                  </Button>
+                </>
+              ) : (
                 <Button asChild variant="secondary">
-                  <Link to="/admin">Painel Admin</Link>
+                  <Link to="/auth">Entrar</Link>
                 </Button>
-              </div>
-            )}
+              )}
+            </div>
           </>
         )}
       </div>

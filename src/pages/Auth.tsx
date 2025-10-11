@@ -1,6 +1,6 @@
 
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import {
@@ -18,6 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 const Auth = () => {
   const { user, signIn, signUp, isAdmin } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -26,12 +27,19 @@ const Auth = () => {
 
   // Redirecionar se o usuário já estiver logado
   React.useEffect(() => {
-    if (user && isAdmin) {
-      navigate("/admin");
-    } else if (user) {
-      navigate("/");
+    if (user) {
+      const redirectTo = searchParams.get("redirect");
+      if (isAdmin && !redirectTo) {
+        navigate("/admin");
+      } else if (redirectTo === "simulador") {
+        navigate("/simulador");
+      } else if (redirectTo) {
+        navigate(`/${redirectTo}`);
+      } else {
+        navigate("/");
+      }
     }
-  }, [user, isAdmin, navigate]);
+  }, [user, isAdmin, navigate, searchParams]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -67,7 +75,9 @@ const Auth = () => {
               <CardHeader>
                 <CardTitle>Login</CardTitle>
                 <CardDescription>
-                  Entre com suas credenciais para acessar o painel administrativo.
+                  {searchParams.get("redirect") === "simulador" 
+                    ? "Faça login para acessar o simulador da reforma tributária."
+                    : "Entre com suas credenciais para acessar sua conta."}
                 </CardDescription>
               </CardHeader>
               <form onSubmit={handleLogin}>
