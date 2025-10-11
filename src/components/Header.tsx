@@ -5,6 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { Button } from "@/components/ui/button";
 import { Menu, X } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { getWhatsAppUrl } from '@/config/contact';
 import {
   Sheet,
   SheetContent,
@@ -65,9 +66,9 @@ const Header = () => {
       </li>
       <li>
         <a 
-          href="https://wa.me/5541996946641" 
+          href={getWhatsAppUrl('Olá! Gostaria de falar com um especialista sobre a Reforma Tributária.')} 
           target="_blank" 
-          rel="noopener noreferrer" 
+          rel="noopener noreferrer nofollow" 
           className={`hover:opacity-80 transition-colors ${isScrolled && !isMobile ? 'text-idvl-text-dark' : 'text-white'} ${isMobile ? 'text-lg' : ''}`}
         >
           Contato

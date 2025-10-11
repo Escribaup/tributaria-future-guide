@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '../ui/button';
 import { MessageSquarePlus } from 'lucide-react';
+import { getWhatsAppUrl } from '@/config/contact';
 
 const CallToAction = () => {
   const [ctaContent, setCtaContent] = useState<{
@@ -76,9 +77,9 @@ const CallToAction = () => {
               Acessar o Guia Completo
             </Link>
             <a
-              href="https://wa.me/5541996946641"
+              href={getWhatsAppUrl('Olá! Gostaria de falar com um especialista sobre a Reforma Tributária e como ela afetará meu negócio.')}
               target="_blank"
-              rel="noopener noreferrer"
+              rel="noopener noreferrer nofollow"
               className="bg-transparent border-2 border-white text-white hover:bg-white hover:bg-opacity-10 transition-all px-8 py-4 rounded-md font-semibold text-lg flex items-center gap-2"
             >
               <MessageSquarePlus className="w-5 h-5" />
