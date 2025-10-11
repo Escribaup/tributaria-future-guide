@@ -7,6 +7,11 @@ export type Json =
   | Json[]
 
 export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "12.2.3 (519615d)"
+  }
   public: {
     Tables: {
       admins: {
@@ -156,6 +161,59 @@ export type Database = {
           },
         ]
       }
+      documentos: {
+        Row: {
+          arquivo_url: string | null
+          created_at: string
+          data_emissao: string | null
+          data_validade: string | null
+          empresa_id: string
+          id: string
+          numero: string
+          observacoes: string | null
+          orgao_emissor: string
+          status: string
+          tipo: string
+          updated_at: string
+        }
+        Insert: {
+          arquivo_url?: string | null
+          created_at?: string
+          data_emissao?: string | null
+          data_validade?: string | null
+          empresa_id: string
+          id?: string
+          numero: string
+          observacoes?: string | null
+          orgao_emissor: string
+          status?: string
+          tipo: string
+          updated_at?: string
+        }
+        Update: {
+          arquivo_url?: string | null
+          created_at?: string
+          data_emissao?: string | null
+          data_validade?: string | null
+          empresa_id?: string
+          id?: string
+          numero?: string
+          observacoes?: string | null
+          orgao_emissor?: string
+          status?: string
+          tipo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documentos_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas_contabil"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       empresas: {
         Row: {
           cnpj: string
@@ -218,6 +276,54 @@ export type Database = {
           site?: string | null
           telefone?: string | null
           updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      empresas_contabil: {
+        Row: {
+          cnpj: string
+          created_at: string
+          email: string | null
+          endereco: string | null
+          id: string
+          nome_fantasia: string
+          observacoes: string | null
+          razao_social: string
+          status: string
+          status_conformidade: string
+          telefone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cnpj: string
+          created_at?: string
+          email?: string | null
+          endereco?: string | null
+          id?: string
+          nome_fantasia: string
+          observacoes?: string | null
+          razao_social: string
+          status?: string
+          status_conformidade?: string
+          telefone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cnpj?: string
+          created_at?: string
+          email?: string | null
+          endereco?: string | null
+          id?: string
+          nome_fantasia?: string
+          observacoes?: string | null
+          razao_social?: string
+          status?: string
+          status_conformidade?: string
+          telefone?: string | null
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
@@ -289,6 +395,45 @@ export type Database = {
           },
         ]
       }
+      funcionarios: {
+        Row: {
+          ativo: boolean
+          cargo: string | null
+          created_at: string
+          email: string
+          id: string
+          nome: string
+          telefone: string | null
+          updated_at: string
+          user_id: string
+          whatsapp: string | null
+        }
+        Insert: {
+          ativo?: boolean
+          cargo?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          nome: string
+          telefone?: string | null
+          updated_at?: string
+          user_id: string
+          whatsapp?: string | null
+        }
+        Update: {
+          ativo?: boolean
+          cargo?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          nome?: string
+          telefone?: string | null
+          updated_at?: string
+          user_id?: string
+          whatsapp?: string | null
+        }
+        Relationships: []
+      }
       homepage_content: {
         Row: {
           content: string | null
@@ -320,6 +465,303 @@ export type Database = {
             columns: ["updated_by"]
             isOneToOne: false
             referencedRelation: "admins"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ia_actions: {
+        Row: {
+          created_at: string
+          descricao: string
+          detalhes: Json | null
+          entidade_id: string | null
+          entidade_tipo: string
+          id: string
+          status: string
+          tipo_acao: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          descricao: string
+          detalhes?: Json | null
+          entidade_id?: string | null
+          entidade_tipo: string
+          id?: string
+          status?: string
+          tipo_acao: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          descricao?: string
+          detalhes?: Json | null
+          entidade_id?: string | null
+          entidade_tipo?: string
+          id?: string
+          status?: string
+          tipo_acao?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ia_chat_messages: {
+        Row: {
+          created_at: string
+          id: string
+          mensagem: string
+          metadata: Json | null
+          resposta: string | null
+          tipo: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          mensagem: string
+          metadata?: Json | null
+          resposta?: string | null
+          tipo?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          mensagem?: string
+          metadata?: Json | null
+          resposta?: string | null
+          tipo?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      ia_config: {
+        Row: {
+          created_at: string
+          dia_relatorio_mensal: number
+          dia_relatorio_semanal: number
+          frequencia_monitoramento: number
+          id: string
+          modelo: string
+          nome_ia: string
+          openai_api_key: string | null
+          prompt_obrigacoes: string | null
+          prompt_principal: string | null
+          prompt_relatorios: string | null
+          prompt_tarefas: string | null
+          relatorios_ativos: boolean
+          updated_at: string
+          use_real_data: boolean
+          user_id: string
+          whatsapp_ativo: boolean
+          whatsapp_numero: string | null
+        }
+        Insert: {
+          created_at?: string
+          dia_relatorio_mensal?: number
+          dia_relatorio_semanal?: number
+          frequencia_monitoramento?: number
+          id?: string
+          modelo?: string
+          nome_ia?: string
+          openai_api_key?: string | null
+          prompt_obrigacoes?: string | null
+          prompt_principal?: string | null
+          prompt_relatorios?: string | null
+          prompt_tarefas?: string | null
+          relatorios_ativos?: boolean
+          updated_at?: string
+          use_real_data?: boolean
+          user_id: string
+          whatsapp_ativo?: boolean
+          whatsapp_numero?: string | null
+        }
+        Update: {
+          created_at?: string
+          dia_relatorio_mensal?: number
+          dia_relatorio_semanal?: number
+          frequencia_monitoramento?: number
+          id?: string
+          modelo?: string
+          nome_ia?: string
+          openai_api_key?: string | null
+          prompt_obrigacoes?: string | null
+          prompt_principal?: string | null
+          prompt_relatorios?: string | null
+          prompt_tarefas?: string | null
+          relatorios_ativos?: boolean
+          updated_at?: string
+          use_real_data?: boolean
+          user_id?: string
+          whatsapp_ativo?: boolean
+          whatsapp_numero?: string | null
+        }
+        Relationships: []
+      }
+      interacoes: {
+        Row: {
+          assunto: string | null
+          created_at: string
+          destinatario: string
+          direcao: string
+          empresa_id: string | null
+          id: string
+          mensagem: string
+          metadata: Json | null
+          obrigacao_id: string | null
+          remetente: string
+          status_entrega: string | null
+          tarefa_id: string | null
+          tipo: string
+        }
+        Insert: {
+          assunto?: string | null
+          created_at?: string
+          destinatario: string
+          direcao: string
+          empresa_id?: string | null
+          id?: string
+          mensagem: string
+          metadata?: Json | null
+          obrigacao_id?: string | null
+          remetente: string
+          status_entrega?: string | null
+          tarefa_id?: string | null
+          tipo: string
+        }
+        Update: {
+          assunto?: string | null
+          created_at?: string
+          destinatario?: string
+          direcao?: string
+          empresa_id?: string | null
+          id?: string
+          mensagem?: string
+          metadata?: Json | null
+          obrigacao_id?: string | null
+          remetente?: string
+          status_entrega?: string | null
+          tarefa_id?: string | null
+          tipo?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "interacoes_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas_contabil"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "interacoes_obrigacao_id_fkey"
+            columns: ["obrigacao_id"]
+            isOneToOne: false
+            referencedRelation: "obrigacoes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "interacoes_tarefa_id_fkey"
+            columns: ["tarefa_id"]
+            isOneToOne: false
+            referencedRelation: "tarefas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      ml_models: {
+        Row: {
+          created_at: string
+          description: string | null
+          file_path: string
+          file_size: number
+          id: string
+          name: string
+          predictions_count: number
+          slug: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          file_path: string
+          file_size: number
+          id?: string
+          name: string
+          predictions_count?: number
+          slug: string
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          file_path?: string
+          file_size?: number
+          id?: string
+          name?: string
+          predictions_count?: number
+          slug?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      obrigacoes: {
+        Row: {
+          created_at: string
+          data_vencimento: string
+          descricao: string | null
+          empresa_id: string
+          id: string
+          nome: string
+          observacoes: string | null
+          periodicidade: string
+          prioridade: string
+          responsavel_id: string | null
+          status: string
+          updated_at: string
+          valor: number | null
+        }
+        Insert: {
+          created_at?: string
+          data_vencimento: string
+          descricao?: string | null
+          empresa_id: string
+          id?: string
+          nome: string
+          observacoes?: string | null
+          periodicidade: string
+          prioridade?: string
+          responsavel_id?: string | null
+          status?: string
+          updated_at?: string
+          valor?: number | null
+        }
+        Update: {
+          created_at?: string
+          data_vencimento?: string
+          descricao?: string | null
+          empresa_id?: string
+          id?: string
+          nome?: string
+          observacoes?: string | null
+          periodicidade?: string
+          prioridade?: string
+          responsavel_id?: string | null
+          status?: string
+          updated_at?: string
+          valor?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "obrigacoes_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas_contabil"
             referencedColumns: ["id"]
           },
         ]
@@ -600,6 +1042,62 @@ export type Database = {
           },
         ]
       }
+      tarefas: {
+        Row: {
+          categoria: string | null
+          concluida_em: string | null
+          created_at: string
+          data_limite: string
+          descricao: string | null
+          empresa_id: string
+          id: string
+          observacoes: string | null
+          prioridade: string
+          responsavel_id: string | null
+          status: string
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          categoria?: string | null
+          concluida_em?: string | null
+          created_at?: string
+          data_limite: string
+          descricao?: string | null
+          empresa_id: string
+          id?: string
+          observacoes?: string | null
+          prioridade?: string
+          responsavel_id?: string | null
+          status?: string
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          categoria?: string | null
+          concluida_em?: string | null
+          created_at?: string
+          data_limite?: string
+          descricao?: string | null
+          empresa_id?: string
+          id?: string
+          observacoes?: string | null
+          prioridade?: string
+          responsavel_id?: string | null
+          status?: string
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tarefas_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas_contabil"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ufs: {
         Row: {
           id: number
@@ -617,6 +1115,68 @@ export type Database = {
           sigla?: string
         }
         Relationships: []
+      }
+      workflow_items: {
+        Row: {
+          acoes_ia: string[] | null
+          created_at: string
+          criado_por_ia: boolean
+          data_limite: string | null
+          descricao: string | null
+          empresa_id: string | null
+          id: string
+          metadata: Json | null
+          prioridade: string
+          responsavel_id: string | null
+          status: string
+          tipo: string
+          titulo: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          acoes_ia?: string[] | null
+          created_at?: string
+          criado_por_ia?: boolean
+          data_limite?: string | null
+          descricao?: string | null
+          empresa_id?: string | null
+          id?: string
+          metadata?: Json | null
+          prioridade?: string
+          responsavel_id?: string | null
+          status?: string
+          tipo: string
+          titulo: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          acoes_ia?: string[] | null
+          created_at?: string
+          criado_por_ia?: boolean
+          data_limite?: string | null
+          descricao?: string | null
+          empresa_id?: string | null
+          id?: string
+          metadata?: Json | null
+          prioridade?: string
+          responsavel_id?: string | null
+          status?: string
+          tipo?: string
+          titulo?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_items_empresa_id_fkey"
+            columns: ["empresa_id"]
+            isOneToOne: false
+            referencedRelation: "empresas_contabil"
+            referencedColumns: ["id"]
+          },
+        ]
       }
     }
     Views: {
@@ -637,21 +1197,25 @@ export type Database = {
   }
 }
 
-type DefaultSchema = Database[Extract<keyof Database, "public">]
+type DatabaseWithoutInternals = Omit<Database, "__InternalSupabase">
+
+type DefaultSchema = DatabaseWithoutInternals[Extract<keyof Database, "public">]
 
 export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
+    ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+        DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
+      DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
       Row: infer R
     }
     ? R
@@ -669,14 +1233,16 @@ export type Tables<
 export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Insert: infer I
     }
     ? I
@@ -692,14 +1258,16 @@ export type TablesInsert<
 export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
     : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
+> = DefaultSchemaTableNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
       Update: infer U
     }
     ? U
@@ -715,14 +1283,16 @@ export type TablesUpdate<
 export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
+    ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
     : never = never,
-> = DefaultSchemaEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
+> = DefaultSchemaEnumNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
   : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
     ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
     : never
@@ -730,14 +1300,16 @@ export type Enums<
 export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof Database },
+    | { schema: keyof DatabaseWithoutInternals },
   CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof Database
+    schema: keyof DatabaseWithoutInternals
   }
-    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
+    ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
     : never = never,
-> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
+> = PublicCompositeTypeNameOrOptions extends {
+  schema: keyof DatabaseWithoutInternals
+}
+  ? DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
   : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
     ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
     : never
