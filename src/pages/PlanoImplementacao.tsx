@@ -7,13 +7,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, FileText, Loader2, Calendar } from 'lucide-react';
 import { usePlanoImplementacao } from '@/hooks/usePlanoImplementacao';
-import { ImplementationTask, ImplementationCheckpoint } from '@/types/plano';
+import { ImplementationTask, ImplementationCheckpoint, PhaseWithProgress, ImplementationPhase } from '@/types/plano';
 import KPIDashboard from '@/components/plano/KPIDashboard';
 import PhaseCard from '@/components/plano/PhaseCard';
 import PlanModal from '@/components/plano/PlanModal';
 import TimelineView from '@/components/plano/TimelineView';
 import TaskDetailModal from '@/components/plano/TaskDetailModal';
 import CheckpointUpdateModal from '@/components/plano/CheckpointUpdateModal';
+import PhaseEditModal from '@/components/plano/PhaseEditModal';
+import TaskCreateModal from '@/components/plano/TaskCreateModal';
 
 const PlanoImplementacao = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -21,6 +23,10 @@ const PlanoImplementacao = () => {
   const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
   const [selectedCheckpoint, setSelectedCheckpoint] = useState<ImplementationCheckpoint | null>(null);
   const [isCheckpointModalOpen, setIsCheckpointModalOpen] = useState(false);
+  const [isPhaseModalOpen, setIsPhaseModalOpen] = useState(false);
+  const [selectedPhase, setSelectedPhase] = useState<PhaseWithProgress | null>(null);
+  const [isTaskCreateModalOpen, setIsTaskCreateModalOpen] = useState(false);
+  const [selectedPhaseIdForTask, setSelectedPhaseIdForTask] = useState<string | null>(null);
   
   const { 
     plan, 
@@ -32,7 +38,19 @@ const PlanoImplementacao = () => {
     updateTaskDetails,
     isUpdatingTaskDetails,
     updateCheckpoint,
-    isUpdatingCheckpoint
+    isUpdatingCheckpoint,
+    createPhase,
+    isCreatingPhase,
+    updatePhase,
+    isUpdatingPhase,
+    deletePhase,
+    isDeletingPhase,
+    createTask,
+    isCreatingTask,
+    deleteTask,
+    isDeletingTask,
+    updateTaskPriority,
+    isUpdatingTaskPriority
   } = usePlanoImplementacao();
 
   const handleCreatePlan = (companyName: string) => {
@@ -61,6 +79,47 @@ const PlanoImplementacao = () => {
   }) => {
     updateCheckpoint({ checkpointId, updates });
     setIsCheckpointModalOpen(false);
+  };
+
+  const handleEditPhase = (phase: PhaseWithProgress) => {
+    setSelectedPhase(phase);
+    setIsPhaseModalOpen(true);
+  };
+
+  const handleCreatePhase = () => {
+    setSelectedPhase(null);
+    setIsPhaseModalOpen(true);
+  };
+
+  const handleSavePhase = (phaseId: string | undefined, updates: Partial<ImplementationPhase>) => {
+    if (phaseId) {
+      updatePhase({ phaseId, updates });
+    } else if (plan?.id) {
+      createPhase({ planId: plan.id, phaseData: updates });
+    }
+    setIsPhaseModalOpen(false);
+  };
+
+  const handleDeletePhase = (phaseId: string) => {
+    deletePhase(phaseId);
+  };
+
+  const handleCreateTaskClick = (phaseId: string) => {
+    setSelectedPhaseIdForTask(phaseId);
+    setIsTaskCreateModalOpen(true);
+  };
+
+  const handleCreateTask = (phaseId: string, taskData: Partial<ImplementationTask>) => {
+    createTask({ phaseId, taskData });
+    setIsTaskCreateModalOpen(false);
+  };
+
+  const handleDeleteTask = (taskId: string) => {
+    deleteTask(taskId);
+  };
+
+  const handleUpdatePriority = (taskId: string, priority: 'high' | 'medium' | 'low') => {
+    updateTaskPriority({ taskId, priority });
   };
 
   if (isPlanLoading) {
@@ -155,14 +214,25 @@ const PlanoImplementacao = () => {
                   </TabsList>
 
                   <TabsContent value="fases" className="space-y-4 mt-4">
-                    <h3 className="text-xl font-semibold">Fases de Implementação</h3>
+                    <div className="flex justify-between items-center mb-4">
+                      <h3 className="text-xl font-semibold">Fases de Implementação</h3>
+                      <Button onClick={handleCreatePhase} variant="outline" size="sm">
+                        <Plus className="h-4 w-4 mr-2" />
+                        Nova Fase
+                      </Button>
+                    </div>
                     {plan.phases.map((phase, index) => (
                       <PhaseCard
                         key={phase.id}
                         phase={phase}
                         onToggleTask={handleToggleTask}
                         onEditTask={handleEditTask}
-                        isUpdating={isUpdatingTask}
+                        onEditPhase={handleEditPhase}
+                        onDeletePhase={handleDeletePhase}
+                        onCreateTask={handleCreateTaskClick}
+                        onDeleteTask={handleDeleteTask}
+                        onUpdatePriority={handleUpdatePriority}
+                        isUpdating={isUpdatingTask || isUpdatingTaskPriority}
                         defaultOpen={phase.status === 'in-progress' || (index === 0 && phase.status === 'pending')}
                       />
                     ))}
@@ -201,6 +271,24 @@ const PlanoImplementacao = () => {
         checkpoint={selectedCheckpoint}
         onUpdate={handleUpdateCheckpoint}
         isUpdating={isUpdatingCheckpoint}
+      />
+
+      <PhaseEditModal
+        open={isPhaseModalOpen}
+        onOpenChange={setIsPhaseModalOpen}
+        phase={selectedPhase || undefined}
+        planId={plan?.id}
+        onSave={handleSavePhase}
+        onDelete={handleDeletePhase}
+        isUpdating={isUpdatingPhase || isCreatingPhase}
+      />
+
+      <TaskCreateModal
+        open={isTaskCreateModalOpen}
+        onOpenChange={setIsTaskCreateModalOpen}
+        phaseId={selectedPhaseIdForTask || ''}
+        onCreate={handleCreateTask}
+        isCreating={isCreatingTask}
       />
     </div>
   );

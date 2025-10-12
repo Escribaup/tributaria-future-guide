@@ -293,6 +293,195 @@ export const usePlanoImplementacao = () => {
     }
   });
 
+  // Criar fase
+  const createPhaseMutation = useMutation({
+    mutationFn: async ({ 
+      planId, 
+      phaseData 
+    }: { 
+      planId: string; 
+      phaseData: Partial<ImplementationPhase> 
+    }) => {
+      const { data: lastPhase } = await supabase
+        .from('implementation_phases')
+        .select('phase_number')
+        .eq('plan_id', planId)
+        .order('phase_number', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      const nextPhaseNumber = (lastPhase?.phase_number || 0) + 1;
+
+      const { error } = await supabase
+        .from('implementation_phases')
+        .insert({
+          plan_id: planId,
+          phase_number: nextPhaseNumber,
+          phase_name: phaseData.phase_name,
+          phase_description: phaseData.phase_description,
+          target_year: phaseData.target_year,
+          target_month: phaseData.target_month,
+          estimated_duration_days: phaseData.estimated_duration_days
+        });
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['implementation-plan'] });
+      toast.success('Fase criada com sucesso!');
+    },
+    onError: (error) => {
+      console.error('Erro ao criar fase:', error);
+      toast.error('Erro ao criar fase');
+    }
+  });
+
+  // Atualizar fase
+  const updatePhaseMutation = useMutation({
+    mutationFn: async ({ 
+      phaseId, 
+      updates 
+    }: { 
+      phaseId: string; 
+      updates: Partial<ImplementationPhase> 
+    }) => {
+      const { error } = await supabase
+        .from('implementation_phases')
+        .update(updates)
+        .eq('id', phaseId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['implementation-plan'] });
+      toast.success('Fase atualizada com sucesso!');
+    },
+    onError: (error) => {
+      console.error('Erro ao atualizar fase:', error);
+      toast.error('Erro ao atualizar fase');
+    }
+  });
+
+  // Excluir fase
+  const deletePhaseMutation = useMutation({
+    mutationFn: async (phaseId: string) => {
+      const { data: tasks } = await supabase
+        .from('implementation_tasks')
+        .select('id')
+        .eq('phase_id', phaseId);
+
+      if (tasks && tasks.length > 0) {
+        throw new Error('Não é possível excluir uma fase que contém tarefas. Exclua as tarefas primeiro.');
+      }
+
+      const { error } = await supabase
+        .from('implementation_phases')
+        .delete()
+        .eq('id', phaseId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['implementation-plan'] });
+      toast.success('Fase excluída com sucesso!');
+    },
+    onError: (error: Error) => {
+      toast.error(error.message);
+    }
+  });
+
+  // Criar tarefa
+  const createTaskMutation = useMutation({
+    mutationFn: async ({ 
+      phaseId, 
+      taskData 
+    }: { 
+      phaseId: string; 
+      taskData: Partial<ImplementationTask> 
+    }) => {
+      const { data: lastTask } = await supabase
+        .from('implementation_tasks')
+        .select('order_index')
+        .eq('phase_id', phaseId)
+        .order('order_index', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      const nextOrderIndex = (lastTask?.order_index || 0) + 1;
+
+      const { error } = await supabase
+        .from('implementation_tasks')
+        .insert({
+          phase_id: phaseId,
+          task_name: taskData.task_name,
+          task_description: taskData.task_description,
+          priority: taskData.priority || 'medium',
+          responsible: taskData.responsible,
+          order_index: nextOrderIndex,
+          target_year: taskData.target_year,
+          target_month: taskData.target_month,
+          target_date: taskData.target_date,
+          estimated_hours: taskData.estimated_hours
+        });
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['implementation-plan'] });
+      toast.success('Tarefa criada com sucesso!');
+    },
+    onError: (error) => {
+      console.error('Erro ao criar tarefa:', error);
+      toast.error('Erro ao criar tarefa');
+    }
+  });
+
+  // Excluir tarefa
+  const deleteTaskMutation = useMutation({
+    mutationFn: async (taskId: string) => {
+      const { error } = await supabase
+        .from('implementation_tasks')
+        .delete()
+        .eq('id', taskId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['implementation-plan'] });
+      toast.success('Tarefa excluída com sucesso!');
+    },
+    onError: (error) => {
+      console.error('Erro ao excluir tarefa:', error);
+      toast.error('Erro ao excluir tarefa');
+    }
+  });
+
+  // Atualizar prioridade da tarefa
+  const updateTaskPriorityMutation = useMutation({
+    mutationFn: async ({ 
+      taskId, 
+      priority 
+    }: { 
+      taskId: string; 
+      priority: 'high' | 'medium' | 'low' 
+    }) => {
+      const { error } = await supabase
+        .from('implementation_tasks')
+        .update({ priority })
+        .eq('id', taskId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['implementation-plan'] });
+      toast.success('Prioridade atualizada!');
+    },
+    onError: (error) => {
+      console.error('Erro ao atualizar prioridade:', error);
+      toast.error('Erro ao atualizar prioridade');
+    }
+  });
+
   return {
     plan,
     isPlanLoading,
@@ -308,5 +497,17 @@ export const usePlanoImplementacao = () => {
     updateCheckpoint: updateCheckpointMutation.mutate,
     isUpdatingCheckpoint: updateCheckpointMutation.isPending,
     updateCompanyName: updateCompanyNameMutation.mutate,
+    createPhase: createPhaseMutation.mutate,
+    isCreatingPhase: createPhaseMutation.isPending,
+    updatePhase: updatePhaseMutation.mutate,
+    isUpdatingPhase: updatePhaseMutation.isPending,
+    deletePhase: deletePhaseMutation.mutate,
+    isDeletingPhase: deletePhaseMutation.isPending,
+    createTask: createTaskMutation.mutate,
+    isCreatingTask: createTaskMutation.isPending,
+    deleteTask: deleteTaskMutation.mutate,
+    isDeletingTask: deleteTaskMutation.isPending,
+    updateTaskPriority: updateTaskPriorityMutation.mutate,
+    isUpdatingTaskPriority: updateTaskPriorityMutation.isPending,
   };
 };
