@@ -601,36 +601,135 @@ export type Database = {
         }
         Relationships: []
       }
+      implementation_checkpoints: {
+        Row: {
+          achieved_date: string | null
+          baseline_value: number | null
+          checkpoint_description: string | null
+          checkpoint_name: string
+          checkpoint_type: string | null
+          created_at: string | null
+          current_value: number | null
+          id: string
+          metric_name: string | null
+          metric_unit: string | null
+          notes: string | null
+          order_index: number
+          phase_id: string
+          progress_percentage: number | null
+          responsible: string | null
+          status: string | null
+          target_date: string | null
+          target_value: number | null
+          task_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          achieved_date?: string | null
+          baseline_value?: number | null
+          checkpoint_description?: string | null
+          checkpoint_name: string
+          checkpoint_type?: string | null
+          created_at?: string | null
+          current_value?: number | null
+          id?: string
+          metric_name?: string | null
+          metric_unit?: string | null
+          notes?: string | null
+          order_index?: number
+          phase_id: string
+          progress_percentage?: number | null
+          responsible?: string | null
+          status?: string | null
+          target_date?: string | null
+          target_value?: number | null
+          task_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          achieved_date?: string | null
+          baseline_value?: number | null
+          checkpoint_description?: string | null
+          checkpoint_name?: string
+          checkpoint_type?: string | null
+          created_at?: string | null
+          current_value?: number | null
+          id?: string
+          metric_name?: string | null
+          metric_unit?: string | null
+          notes?: string | null
+          order_index?: number
+          phase_id?: string
+          progress_percentage?: number | null
+          responsible?: string | null
+          status?: string | null
+          target_date?: string | null
+          target_value?: number | null
+          task_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "implementation_checkpoints_phase_id_fkey"
+            columns: ["phase_id"]
+            isOneToOne: false
+            referencedRelation: "implementation_phases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "implementation_checkpoints_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "implementation_tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       implementation_phases: {
         Row: {
+          actual_end_date: string | null
+          actual_start_date: string | null
           created_at: string | null
           end_date: string | null
+          estimated_duration_days: number | null
           id: string
           phase_description: string | null
           phase_name: string
           phase_number: number
           plan_id: string
           start_date: string | null
+          target_month: number | null
+          target_year: number | null
         }
         Insert: {
+          actual_end_date?: string | null
+          actual_start_date?: string | null
           created_at?: string | null
           end_date?: string | null
+          estimated_duration_days?: number | null
           id?: string
           phase_description?: string | null
           phase_name: string
           phase_number: number
           plan_id: string
           start_date?: string | null
+          target_month?: number | null
+          target_year?: number | null
         }
         Update: {
+          actual_end_date?: string | null
+          actual_start_date?: string | null
           created_at?: string | null
           end_date?: string | null
+          estimated_duration_days?: number | null
           id?: string
           phase_description?: string | null
           phase_name?: string
           phase_number?: number
           plan_id?: string
           start_date?: string | null
+          target_month?: number | null
+          target_year?: number | null
         }
         Relationships: [
           {
@@ -666,40 +765,114 @@ export type Database = {
         }
         Relationships: []
       }
+      implementation_progress_history: {
+        Row: {
+          checkpoint_id: string
+          id: string
+          notes: string | null
+          progress_percentage: number
+          recorded_at: string | null
+          recorded_by: string | null
+          recorded_value: number
+        }
+        Insert: {
+          checkpoint_id: string
+          id?: string
+          notes?: string | null
+          progress_percentage: number
+          recorded_at?: string | null
+          recorded_by?: string | null
+          recorded_value: number
+        }
+        Update: {
+          checkpoint_id?: string
+          id?: string
+          notes?: string | null
+          progress_percentage?: number
+          recorded_at?: string | null
+          recorded_by?: string | null
+          recorded_value?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "implementation_progress_history_checkpoint_id_fkey"
+            columns: ["checkpoint_id"]
+            isOneToOne: false
+            referencedRelation: "implementation_checkpoints"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       implementation_tasks: {
         Row: {
+          actual_completion_date: string | null
+          actual_hours: number | null
+          actual_start_date: string | null
+          attachments: Json | null
+          challenges_faced: string | null
           completed_at: string | null
+          completion_notes: string | null
           created_at: string | null
+          estimated_hours: number | null
           id: string
           is_completed: boolean | null
+          lessons_learned: string | null
           order_index: number
           phase_id: string
+          planning_notes: string | null
           priority: string | null
           responsible: string | null
+          target_date: string | null
+          target_month: number | null
+          target_year: number | null
           task_description: string | null
           task_name: string
         }
         Insert: {
+          actual_completion_date?: string | null
+          actual_hours?: number | null
+          actual_start_date?: string | null
+          attachments?: Json | null
+          challenges_faced?: string | null
           completed_at?: string | null
+          completion_notes?: string | null
           created_at?: string | null
+          estimated_hours?: number | null
           id?: string
           is_completed?: boolean | null
+          lessons_learned?: string | null
           order_index?: number
           phase_id: string
+          planning_notes?: string | null
           priority?: string | null
           responsible?: string | null
+          target_date?: string | null
+          target_month?: number | null
+          target_year?: number | null
           task_description?: string | null
           task_name: string
         }
         Update: {
+          actual_completion_date?: string | null
+          actual_hours?: number | null
+          actual_start_date?: string | null
+          attachments?: Json | null
+          challenges_faced?: string | null
           completed_at?: string | null
+          completion_notes?: string | null
           created_at?: string | null
+          estimated_hours?: number | null
           id?: string
           is_completed?: boolean | null
+          lessons_learned?: string | null
           order_index?: number
           phase_id?: string
+          planning_notes?: string | null
           priority?: string | null
           responsible?: string | null
+          target_date?: string | null
+          target_month?: number | null
+          target_year?: number | null
           task_description?: string | null
           task_name?: string
         }

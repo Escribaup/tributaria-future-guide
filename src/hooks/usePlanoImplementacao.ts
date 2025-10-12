@@ -175,6 +175,104 @@ export const usePlanoImplementacao = () => {
     }
   });
 
+  // Atualizar detalhes completos da tarefa (temporal e documentação)
+  const updateTaskDetailsMutation = useMutation({
+    mutationFn: async ({ taskId, updates }: { taskId: string; updates: Partial<ImplementationTask> }) => {
+      const { error } = await supabase
+        .from('implementation_tasks')
+        .update(updates)
+        .eq('id', taskId);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['implementation-plan'] });
+      toast.success('Tarefa atualizada com sucesso!');
+    },
+    onError: (error) => {
+      console.error('Erro ao atualizar tarefa:', error);
+      toast.error('Erro ao atualizar tarefa');
+    }
+  });
+
+  // Criar checkpoint
+  const createCheckpointMutation = useMutation({
+    mutationFn: async (checkpointData: any) => {
+      const { error } = await supabase
+        .from('implementation_checkpoints')
+        .insert(checkpointData);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['implementation-plan'] });
+      toast.success('Checkpoint criado com sucesso!');
+    },
+    onError: (error) => {
+      console.error('Erro ao criar checkpoint:', error);
+      toast.error('Erro ao criar checkpoint');
+    }
+  });
+
+  // Atualizar checkpoint
+  const updateCheckpointMutation = useMutation({
+    mutationFn: async ({ 
+      checkpointId, 
+      updates 
+    }: { 
+      checkpointId: string; 
+      updates: { current_value: number; status: string; notes: string } 
+    }) => {
+      // Calcular progresso
+      const { data: checkpoint } = await supabase
+        .from('implementation_checkpoints')
+        .select('target_value')
+        .eq('id', checkpointId)
+        .single();
+
+      const progress_percentage = checkpoint?.target_value
+        ? Math.min(100, (updates.current_value / checkpoint.target_value) * 100)
+        : 0;
+
+      // Atualizar checkpoint
+      const { error: updateError } = await supabase
+        .from('implementation_checkpoints')
+        .update({
+          current_value: updates.current_value,
+          status: updates.status,
+          notes: updates.notes,
+          progress_percentage,
+          achieved_date: updates.status === 'achieved' ? new Date().toISOString() : null
+        })
+        .eq('id', checkpointId);
+
+      if (updateError) throw updateError;
+
+      // Registrar no histórico se o usuário adicionou notas
+      if (updates.notes && user?.id) {
+        const { error: historyError } = await supabase
+          .from('implementation_progress_history')
+          .insert({
+            checkpoint_id: checkpointId,
+            recorded_value: updates.current_value,
+            progress_percentage,
+            notes: updates.notes,
+            recorded_by: user.id
+          });
+
+        if (historyError) throw historyError;
+      }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['implementation-plan'] });
+      toast.success('Checkpoint atualizado com sucesso!');
+    },
+    onError: (error) => {
+      console.error('Erro ao atualizar checkpoint:', error);
+      toast.error('Erro ao atualizar checkpoint');
+    }
+  });
+
   // Atualizar nome da empresa
   const updateCompanyNameMutation = useMutation({
     mutationFn: async ({ planId, companyName }: { planId: string; companyName: string }) => {
@@ -203,6 +301,12 @@ export const usePlanoImplementacao = () => {
     isCreatingPlan: createPlanMutation.isPending,
     updateTask: updateTaskMutation.mutate,
     isUpdatingTask: updateTaskMutation.isPending,
+    updateTaskDetails: updateTaskDetailsMutation.mutate,
+    isUpdatingTaskDetails: updateTaskDetailsMutation.isPending,
+    createCheckpoint: createCheckpointMutation.mutate,
+    isCreatingCheckpoint: createCheckpointMutation.isPending,
+    updateCheckpoint: updateCheckpointMutation.mutate,
+    isUpdatingCheckpoint: updateCheckpointMutation.isPending,
     updateCompanyName: updateCompanyNameMutation.mutate,
   };
 };

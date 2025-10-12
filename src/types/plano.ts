@@ -14,8 +14,47 @@ export interface ImplementationPhase {
   phase_description: string | null;
   start_date: string | null;
   end_date: string | null;
+  target_year: number | null;
+  target_month: number | null;
+  actual_start_date: string | null;
+  actual_end_date: string | null;
+  estimated_duration_days: number | null;
   created_at: string;
   tasks?: ImplementationTask[];
+  checkpoints?: ImplementationCheckpoint[];
+}
+
+export interface ImplementationCheckpoint {
+  id: string;
+  phase_id: string;
+  task_id: string | null;
+  checkpoint_name: string;
+  checkpoint_description: string | null;
+  checkpoint_type: 'objective' | 'key_result' | 'milestone';
+  metric_name: string | null;
+  metric_unit: string | null;
+  target_value: number | null;
+  current_value: number;
+  baseline_value: number | null;
+  target_date: string | null;
+  achieved_date: string | null;
+  status: 'not_started' | 'in_progress' | 'achieved' | 'at_risk' | 'blocked';
+  progress_percentage: number;
+  responsible: string | null;
+  notes: string | null;
+  order_index: number;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ImplementationProgressHistory {
+  id: string;
+  checkpoint_id: string;
+  recorded_value: number;
+  progress_percentage: number;
+  notes: string | null;
+  recorded_by: string | null;
+  recorded_at: string;
 }
 
 export interface ImplementationTask {
@@ -28,7 +67,20 @@ export interface ImplementationTask {
   priority: 'high' | 'medium' | 'low';
   responsible: string | null;
   order_index: number;
+  target_year: number | null;
+  target_month: number | null;
+  target_date: string | null;
+  actual_start_date: string | null;
+  actual_completion_date: string | null;
+  estimated_hours: number | null;
+  actual_hours: number | null;
+  planning_notes: string | null;
+  completion_notes: string | null;
+  challenges_faced: string | null;
+  lessons_learned: string | null;
+  attachments: any | null;
   created_at: string;
+  checkpoints?: ImplementationCheckpoint[];
 }
 
 export type PhaseStatus = 'pending' | 'in-progress' | 'completed';
@@ -36,11 +88,35 @@ export type PhaseStatus = 'pending' | 'in-progress' | 'completed';
 export interface PhaseWithProgress extends ImplementationPhase {
   progress: number;
   status: PhaseStatus;
+  target_year: number | null;
+  target_month: number | null;
+  actual_start_date: string | null;
+  actual_end_date: string | null;
+  estimated_duration_days: number | null;
+  checkpoints?: ImplementationCheckpoint[];
 }
 
 export interface PlanWithPhases extends ImplementationPlan {
   phases: PhaseWithProgress[];
   overallProgress: number;
+}
+
+export interface TimelineEvent {
+  id: string;
+  type: 'phase' | 'task' | 'checkpoint';
+  name: string;
+  year: number;
+  month: number;
+  date?: string;
+  status: string;
+  entity: ImplementationPhase | ImplementationTask | ImplementationCheckpoint;
+}
+
+export interface MonthlyTimeline {
+  year: number;
+  month: number;
+  monthName: string;
+  events: TimelineEvent[];
 }
 
 export const DEFAULT_PHASES_TEMPLATE = [

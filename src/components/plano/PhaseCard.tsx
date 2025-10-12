@@ -8,12 +8,13 @@ import {
   CollapsibleTrigger,
 } from '@/components/ui/collapsible';
 import { ChevronDown, Circle, CheckCircle2, Clock } from 'lucide-react';
-import { PhaseWithProgress } from '@/types/plano';
+import { PhaseWithProgress, ImplementationTask } from '@/types/plano';
 import TaskChecklist from './TaskChecklist';
 
 interface PhaseCardProps {
   phase: PhaseWithProgress;
   onToggleTask: (taskId: string, isCompleted: boolean) => void;
+  onEditTask?: (task: ImplementationTask) => void;
   isUpdating: boolean;
   defaultOpen?: boolean;
 }
@@ -21,6 +22,7 @@ interface PhaseCardProps {
 const PhaseCard: React.FC<PhaseCardProps> = ({ 
   phase, 
   onToggleTask, 
+  onEditTask,
   isUpdating,
   defaultOpen = false 
 }) => {
@@ -95,6 +97,7 @@ const PhaseCard: React.FC<PhaseCardProps> = ({
               <TaskChecklist 
                 tasks={phase.tasks} 
                 onToggleTask={onToggleTask}
+                onEditTask={onEditTask}
                 isUpdating={isUpdating}
               />
             ) : (

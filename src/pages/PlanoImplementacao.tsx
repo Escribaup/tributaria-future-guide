@@ -4,21 +4,35 @@ import Footer from '@/components/Footer';
 import PageHeader from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus, FileText, Loader2 } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Plus, FileText, Loader2, Calendar } from 'lucide-react';
 import { usePlanoImplementacao } from '@/hooks/usePlanoImplementacao';
+import { ImplementationTask, ImplementationCheckpoint } from '@/types/plano';
 import KPIDashboard from '@/components/plano/KPIDashboard';
 import PhaseCard from '@/components/plano/PhaseCard';
 import PlanModal from '@/components/plano/PlanModal';
+import TimelineView from '@/components/plano/TimelineView';
+import TaskDetailModal from '@/components/plano/TaskDetailModal';
+import CheckpointUpdateModal from '@/components/plano/CheckpointUpdateModal';
 
 const PlanoImplementacao = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState<ImplementationTask | null>(null);
+  const [isTaskModalOpen, setIsTaskModalOpen] = useState(false);
+  const [selectedCheckpoint, setSelectedCheckpoint] = useState<ImplementationCheckpoint | null>(null);
+  const [isCheckpointModalOpen, setIsCheckpointModalOpen] = useState(false);
+  
   const { 
     plan, 
     isPlanLoading, 
     createPlan, 
     isCreatingPlan, 
     updateTask,
-    isUpdatingTask 
+    isUpdatingTask,
+    updateTaskDetails,
+    isUpdatingTaskDetails,
+    updateCheckpoint,
+    isUpdatingCheckpoint
   } = usePlanoImplementacao();
 
   const handleCreatePlan = (companyName: string) => {
@@ -28,6 +42,25 @@ const PlanoImplementacao = () => {
 
   const handleToggleTask = (taskId: string, isCompleted: boolean) => {
     updateTask({ taskId, isCompleted });
+  };
+
+  const handleEditTask = (task: ImplementationTask) => {
+    setSelectedTask(task);
+    setIsTaskModalOpen(true);
+  };
+
+  const handleUpdateTask = (taskId: string, updates: Partial<ImplementationTask>) => {
+    updateTaskDetails({ taskId, updates });
+    setIsTaskModalOpen(false);
+  };
+
+  const handleUpdateCheckpoint = (checkpointId: string, updates: {
+    current_value: number;
+    status: string;
+    notes: string;
+  }) => {
+    updateCheckpoint({ checkpointId, updates });
+    setIsCheckpointModalOpen(false);
   };
 
   if (isPlanLoading) {
@@ -112,18 +145,33 @@ const PlanoImplementacao = () => {
 
                 <KPIDashboard plan={plan} />
 
-                <div className="space-y-4">
-                  <h3 className="text-xl font-semibold">Fases de Implementação</h3>
-                  {plan.phases.map((phase, index) => (
-                    <PhaseCard
-                      key={phase.id}
-                      phase={phase}
-                      onToggleTask={handleToggleTask}
-                      isUpdating={isUpdatingTask}
-                      defaultOpen={phase.status === 'in-progress' || (index === 0 && phase.status === 'pending')}
-                    />
-                  ))}
-                </div>
+                <Tabs defaultValue="fases" className="w-full">
+                  <TabsList className="grid w-full grid-cols-2">
+                    <TabsTrigger value="fases">Fases e Tarefas</TabsTrigger>
+                    <TabsTrigger value="timeline">
+                      <Calendar className="h-4 w-4 mr-2" />
+                      Timeline
+                    </TabsTrigger>
+                  </TabsList>
+
+                  <TabsContent value="fases" className="space-y-4 mt-4">
+                    <h3 className="text-xl font-semibold">Fases de Implementação</h3>
+                    {plan.phases.map((phase, index) => (
+                      <PhaseCard
+                        key={phase.id}
+                        phase={phase}
+                        onToggleTask={handleToggleTask}
+                        onEditTask={handleEditTask}
+                        isUpdating={isUpdatingTask}
+                        defaultOpen={phase.status === 'in-progress' || (index === 0 && phase.status === 'pending')}
+                      />
+                    ))}
+                  </TabsContent>
+
+                  <TabsContent value="timeline" className="mt-4">
+                    <TimelineView plan={plan} />
+                  </TabsContent>
+                </Tabs>
               </div>
             )}
           </div>
@@ -137,6 +185,22 @@ const PlanoImplementacao = () => {
         onOpenChange={setIsModalOpen}
         onCreatePlan={handleCreatePlan}
         isCreating={isCreatingPlan}
+      />
+
+      <TaskDetailModal
+        open={isTaskModalOpen}
+        onOpenChange={setIsTaskModalOpen}
+        task={selectedTask}
+        onUpdate={handleUpdateTask}
+        isUpdating={isUpdatingTaskDetails}
+      />
+
+      <CheckpointUpdateModal
+        open={isCheckpointModalOpen}
+        onOpenChange={setIsCheckpointModalOpen}
+        checkpoint={selectedCheckpoint}
+        onUpdate={handleUpdateCheckpoint}
+        isUpdating={isUpdatingCheckpoint}
       />
     </div>
   );
