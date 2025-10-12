@@ -281,8 +281,8 @@ const generateInfographic = async (
     ctx.fillStyle = 'rgba(35, 45, 66, 0.92)';
     ctx.fillRect(0, 0, 1080, 150);
 
-    // Logo no header com dimensões maiores e qualidade máxima
-    drawImageWithAspectRatio(ctx, logo, 40, 35, 250, 80, 'left');
+    // Logo no header com dimensões padronizadas
+    drawImageWithAspectRatio(ctx, logo, 40, 42, 200, 65, 'left');
 
     // Title with shadow for depth
     ctx.font = '900 44px system-ui, -apple-system, sans-serif';
@@ -392,8 +392,8 @@ const generateInfographic = async (
     ctx.fillStyle = COLORS.footerBg;
     ctx.fillRect(0, 1230, 1080, 120);
 
-    // Logo no footer com dimensões maiores, alinhamento à direita e qualidade máxima
-    drawImageWithAspectRatio(ctx, logo, 1080 - 180, 1350 - 85, 150, 50, 'right');
+    // Logo no footer com dimensões padronizadas, alinhamento à direita
+    drawImageWithAspectRatio(ctx, logo, 1080 - 220, 1350 - 92, 200, 65, 'right');
 
     // CTA text
     ctx.font = '900 26px system-ui, -apple-system, sans-serif';
