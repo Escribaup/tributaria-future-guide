@@ -601,6 +601,118 @@ export type Database = {
         }
         Relationships: []
       }
+      implementation_phases: {
+        Row: {
+          created_at: string | null
+          end_date: string | null
+          id: string
+          phase_description: string | null
+          phase_name: string
+          phase_number: number
+          plan_id: string
+          start_date: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          phase_description?: string | null
+          phase_name: string
+          phase_number: number
+          plan_id: string
+          start_date?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          phase_description?: string | null
+          phase_name?: string
+          phase_number?: number
+          plan_id?: string
+          start_date?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "implementation_phases_plan_id_fkey"
+            columns: ["plan_id"]
+            isOneToOne: false
+            referencedRelation: "implementation_plans"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      implementation_plans: {
+        Row: {
+          company_name: string
+          created_at: string | null
+          id: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          company_name: string
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          company_name?: string
+          created_at?: string | null
+          id?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      implementation_tasks: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          id: string
+          is_completed: boolean | null
+          order_index: number
+          phase_id: string
+          priority: string | null
+          responsible: string | null
+          task_description: string | null
+          task_name: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          is_completed?: boolean | null
+          order_index?: number
+          phase_id: string
+          priority?: string | null
+          responsible?: string | null
+          task_description?: string | null
+          task_name: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          is_completed?: boolean | null
+          order_index?: number
+          phase_id?: string
+          priority?: string | null
+          responsible?: string | null
+          task_description?: string | null
+          task_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "implementation_tasks_phase_id_fkey"
+            columns: ["phase_id"]
+            isOneToOne: false
+            referencedRelation: "implementation_phases"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       interacoes: {
         Row: {
           assunto: string | null
