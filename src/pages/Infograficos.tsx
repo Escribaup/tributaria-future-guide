@@ -1,32 +1,34 @@
 import { useState } from "react";
-import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 import { Loader2, Download } from "lucide-react";
 import { toast } from "sonner";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
-// Default background prompt for AI generation
-const DEFAULT_BG_PROMPT = `Create a professional abstract background image (1080x1350px) for a corporate infographic.
+// Color palette for modern design
+const COLORS = {
+  primary: '#1e6efb',
+  darkBlue: '#232d42',
+  footerBg: '#1a2335',
+  accentBlue: '#3b82f6',
+  lightBlue: '#60a5fa',
+  urlHighlight: '#38bdf8', // Cyan vibrante para URL (melhor contraste)
+  cardBg: '#ffffff',
+  cardShadow: 'rgba(0, 0, 0, 0.12)',
+  textPrimary: '#0b1a37',
+  textSecondary: '#334155',
+  textMuted: '#64748b'
+};
 
-CRITICAL RULES - MUST FOLLOW:
-- NO TEXT, NO LETTERS, NO NUMBERS, NO LOGOS whatsoever
-- Only abstract shapes, gradients, and corporate design elements
-
-COLOR PALETTE (IDVL Corporate Identity):
-- Primary gradient: #232d42 (top) to #1e6efb (bottom)
-- Accent shades: use variations of blue (#1e6efb, #2563eb, #3b82f6)
-
-LAYOUT REQUIREMENTS:
-- Top section (0-150px): clean area for header text and logo
-- Middle section (150-1230px): subtle abstract elements, flowing gradients
-- Bottom section (1230-1350px): clean area for footer
-
-STYLE: Modern, minimalist, corporate, high contrast for text readability, professional business aesthetic`;
-
-// Default timeline data structure - prevents errors and ensures correct content
+// Default timeline data structure
+type TimelineItem = {
+  year: string;
+  bullets: string[];
+};
 const DEFAULT_TIMELINE_DATA = [
   {
     year: "2025 – Preparação Estratégica",
@@ -124,10 +126,92 @@ const drawImageWithAspectRatio = (
   ctx.drawImage(image, drawX, drawY, drawWidth, drawHeight);
 };
 
-// Compose the final infographic with background + content + logos
-const composeInfographic = async (
-  backgroundUrl: string,
-  timelineData: typeof DEFAULT_TIMELINE_DATA
+// Background drawing functions
+const drawCleanGradient = (ctx: CanvasRenderingContext2D) => {
+  const gradient = ctx.createLinearGradient(0, 0, 0, 1350);
+  gradient.addColorStop(0, COLORS.darkBlue);
+  gradient.addColorStop(0.5, '#1a4d8f');
+  gradient.addColorStop(1, COLORS.primary);
+  ctx.fillStyle = gradient;
+  ctx.fillRect(0, 0, 1080, 1350);
+};
+
+const drawGeometricBackground = (ctx: CanvasRenderingContext2D, showDecorations: boolean) => {
+  drawCleanGradient(ctx);
+  
+  if (!showDecorations) return;
+  
+  // Círculos decorativos
+  const circles = [
+    { x: 200, y: 300, r: 150, alpha: 0.08 },
+    { x: 900, y: 700, r: 200, alpha: 0.06 },
+    { x: 100, y: 1100, r: 120, alpha: 0.1 }
+  ];
+  
+  circles.forEach(c => {
+    ctx.fillStyle = `rgba(255, 255, 255, ${c.alpha})`;
+    ctx.beginPath();
+    ctx.arc(c.x, c.y, c.r, 0, Math.PI * 2);
+    ctx.fill();
+  });
+  
+  // Linhas diagonais
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.04)';
+  ctx.lineWidth = 2;
+  for (let i = 0; i < 5; i++) {
+    ctx.beginPath();
+    ctx.moveTo(-200 + i * 300, 0);
+    ctx.lineTo(400 + i * 300, 1350);
+    ctx.stroke();
+  }
+};
+
+const drawDataLinesBackground = (ctx: CanvasRenderingContext2D, showDecorations: boolean) => {
+  drawCleanGradient(ctx);
+  
+  if (!showDecorations) return;
+  
+  // Barras verticais estilizadas
+  for (let i = 0; i < 20; i++) {
+    const x = 50 + i * 50;
+    const height = 100 + Math.random() * 400;
+    const y = 1200 - height;
+    
+    const gradient = ctx.createLinearGradient(x, y, x, y + height);
+    gradient.addColorStop(0, 'rgba(59, 130, 246, 0.15)');
+    gradient.addColorStop(1, 'rgba(59, 130, 246, 0.03)');
+    
+    ctx.fillStyle = gradient;
+    ctx.fillRect(x, y, 30, height);
+  }
+};
+
+const drawAbstractBackground = (ctx: CanvasRenderingContext2D, showDecorations: boolean) => {
+  drawCleanGradient(ctx);
+  
+  if (!showDecorations) return;
+  
+  // Curvas suaves
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+  ctx.lineWidth = 3;
+  
+  for (let i = 0; i < 4; i++) {
+    ctx.beginPath();
+    ctx.moveTo(0, 200 + i * 300);
+    ctx.bezierCurveTo(
+      300, 100 + i * 300,
+      700, 300 + i * 300,
+      1080, 200 + i * 300
+    );
+    ctx.stroke();
+  }
+};
+
+// Generate complete infographic programmatically
+const generateInfographic = async (
+  timelineData: TimelineItem[],
+  backgroundStyle: 'clean' | 'geometric' | 'data' | 'abstract',
+  showDecorations: boolean
 ): Promise<string> => {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
@@ -136,48 +220,68 @@ const composeInfographic = async (
     throw new Error('Could not get canvas context');
   }
 
-  // Set canvas dimensions
   canvas.width = 1080;
   canvas.height = 1350;
 
   try {
-    // Load and draw background
-    const bgImage = await loadImage(backgroundUrl);
-    ctx.drawImage(bgImage, 0, 0, 1080, 1350);
+    // 1. Draw background based on style
+    switch (backgroundStyle) {
+      case 'clean':
+        drawCleanGradient(ctx);
+        break;
+      case 'geometric':
+        drawGeometricBackground(ctx, showDecorations);
+        break;
+      case 'data':
+        drawDataLinesBackground(ctx, showDecorations);
+        break;
+      case 'abstract':
+        drawAbstractBackground(ctx, showDecorations);
+        break;
+    }
 
-    // Load logo
+    // 2. Load logo
     const logo = await loadImage('/logo-idvl-white.png');
 
-    // === HEADER SECTION ===
-    // Draw semi-transparent overlay for better text readability
-    ctx.fillStyle = 'rgba(35, 45, 66, 0.85)';
+    // 3. HEADER SECTION
+    ctx.fillStyle = 'rgba(35, 45, 66, 0.92)';
     ctx.fillRect(0, 0, 1080, 150);
 
-    // Draw header logo (top-left) with aspect ratio preserved
     drawImageWithAspectRatio(ctx, logo, 40, 40, 200, 60);
 
-    // Title
-    ctx.font = 'bold 42px system-ui, -apple-system, sans-serif';
+    // Title with shadow for depth
+    ctx.font = '900 44px system-ui, -apple-system, sans-serif';
     ctx.fillStyle = '#ffffff';
     ctx.textAlign = 'center';
+    ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+    ctx.shadowBlur = 8;
+    ctx.shadowOffsetY = 2;
     ctx.fillText('Reforma Tributária:', 540, 60);
     ctx.fillText('Linha do Tempo 2025-2033', 540, 100);
+    
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
+    ctx.shadowOffsetY = 0;
 
     // Subtitle
-    ctx.font = '20px system-ui, -apple-system, sans-serif';
+    ctx.font = '600 20px system-ui, -apple-system, sans-serif';
     ctx.fillStyle = '#e2e8f0';
     ctx.fillText('Prepare sua empresa para a transformação total', 540, 130);
 
-    // === TIMELINE SECTION ===
+    // 4. TIMELINE SECTION
     const timelineX = 540;
     const startY = 200;
     const cardWidth = 480;
     const cardHeight = 140;
     const verticalSpacing = 170;
 
-    // Draw vertical timeline spine
-    ctx.strokeStyle = '#1e6efb';
-    ctx.lineWidth = 4;
+    // Draw vertical timeline spine with gradient
+    const spineGradient = ctx.createLinearGradient(0, 160, 0, 1230);
+    spineGradient.addColorStop(0, COLORS.primary);
+    spineGradient.addColorStop(0.5, COLORS.accentBlue);
+    spineGradient.addColorStop(1, COLORS.lightBlue);
+    ctx.strokeStyle = spineGradient;
+    ctx.lineWidth = 6;
     ctx.beginPath();
     ctx.moveTo(timelineX, 160);
     ctx.lineTo(timelineX, 1230);
@@ -189,36 +293,51 @@ const composeInfographic = async (
       const isLeft = index % 2 === 0;
       const cardX = isLeft ? timelineX - cardWidth - 30 : timelineX + 30;
 
-      // Draw connector dot
-      ctx.fillStyle = '#1e6efb';
+      // Draw connector dot with glow
+      ctx.fillStyle = COLORS.primary;
+      ctx.shadowColor = COLORS.primary;
+      ctx.shadowBlur = 20;
       ctx.beginPath();
-      ctx.arc(timelineX, y + 40, 12, 0, Math.PI * 2);
+      ctx.arc(timelineX, y + 40, 16, 0, Math.PI * 2);
       ctx.fill();
-
-      // Draw card background
-      ctx.fillStyle = '#ffffff';
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
-      ctx.shadowBlur = 10;
-      ctx.shadowOffsetX = 0;
-      ctx.shadowOffsetY = 4;
+      
+      // Outer ring
+      ctx.strokeStyle = COLORS.lightBlue;
+      ctx.lineWidth = 3;
       ctx.beginPath();
-      ctx.roundRect(cardX, y, cardWidth, cardHeight, 12);
+      ctx.arc(timelineX, y + 40, 20, 0, Math.PI * 2);
+      ctx.stroke();
+      
+      ctx.shadowColor = 'transparent';
+      ctx.shadowBlur = 0;
+
+      // Draw card with mini border on top
+      ctx.fillStyle = COLORS.primary;
+      ctx.fillRect(cardX, y, cardWidth, 4);
+      
+      ctx.fillStyle = COLORS.cardBg;
+      ctx.shadowColor = COLORS.cardShadow;
+      ctx.shadowBlur = 15;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 6;
+      ctx.beginPath();
+      ctx.roundRect(cardX, y + 4, cardWidth, cardHeight - 4, [0, 0, 16, 16]);
       ctx.fill();
       ctx.shadowColor = 'transparent';
       ctx.shadowBlur = 0;
 
-      // Draw card title
-      ctx.font = 'bold 22px system-ui, -apple-system, sans-serif';
-      ctx.fillStyle = '#0b1a37';
+      // Card title
+      ctx.font = '900 23px system-ui, -apple-system, sans-serif';
+      ctx.fillStyle = COLORS.textPrimary;
       ctx.textAlign = 'left';
-      ctx.fillText(item.year, cardX + 20, y + 35);
+      ctx.fillText(item.year, cardX + 20, y + 38);
 
-      // Draw bullets
-      ctx.font = '16px system-ui, -apple-system, sans-serif';
-      ctx.fillStyle = '#334155';
-      let bulletY = y + 60;
+      // Bullets
+      ctx.font = '600 16px system-ui, -apple-system, sans-serif';
+      ctx.fillStyle = COLORS.textSecondary;
+      let bulletY = y + 62;
       item.bullets.forEach((bullet) => {
-        if (bulletY < y + cardHeight - 15) {
+        if (bulletY < y + cardHeight - 10) {
           const bulletText = bullet.length > 60 ? bullet.substring(0, 57) + '...' : bullet;
           ctx.fillText(bulletText, cardX + 20, bulletY);
           bulletY += 22;
@@ -226,24 +345,26 @@ const composeInfographic = async (
       });
     });
 
-    // === FOOTER SECTION ===
-    // Draw footer background
-    ctx.fillStyle = '#1a2335';
+    // 5. FOOTER SECTION
+    ctx.fillStyle = COLORS.footerBg;
     ctx.fillRect(0, 1230, 1080, 120);
 
-    // Draw footer logo (bottom-right) with aspect ratio preserved
     drawImageWithAspectRatio(ctx, logo, 1080 - 140, 1350 - 70, 100, 30);
 
     // CTA text
-    ctx.font = 'bold 24px system-ui, -apple-system, sans-serif';
+    ctx.font = '900 26px system-ui, -apple-system, sans-serif';
     ctx.fillStyle = '#ffffff';
     ctx.textAlign = 'center';
     ctx.fillText('Acesse o Simulador e Assistente IA', 540, 1270);
 
-    // URL
-    ctx.font = 'bold 28px system-ui, -apple-system, sans-serif';
-    ctx.fillStyle = '#1e6efb';
-    ctx.fillText('https://reforma.idvl.com.br/', 540, 1310);
+    // URL with cyan highlight and glow
+    ctx.font = '900 30px system-ui, -apple-system, sans-serif';
+    ctx.fillStyle = COLORS.urlHighlight;
+    ctx.shadowColor = COLORS.urlHighlight;
+    ctx.shadowBlur = 15;
+    ctx.fillText('https://reforma.idvl.com.br/', 540, 1312);
+    ctx.shadowColor = 'transparent';
+    ctx.shadowBlur = 0;
 
     // Convert to PNG
     return canvas.toDataURL('image/png', 1.0);
@@ -254,55 +375,18 @@ const composeInfographic = async (
 };
 
 const Infograficos = () => {
-  const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
-  const [isGeneratingBg, setIsGeneratingBg] = useState(false);
-  const [isComposing, setIsComposing] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
   
-  // Editable prompts and content
-  const [bgPrompt, setBgPrompt] = useState(DEFAULT_BG_PROMPT);
+  // Design controls
+  const [backgroundStyle, setBackgroundStyle] = useState<'clean' | 'geometric' | 'data' | 'abstract'>('geometric');
+  const [showDecorations, setShowDecorations] = useState(true);
   const [timelineJson, setTimelineJson] = useState(JSON.stringify(DEFAULT_TIMELINE_DATA, null, 2));
   const [jsonError, setJsonError] = useState<string | null>(null);
 
-  const handleGenerateBackground = async () => {
-    setIsGeneratingBg(true);
-    setBackgroundImage(null);
-    setGeneratedImage(null);
-
-    try {
-      toast.loading("Gerando fundo com IA...", { id: "bg-gen" });
-      
-      const { data, error } = await supabase.functions.invoke("generate-infographic-bg", {
-        body: { prompt: bgPrompt }
-      });
-
-      if (error) throw error;
-
-      if (data?.imageUrl) {
-        setBackgroundImage(data.imageUrl);
-        toast.success("Fundo gerado! Agora monte o infográfico final.", { id: "bg-gen" });
-      } else {
-        throw new Error("Nenhuma imagem de fundo foi gerada");
-      }
-    } catch (error: any) {
-      console.error("Error generating background:", error);
-      toast.error(
-        error.message || "Não foi possível gerar o fundo. Tente novamente.",
-        { id: "bg-gen" }
-      );
-    } finally {
-      setIsGeneratingBg(false);
-    }
-  };
-
-  const handleComposeInfographic = async () => {
-    if (!backgroundImage) {
-      toast.error("Gere o fundo primeiro!");
-      return;
-    }
-
+  const handleGenerateInfographic = async () => {
     // Validate timeline JSON
-    let parsedTimeline;
+    let parsedTimeline: TimelineItem[];
     try {
       parsedTimeline = JSON.parse(timelineJson);
       setJsonError(null);
@@ -312,23 +396,23 @@ const Infograficos = () => {
       return;
     }
 
-    setIsComposing(true);
+    setIsGenerating(true);
 
     try {
-      toast.loading("Compondo infográfico com conteúdo e logos...", { id: "compose" });
+      toast.loading("Gerando infográfico...", { id: "generate" });
       
-      const finalImage = await composeInfographic(backgroundImage, parsedTimeline);
+      const finalImage = await generateInfographic(parsedTimeline, backgroundStyle, showDecorations);
       setGeneratedImage(finalImage);
       
-      toast.success("Infográfico pronto para download!", { id: "compose" });
+      toast.success("Infográfico pronto para download!", { id: "generate" });
     } catch (error: any) {
-      console.error("Error composing infographic:", error);
+      console.error("Error generating infographic:", error);
       toast.error(
-        error.message || "Não foi possível compor o infográfico. Tente novamente.",
-        { id: "compose" }
+        error.message || "Não foi possível gerar o infográfico. Tente novamente.",
+        { id: "generate" }
       );
     } finally {
-      setIsComposing(false);
+      setIsGenerating(false);
     }
   };
 
@@ -364,28 +448,37 @@ const Infograficos = () => {
             {/* Controls */}
             <Card>
               <CardHeader>
-                <CardTitle>Geração do Infográfico</CardTitle>
+                <CardTitle>Configuração do Infográfico</CardTitle>
                 <CardDescription>
-                  Processo em 2 etapas: primeiro gera o fundo, depois monta o conteúdo
+                  Customize o design e conteúdo do seu infográfico profissional
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                {/* Prompt do Background */}
-                <div>
-                  <label className="text-sm font-medium mb-2 block">
-                    Prompt do Background (IA)
-                  </label>
-                  <Textarea
-                    value={bgPrompt}
-                    onChange={(e) => setBgPrompt(e.target.value)}
-                    placeholder="Descreva como deve ser o fundo..."
-                    className="min-h-[120px] font-mono text-xs"
-                  />
+              <CardContent className="space-y-6">
+                {/* Estilo de Fundo */}
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">Estilo de Fundo</label>
+                  <Select value={backgroundStyle} onValueChange={(v: any) => setBackgroundStyle(v)}>
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="clean">Gradiente Limpo</SelectItem>
+                      <SelectItem value="geometric">Elementos Geométricos</SelectItem>
+                      <SelectItem value="data">Linhas de Dados</SelectItem>
+                      <SelectItem value="abstract">Abstrato Corporativo</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* Toggle Decorações */}
+                <div className="flex items-center justify-between">
+                  <label className="text-sm font-medium">Elementos Decorativos</label>
+                  <Switch checked={showDecorations} onCheckedChange={setShowDecorations} />
                 </div>
 
                 {/* Editor de Conteúdo da Timeline */}
-                <div>
-                  <label className="text-sm font-medium mb-2 block">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium">
                     Conteúdo da Timeline (JSON)
                   </label>
                   <Textarea
@@ -400,55 +493,28 @@ const Infograficos = () => {
                       }
                     }}
                     placeholder="Edite o conteúdo da timeline..."
-                    className={`min-h-[200px] font-mono text-xs ${jsonError ? 'border-destructive' : ''}`}
+                    className={`min-h-[280px] font-mono text-xs ${jsonError ? 'border-destructive' : ''}`}
                   />
                   {jsonError && (
                     <p className="text-xs text-destructive mt-1">{jsonError}</p>
                   )}
                 </div>
 
-                <div className="flex gap-4">
-                  <Button 
-                    onClick={handleGenerateBackground}
-                    disabled={isGeneratingBg || isComposing}
-                    className="flex-1"
-                    size="lg"
-                  >
-                    {isGeneratingBg ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Gerando fundo...
-                      </>
-                    ) : (
-                      "1. Gerar Fundo com IA"
-                    )}
-                  </Button>
-
-                  <Button 
-                    onClick={handleComposeInfographic}
-                    disabled={!backgroundImage || isGeneratingBg || isComposing}
-                    className="flex-1"
-                    size="lg"
-                    variant="secondary"
-                  >
-                    {isComposing ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Montando...
-                      </>
-                    ) : (
-                      "2. Montar Infográfico Final"
-                    )}
-                  </Button>
-                </div>
-
-                {backgroundImage && !generatedImage && (
-                  <div className="p-4 bg-muted rounded-lg">
-                    <p className="text-sm text-muted-foreground text-center">
-                      ✅ Fundo gerado! Clique em "Montar Infográfico Final" para adicionar conteúdo e logos.
-                    </p>
-                  </div>
-                )}
+                <Button 
+                  onClick={handleGenerateInfographic}
+                  disabled={isGenerating || !!jsonError}
+                  className="w-full"
+                  size="lg"
+                >
+                  {isGenerating ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Gerando...
+                    </>
+                  ) : (
+                    "Gerar Infográfico"
+                  )}
+                </Button>
               </CardContent>
             </Card>
 
@@ -461,11 +527,11 @@ const Infograficos = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {(isGeneratingBg || isComposing) ? (
+                {isGenerating ? (
                   <div className="flex flex-col items-center justify-center py-20 space-y-4">
                     <Loader2 className="h-12 w-12 animate-spin text-primary" />
                     <p className="text-muted-foreground">
-                      {isGeneratingBg ? "Gerando fundo com IA..." : "Compondo infográfico com conteúdo e logos..."}
+                      Gerando seu infográfico...
                     </p>
                   </div>
                 ) : generatedImage ? (
@@ -494,7 +560,7 @@ const Infograficos = () => {
                       Nenhum infográfico gerado ainda
                     </p>
                     <p className="text-sm text-muted-foreground text-center max-w-sm">
-                      Clique em "Gerar Fundo com IA" para começar. Depois monte o infográfico com conteúdo e logos.
+                      Configure o design e clique em "Gerar Infográfico" para criar sua visualização profissional instantaneamente.
                     </p>
                   </div>
                 )}
