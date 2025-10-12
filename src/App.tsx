@@ -10,7 +10,8 @@ import GuideComplete from "./pages/GuideComplete";
 import NotFound from "./pages/NotFound";
 import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
-import Simulador from "./pages/Simulador"; // Nova importação
+import Simulador from "./pages/Simulador";
+import Infograficos from "./pages/Infograficos";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import { AuthProvider } from "./hooks/useAuth";
@@ -70,6 +71,12 @@ const App = () => {
                 <Route path="/simulador" element={
                   <ProtectedRoute>
                     <Simulador />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/infograficos" element={
+                  <ProtectedRoute>
+                    <Infograficos />
                   </ProtectedRoute>
                 } />
                 

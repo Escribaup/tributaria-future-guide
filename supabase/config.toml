@@ -1,1 +1,4 @@
 project_id = "veuuwtxfrrmztrjchptn"
+
+[functions.generate-infographic]
+verify_jwt = false
