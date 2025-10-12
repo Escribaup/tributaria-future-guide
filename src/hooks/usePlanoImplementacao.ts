@@ -490,7 +490,7 @@ export const usePlanoImplementacao = () => {
     isCreatingPlan: createPlanMutation.isPending,
     updateTask: updateTaskMutation.mutate,
     isUpdatingTask: updateTaskMutation.isPending,
-    updateTaskDetails: updateTaskDetailsMutation.mutate,
+    updateTaskDetails: updateTaskDetailsMutation.mutateAsync,
     isUpdatingTaskDetails: updateTaskDetailsMutation.isPending,
     createCheckpoint: createCheckpointMutation.mutate,
     isCreatingCheckpoint: createCheckpointMutation.isPending,

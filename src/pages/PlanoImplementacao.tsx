@@ -67,9 +67,17 @@ const PlanoImplementacao = () => {
     setIsTaskModalOpen(true);
   };
 
-  const handleUpdateTask = (taskId: string, updates: Partial<ImplementationTask>) => {
-    updateTaskDetails({ taskId, updates });
-    setIsTaskModalOpen(false);
+  const handleUpdateTask = async (taskId: string, updates: Partial<ImplementationTask>) => {
+    try {
+      await updateTaskDetails({ taskId, updates });
+      // Pequeno delay para o usuário ver o toast de sucesso
+      setTimeout(() => {
+        setIsTaskModalOpen(false);
+      }, 600);
+    } catch (error) {
+      // Em caso de erro, manter o modal aberto
+      console.error('Erro ao salvar tarefa:', error);
+    }
   };
 
   const handleUpdateCheckpoint = (checkpointId: string, updates: {
