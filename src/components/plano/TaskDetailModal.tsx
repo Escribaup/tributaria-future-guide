@@ -41,6 +41,10 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
   React.useEffect(() => {
     if (task && open) {
       setFormData({
+        task_name: task.task_name,
+        task_description: task.task_description,
+        priority: task.priority,
+        responsible: task.responsible,
         target_year: task.target_year,
         target_month: task.target_month,
         target_date: task.target_date,
@@ -90,12 +94,70 @@ const TaskDetailModal: React.FC<TaskDetailModalProps> = ({
         </DialogHeader>
 
         <form onSubmit={handleSubmit}>
-          <Tabs defaultValue="temporal" className="w-full">
-            <TabsList className="grid w-full grid-cols-3">
+          <Tabs defaultValue="basic" className="w-full">
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="basic">Básico</TabsTrigger>
               <TabsTrigger value="temporal">Temporal</TabsTrigger>
               <TabsTrigger value="documentation">Documentação</TabsTrigger>
               <TabsTrigger value="completion">Conclusão</TabsTrigger>
             </TabsList>
+
+            <TabsContent value="basic" className="space-y-4 mt-4">
+              <div className="space-y-2">
+                <Label htmlFor="task_name">Nome da Tarefa *</Label>
+                <Input
+                  id="task_name"
+                  value={formData.task_name || ''}
+                  onChange={(e) => updateField('task_name', e.target.value)}
+                  placeholder="Nome da tarefa"
+                  disabled={isUpdating}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="task_description">Descrição</Label>
+                <Textarea
+                  id="task_description"
+                  value={formData.task_description || ''}
+                  onChange={(e) => updateField('task_description', e.target.value)}
+                  placeholder="Descreva a tarefa..."
+                  rows={4}
+                  disabled={isUpdating}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="priority">Prioridade</Label>
+                  <Select
+                    value={formData.priority || 'medium'}
+                    onValueChange={(value) => updateField('priority', value)}
+                    disabled={isUpdating}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="high">Alta</SelectItem>
+                      <SelectItem value="medium">Média</SelectItem>
+                      <SelectItem value="low">Baixa</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="responsible">Responsável</Label>
+                  <Input
+                    id="responsible"
+                    value={formData.responsible || ''}
+                    onChange={(e) => updateField('responsible', e.target.value)}
+                    placeholder="Nome do responsável"
+                    disabled={isUpdating}
+                  />
+                </div>
+              </div>
+            </TabsContent>
 
             <TabsContent value="temporal" className="space-y-4 mt-4">
               <div className="grid grid-cols-2 gap-4">

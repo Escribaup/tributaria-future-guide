@@ -5,8 +5,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { AlertCircle, Circle, CheckCircle2 } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 interface PrioritySelectorProps {
   currentPriority: 'high' | 'medium' | 'low';
@@ -49,13 +50,19 @@ const PrioritySelector: React.FC<PrioritySelectorProps> = ({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild disabled={disabled}>
-        <Badge 
-          variant={currentConfig.variant}
-          className="text-xs flex items-center gap-1 cursor-pointer hover:opacity-80 transition-opacity"
+        <Button
+          variant="ghost"
+          size="sm"
+          className={cn(
+            "h-6 px-2 text-xs flex items-center gap-1 cursor-pointer hover:opacity-80 transition-opacity rounded-full",
+            currentConfig.variant === 'destructive' && "bg-destructive text-destructive-foreground hover:bg-destructive/80",
+            currentConfig.variant === 'default' && "bg-primary text-primary-foreground hover:bg-primary/80",
+            currentConfig.variant === 'secondary' && "bg-secondary text-secondary-foreground hover:bg-secondary/80"
+          )}
         >
           {currentConfig.icon}
           {currentConfig.label}
-        </Badge>
+        </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start">
         <DropdownMenuItem
