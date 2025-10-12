@@ -8,57 +8,135 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Loader2, Download, Image as ImageIcon } from "lucide-react";
 
-const DEFAULT_PROMPT = `Create a professional vertical infographic (1080x1350px) with IDVL brand identity:
+const DEFAULT_PROMPT = `Create a professional vertical infographic (1080x1350px) for social media about Brazil's Tax Reform Timeline.
 
-HEADER:
-- IDVL logo (navy blue #232d42 with bright blue #1e6efb accent on 'i')
+IMPORTANT INSTRUCTIONS:
+- DO NOT create or draw any logos
+- Leave a WHITE RECTANGULAR SPACE (200x60px) at top-left of header for logo placement
+- Leave a WHITE RECTANGULAR SPACE (100x30px) at bottom-right of footer for logo placement
+- Each year should appear ONLY ONCE in the timeline
+- Use clear, professional typography
+
+HEADER SECTION (top 150px):
+- Reserved logo space: 200x60px white rectangle at top-left
 - Title: "Reforma Tributária: Linha do Tempo 2025-2033"
-- Subtitle: "Prepare sua empresa para a transformação"
+- Subtitle: "Prepare sua empresa para a transformação total"
 
 BACKGROUND:
-- Subtle gradient from #232d42 (top) to #1e6efb (bottom)
+- Subtle gradient: #232d42 (top) to #1e6efb (bottom)
 - Clean, professional, corporate style
+- Sufficient contrast for text readability
 
-TIMELINE (vertical line in #1e6efb connecting all sections):
+TIMELINE (vertical structure with connecting line in #1e6efb):
 
-2025 - Preparação Estratégica
-• 📊 Revisar regime e fluxo de caixa
-• 🧾 Diagnosticar créditos acumulados  
-• 💻 Atualizar sistemas fiscais
+📅 2025 – Preparação Estratégica
+• Último ano antes da transição
+• 📊 Revisar regime tributário e fluxo de caixa
+• 🧾 Diagnosticar créditos acumulados (ICMS, PIS, COFINS)
+• 💻 Treinar equipes e atualizar sistemas fiscais
 
-2026 - Ano de Teste (1%)
-• 🧾 IBS 0,1% + CBS 0,9%
-• 🏢 DF-e obrigatório
-• 💳 Split Payment piloto
+🧪 Até Dez/2025 – Testes e CIB
+• Piloto da CBS e Apuração Assistida (jul/25)
+• 🏢 Adaptação ao Cadastro Imobiliário Brasileiro (CIB)
 
-2027 - Cobrança Efetiva
-• ⚙️ CBS substitui PIS/COFINS
+💡 2026 – Ano de Teste (Alíquota 1%)
+• 🧾 IBS (0,1%) + CBS (0,9%) nas notas fiscais
+• 🏢 DF-e obrigatório para novos setores
+• 💳 Split Payment em fase piloto
+
+⚙️ 2027 – Início da Cobrança Efetiva
+• Fim de PIS/COFINS, início da CBS
 • 💰 Split Payment obrigatório
-• 🏭 IPI zerado (exceto ZFM)
-• 💡 Imposto Seletivo
+• 📉 Crédito fiscal só após recolhimento efetivo
+• 🏭 IPI reduzido a zero (exceto Zona Franca de Manaus)
+• 💡 Início do Imposto Seletivo (IS)
+• 📈 Revisar preços, margens e contratos
 
-2029-2032 - Transição
-• 📊 Redução ICMS/ISS
-• 🚀 Aumento IBS
-• 💼 Gestão de créditos
+📊 2029-2032 – Transição Gradual
+• Redução progressiva de ICMS/ISS
+• 🚀 Aumento gradual do IBS
+• 💼 Gestão atenta dos créditos e Fundo de Compensação
 
-2033 - Sistema Pleno
-• 🧩 Extinção ICMS/ISS/IPI
-• 🏛️ IBS 100% implementado
-• 🔍 Avaliação quinquenal
+🏛️ 2033 – Sistema Pleno Implementado
+• 🧩 Extinção total de ICMS, ISS e IPI
+• IBS totalmente implementado e não cumulativo
+• 🔍 Primeira avaliação quinquenal da reforma
 
-FOOTER:
-- Bold CTA: "Acesse o Simulador e Assistente IA"
-- "reformatributaria.idvl.com.br"
-- Small IDVL logo
+FOOTER SECTION (bottom 100px):
+- Background: slightly darker shade (#1a2335)
+- Bold CTA text: "Acesse o Simulador e Assistente IA"
+- URL: "https://reforma.idvl.com.br/" (large, clear font)
+- Reserved logo space: 100x30px white rectangle at bottom-right
 
-STYLE:
-- Font: Montserrat Bold for titles, Open Sans for text
-- Cards: white/light gray (#f2f2f2) with subtle shadows
-- Icons: bright blue (#1e6efb)
-- Professional, clean, corporate design
-- High contrast for readability
-- Modern minimalist aesthetic`;
+STYLE GUIDELINES:
+- Typography: Montserrat Bold for headings, Open Sans for body text
+- Cards/sections: white/light gray (#f2f2f2) with subtle shadows
+- Icons: bright blue (#1e6efb) for visual consistency
+- High contrast for readability on mobile devices
+- Modern, clean, minimalist corporate aesthetic
+- Professional color balance throughout`;
+
+const composeWithLogo = async (generatedImageUrl: string): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    if (!ctx) {
+      reject(new Error('Could not get canvas context'));
+      return;
+    }
+
+    // Carregar a imagem gerada pela IA
+    const aiImage = new Image();
+    aiImage.crossOrigin = 'anonymous';
+    
+    aiImage.onload = () => {
+      // Configurar canvas com as dimensões da imagem
+      canvas.width = aiImage.width;
+      canvas.height = aiImage.height;
+      
+      // Desenhar a imagem base
+      ctx.drawImage(aiImage, 0, 0);
+      
+      // Carregar e sobrepor a logo no header
+      const logoHeader = new Image();
+      logoHeader.onload = () => {
+        // Posicionar logo no header (top-left com margem)
+        const headerLogoWidth = 200;
+        const headerLogoHeight = 60;
+        const headerX = 40; // margem esquerda
+        const headerY = 40; // margem superior
+        
+        ctx.drawImage(logoHeader, headerX, headerY, headerLogoWidth, headerLogoHeight);
+        
+        // Carregar e sobrepor a logo no footer
+        const logoFooter = new Image();
+        logoFooter.onload = () => {
+          // Posicionar logo no footer (bottom-right com margem)
+          const footerLogoWidth = 100;
+          const footerLogoHeight = 30;
+          const footerX = canvas.width - footerLogoWidth - 40; // margem direita
+          const footerY = canvas.height - footerLogoHeight - 40; // margem inferior
+          
+          ctx.drawImage(logoFooter, footerX, footerY, footerLogoWidth, footerLogoHeight);
+          
+          // Converter canvas para data URL
+          const finalImage = canvas.toDataURL('image/png', 1.0);
+          resolve(finalImage);
+        };
+        
+        logoFooter.onerror = () => reject(new Error('Failed to load footer logo'));
+        logoFooter.src = '/logo-idvl-white.png';
+      };
+      
+      logoHeader.onerror = () => reject(new Error('Failed to load header logo'));
+      logoHeader.src = '/logo-idvl-white.png';
+    };
+    
+    aiImage.onerror = () => reject(new Error('Failed to load AI generated image'));
+    aiImage.src = generatedImageUrl;
+  });
+};
 
 const Infograficos = () => {
   const [prompt, setPrompt] = useState(DEFAULT_PROMPT);
@@ -80,6 +158,7 @@ const Infograficos = () => {
     setGeneratedImage(null);
 
     try {
+      // Passo 1: Gerar infográfico com IA
       const { data, error } = await supabase.functions.invoke("generate-infographic", {
         body: { prompt },
       });
@@ -87,10 +166,18 @@ const Infograficos = () => {
       if (error) throw error;
 
       if (data?.imageUrl) {
-        setGeneratedImage(data.imageUrl);
+        // Passo 2: Compor com logo real
+        toast({
+          title: "Processando...",
+          description: "Adicionando logo IDVL ao infográfico",
+        });
+        
+        const finalImage = await composeWithLogo(data.imageUrl);
+        setGeneratedImage(finalImage);
+        
         toast({
           title: "Sucesso!",
-          description: "Infográfico gerado com sucesso",
+          description: "Infográfico gerado e composto com logo IDVL",
         });
       } else {
         throw new Error("Nenhuma imagem foi gerada");
