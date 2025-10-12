@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Loader2, Download } from "lucide-react";
 import { toast } from "sonner";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import { TimelineEditor } from "@/components/infograficos/TimelineEditor";
 
 // Color palette for modern design
 const COLORS = {
@@ -381,18 +381,13 @@ const Infograficos = () => {
   // Design controls
   const [backgroundStyle, setBackgroundStyle] = useState<'clean' | 'geometric' | 'data' | 'abstract'>('geometric');
   const [showDecorations, setShowDecorations] = useState(true);
-  const [timelineJson, setTimelineJson] = useState(JSON.stringify(DEFAULT_TIMELINE_DATA, null, 2));
-  const [jsonError, setJsonError] = useState<string | null>(null);
+  const [timelineItems, setTimelineItems] = useState<TimelineItem[]>(DEFAULT_TIMELINE_DATA);
 
   const handleGenerateInfographic = async () => {
-    // Validate timeline JSON
-    let parsedTimeline: TimelineItem[];
-    try {
-      parsedTimeline = JSON.parse(timelineJson);
-      setJsonError(null);
-    } catch (err) {
-      setJsonError("JSON inválido - verifique a sintaxe");
-      toast.error("JSON da timeline inválido!");
+    // Validate timeline items
+    const hasEmptyYears = timelineItems.some(item => !item.year.trim());
+    if (hasEmptyYears) {
+      toast.error("Por favor, preencha todos os títulos dos períodos da timeline");
       return;
     }
 
@@ -401,7 +396,7 @@ const Infograficos = () => {
     try {
       toast.loading("Gerando infográfico...", { id: "generate" });
       
-      const finalImage = await generateInfographic(parsedTimeline, backgroundStyle, showDecorations);
+      const finalImage = await generateInfographic(timelineItems, backgroundStyle, showDecorations);
       setGeneratedImage(finalImage);
       
       toast.success("Infográfico pronto para download!", { id: "generate" });
@@ -479,30 +474,17 @@ const Infograficos = () => {
                 {/* Editor de Conteúdo da Timeline */}
                 <div className="space-y-2">
                   <label className="text-sm font-medium">
-                    Conteúdo da Timeline (JSON)
+                    Conteúdo da Timeline
                   </label>
-                  <Textarea
-                    value={timelineJson}
-                    onChange={(e) => {
-                      setTimelineJson(e.target.value);
-                      try {
-                        JSON.parse(e.target.value);
-                        setJsonError(null);
-                      } catch (err) {
-                        setJsonError("JSON inválido");
-                      }
-                    }}
-                    placeholder="Edite o conteúdo da timeline..."
-                    className={`min-h-[280px] font-mono text-xs ${jsonError ? 'border-destructive' : ''}`}
+                  <TimelineEditor
+                    items={timelineItems}
+                    onChange={setTimelineItems}
                   />
-                  {jsonError && (
-                    <p className="text-xs text-destructive mt-1">{jsonError}</p>
-                  )}
                 </div>
 
                 <Button 
                   onClick={handleGenerateInfographic}
-                  disabled={isGenerating || !!jsonError}
+                  disabled={isGenerating}
                   className="w-full"
                   size="lg"
                 >
