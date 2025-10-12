@@ -96,8 +96,14 @@ const loadImage = (url: string): Promise<HTMLImageElement> => {
     if (!url.startsWith('data:')) {
       img.crossOrigin = 'anonymous';
     }
-    img.onload = () => resolve(img);
-    img.onerror = reject;
+    img.onload = () => {
+      console.log(`✅ Logo carregada: ${img.width}x${img.height}px`);
+      resolve(img);
+    };
+    img.onerror = (err) => {
+      console.error('❌ Erro ao carregar logo:', err);
+      reject(err);
+    };
     img.src = url;
   });
 };
@@ -109,8 +115,13 @@ const drawImageWithAspectRatio = (
   x: number,
   y: number,
   maxWidth: number,
-  maxHeight: number
+  maxHeight: number,
+  align: 'left' | 'center' | 'right' = 'left'
 ) => {
+  // Configurar qualidade máxima de renderização
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+  
   const imgAspect = image.width / image.height;
   const maxAspect = maxWidth / maxHeight;
   
@@ -125,8 +136,21 @@ const drawImageWithAspectRatio = (
     drawWidth = maxHeight * imgAspect;
   }
   
-  // Center within available space
-  const drawX = x + (maxWidth - drawWidth) / 2;
+  // Calcular posição X baseado no alinhamento
+  let drawX = x;
+  switch(align) {
+    case 'center':
+      drawX = x + (maxWidth - drawWidth) / 2;
+      break;
+    case 'right':
+      drawX = x + maxWidth - drawWidth;
+      break;
+    case 'left':
+    default:
+      drawX = x;
+  }
+  
+  // Centralizar verticalmente
   const drawY = y + (maxHeight - drawHeight) / 2;
   
   ctx.drawImage(image, drawX, drawY, drawWidth, drawHeight);
@@ -229,6 +253,10 @@ const generateInfographic = async (
   canvas.width = 1080;
   canvas.height = 1350;
 
+  // Configurar qualidade de renderização global
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = 'high';
+
   try {
     // 1. Draw background based on style
     switch (backgroundStyle) {
@@ -253,7 +281,8 @@ const generateInfographic = async (
     ctx.fillStyle = 'rgba(35, 45, 66, 0.92)';
     ctx.fillRect(0, 0, 1080, 150);
 
-    drawImageWithAspectRatio(ctx, logo, 40, 40, 200, 60);
+    // Logo no header com dimensões maiores e qualidade máxima
+    drawImageWithAspectRatio(ctx, logo, 40, 35, 250, 80, 'left');
 
     // Title with shadow for depth
     ctx.font = '900 44px system-ui, -apple-system, sans-serif';
@@ -363,7 +392,8 @@ const generateInfographic = async (
     ctx.fillStyle = COLORS.footerBg;
     ctx.fillRect(0, 1230, 1080, 120);
 
-    drawImageWithAspectRatio(ctx, logo, 1080 - 140, 1350 - 70, 100, 30);
+    // Logo no footer com dimensões maiores, alinhamento à direita e qualidade máxima
+    drawImageWithAspectRatio(ctx, logo, 1080 - 180, 1350 - 85, 150, 50, 'right');
 
     // CTA text
     ctx.font = '900 26px system-ui, -apple-system, sans-serif';
