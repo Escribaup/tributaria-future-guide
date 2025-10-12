@@ -13,12 +13,16 @@ serve(async (req) => {
   console.log('[2025-10-12T' + new Date().toISOString() + '] generate-infographic-bg function invoked');
 
   try {
+    // Parse request body for custom prompt
+    const { prompt } = await req.json().catch(() => ({}));
+    
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
     if (!LOVABLE_API_KEY) {
       throw new Error('LOVABLE_API_KEY not configured');
     }
 
-    const backgroundPrompt = `Create a professional abstract background image (1080x1350px) for a corporate infographic.
+    // Use custom prompt or default background prompt
+    const backgroundPrompt = prompt || `Create a professional abstract background image (1080x1350px) for a corporate infographic.
 
 CRITICAL RULES - MUST FOLLOW:
 - NO TEXT, NO LETTERS, NO NUMBERS, NO LOGOS whatsoever

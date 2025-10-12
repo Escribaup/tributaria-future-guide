@@ -2,13 +2,32 @@ import { useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
 import { Loader2, Download } from "lucide-react";
 import { toast } from "sonner";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 
-// Timeline data structure - prevents errors and ensures correct content
-const timelineData = [
+// Default background prompt for AI generation
+const DEFAULT_BG_PROMPT = `Create a professional abstract background image (1080x1350px) for a corporate infographic.
+
+CRITICAL RULES - MUST FOLLOW:
+- NO TEXT, NO LETTERS, NO NUMBERS, NO LOGOS whatsoever
+- Only abstract shapes, gradients, and corporate design elements
+
+COLOR PALETTE (IDVL Corporate Identity):
+- Primary gradient: #232d42 (top) to #1e6efb (bottom)
+- Accent shades: use variations of blue (#1e6efb, #2563eb, #3b82f6)
+
+LAYOUT REQUIREMENTS:
+- Top section (0-150px): clean area for header text and logo
+- Middle section (150-1230px): subtle abstract elements, flowing gradients
+- Bottom section (1230-1350px): clean area for footer
+
+STYLE: Modern, minimalist, corporate, high contrast for text readability, professional business aesthetic`;
+
+// Default timeline data structure - prevents errors and ensures correct content
+const DEFAULT_TIMELINE_DATA = [
   {
     year: "2025 – Preparação Estratégica",
     bullets: [
@@ -75,8 +94,41 @@ const loadImage = (url: string): Promise<HTMLImageElement> => {
   });
 };
 
+// Helper to draw image with aspect ratio preserved
+const drawImageWithAspectRatio = (
+  ctx: CanvasRenderingContext2D,
+  image: HTMLImageElement,
+  x: number,
+  y: number,
+  maxWidth: number,
+  maxHeight: number
+) => {
+  const imgAspect = image.width / image.height;
+  const maxAspect = maxWidth / maxHeight;
+  
+  let drawWidth = maxWidth;
+  let drawHeight = maxHeight;
+  
+  if (imgAspect > maxAspect) {
+    // Image is wider - fit by width
+    drawHeight = maxWidth / imgAspect;
+  } else {
+    // Image is taller - fit by height
+    drawWidth = maxHeight * imgAspect;
+  }
+  
+  // Center within available space
+  const drawX = x + (maxWidth - drawWidth) / 2;
+  const drawY = y + (maxHeight - drawHeight) / 2;
+  
+  ctx.drawImage(image, drawX, drawY, drawWidth, drawHeight);
+};
+
 // Compose the final infographic with background + content + logos
-const composeInfographic = async (backgroundUrl: string): Promise<string> => {
+const composeInfographic = async (
+  backgroundUrl: string,
+  timelineData: typeof DEFAULT_TIMELINE_DATA
+): Promise<string> => {
   const canvas = document.createElement('canvas');
   const ctx = canvas.getContext('2d');
   
@@ -101,8 +153,8 @@ const composeInfographic = async (backgroundUrl: string): Promise<string> => {
     ctx.fillStyle = 'rgba(35, 45, 66, 0.85)';
     ctx.fillRect(0, 0, 1080, 150);
 
-    // Draw header logo (top-left)
-    ctx.drawImage(logo, 40, 40, 200, 60);
+    // Draw header logo (top-left) with aspect ratio preserved
+    drawImageWithAspectRatio(ctx, logo, 40, 40, 200, 60);
 
     // Title
     ctx.font = 'bold 42px system-ui, -apple-system, sans-serif';
@@ -179,8 +231,8 @@ const composeInfographic = async (backgroundUrl: string): Promise<string> => {
     ctx.fillStyle = '#1a2335';
     ctx.fillRect(0, 1230, 1080, 120);
 
-    // Draw footer logo (bottom-right)
-    ctx.drawImage(logo, 1080 - 140, 1350 - 70, 100, 30);
+    // Draw footer logo (bottom-right) with aspect ratio preserved
+    drawImageWithAspectRatio(ctx, logo, 1080 - 140, 1350 - 70, 100, 30);
 
     // CTA text
     ctx.font = 'bold 24px system-ui, -apple-system, sans-serif';
@@ -206,6 +258,11 @@ const Infograficos = () => {
   const [generatedImage, setGeneratedImage] = useState<string | null>(null);
   const [isGeneratingBg, setIsGeneratingBg] = useState(false);
   const [isComposing, setIsComposing] = useState(false);
+  
+  // Editable prompts and content
+  const [bgPrompt, setBgPrompt] = useState(DEFAULT_BG_PROMPT);
+  const [timelineJson, setTimelineJson] = useState(JSON.stringify(DEFAULT_TIMELINE_DATA, null, 2));
+  const [jsonError, setJsonError] = useState<string | null>(null);
 
   const handleGenerateBackground = async () => {
     setIsGeneratingBg(true);
@@ -215,7 +272,9 @@ const Infograficos = () => {
     try {
       toast.loading("Gerando fundo com IA...", { id: "bg-gen" });
       
-      const { data, error } = await supabase.functions.invoke("generate-infographic-bg");
+      const { data, error } = await supabase.functions.invoke("generate-infographic-bg", {
+        body: { prompt: bgPrompt }
+      });
 
       if (error) throw error;
 
@@ -242,12 +301,23 @@ const Infograficos = () => {
       return;
     }
 
+    // Validate timeline JSON
+    let parsedTimeline;
+    try {
+      parsedTimeline = JSON.parse(timelineJson);
+      setJsonError(null);
+    } catch (err) {
+      setJsonError("JSON inválido - verifique a sintaxe");
+      toast.error("JSON da timeline inválido!");
+      return;
+    }
+
     setIsComposing(true);
 
     try {
       toast.loading("Compondo infográfico com conteúdo e logos...", { id: "compose" });
       
-      const finalImage = await composeInfographic(backgroundImage);
+      const finalImage = await composeInfographic(backgroundImage, parsedTimeline);
       setGeneratedImage(finalImage);
       
       toast.success("Infográfico pronto para download!", { id: "compose" });
@@ -300,6 +370,43 @@ const Infograficos = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
+                {/* Prompt do Background */}
+                <div>
+                  <label className="text-sm font-medium mb-2 block">
+                    Prompt do Background (IA)
+                  </label>
+                  <Textarea
+                    value={bgPrompt}
+                    onChange={(e) => setBgPrompt(e.target.value)}
+                    placeholder="Descreva como deve ser o fundo..."
+                    className="min-h-[120px] font-mono text-xs"
+                  />
+                </div>
+
+                {/* Editor de Conteúdo da Timeline */}
+                <div>
+                  <label className="text-sm font-medium mb-2 block">
+                    Conteúdo da Timeline (JSON)
+                  </label>
+                  <Textarea
+                    value={timelineJson}
+                    onChange={(e) => {
+                      setTimelineJson(e.target.value);
+                      try {
+                        JSON.parse(e.target.value);
+                        setJsonError(null);
+                      } catch (err) {
+                        setJsonError("JSON inválido");
+                      }
+                    }}
+                    placeholder="Edite o conteúdo da timeline..."
+                    className={`min-h-[200px] font-mono text-xs ${jsonError ? 'border-destructive' : ''}`}
+                  />
+                  {jsonError && (
+                    <p className="text-xs text-destructive mt-1">{jsonError}</p>
+                  )}
+                </div>
+
                 <div className="flex gap-4">
                   <Button 
                     onClick={handleGenerateBackground}
