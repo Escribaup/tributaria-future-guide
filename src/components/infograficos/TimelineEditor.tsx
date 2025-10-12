@@ -5,7 +5,10 @@ import { toast } from "@/hooks/use-toast";
 
 interface TimelineItem {
   year: string;
-  bullets: string[];
+  bullets: Array<{
+    icon?: string;
+    text: string;
+  }>;
 }
 
 interface TimelineEditorProps {
@@ -15,7 +18,7 @@ interface TimelineEditorProps {
 
 export const TimelineEditor = ({ items, onChange }: TimelineEditorProps) => {
   const handleAddNewItem = () => {
-    onChange([...items, { year: "", bullets: [""] }]);
+    onChange([...items, { year: "", bullets: [{ text: "" }] }]);
     toast({
       title: "Novo período adicionado",
       description: "Preencha os dados do novo período da timeline",

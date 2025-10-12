@@ -8,6 +8,8 @@ import { toast } from "sonner";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import { TimelineEditor } from "@/components/infograficos/TimelineEditor";
+import { drawIcon } from "@/lib/canvasIcons";
+import { wrapText } from "@/lib/canvasText";
 
 // Color palette for modern design
 const COLORS = {
@@ -27,58 +29,62 @@ const COLORS = {
 // Default timeline data structure
 type TimelineItem = {
   year: string;
-  bullets: string[];
+  bullets: Array<{
+    icon?: string;
+    text: string;
+  }>;
 };
-const DEFAULT_TIMELINE_DATA = [
+
+const DEFAULT_TIMELINE_DATA: TimelineItem[] = [
   {
     year: "2025 – Preparação Estratégica",
     bullets: [
-      "Último ano antes da transição",
-      "📊 Revisar regime tributário e fluxo de caixa",
-      "🧾 Diagnosticar créditos acumulados (ICMS, PIS, COFINS)",
-      "💻 Treinar equipes e atualizar sistemas fiscais"
+      { icon: "AlertTriangle", text: "Último ano antes da transição" },
+      { icon: "BarChart3", text: "Revisar regime tributário e fluxo de caixa" },
+      { icon: "FileText", text: "Diagnosticar créditos acumulados (ICMS, PIS, COFINS)" },
+      { icon: "Users", text: "Treinar equipes e atualizar sistemas fiscais" }
     ]
   },
   {
     year: "Até Dez/2025 – Testes e CIB",
     bullets: [
-      "Piloto da CBS e Apuração Assistida (jul/25)",
-      "🏢 Adaptação ao Cadastro Imobiliário Brasileiro (CIB)"
+      { icon: "Target", text: "Piloto da CBS e Apuração Assistida (jul/25)" },
+      { icon: "Database", text: "Adaptação ao Cadastro Imobiliário Brasileiro (CIB)" }
     ]
   },
   {
     year: "2026 – Ano de Teste (Alíquota 1%)",
     bullets: [
-      "🧾 IBS (0,1%) + CBS (0,9%) nas notas fiscais",
-      "🏢 DF-e obrigatório para novos setores",
-      "💳 Split Payment em fase piloto"
+      { icon: "FileText", text: "IBS (0,1%) + CBS (0,9%) nas notas fiscais" },
+      { icon: "Database", text: "DF-e obrigatório para novos setores" },
+      { icon: "Zap", text: "Split Payment em fase piloto" }
     ]
   },
   {
     year: "2027 – Início da Cobrança Efetiva",
     bullets: [
-      "Fim de PIS/COFINS, início da CBS",
-      "💰 Split Payment obrigatório",
-      "📉 Crédito fiscal só após recolhimento efetivo",
-      "🏭 IPI reduzido a zero (exceto Zona Franca de Manaus)",
-      "💡 Início do Imposto Seletivo (IS)",
-      "📈 Revisar preços, margens e contratos"
+      { icon: "CheckCircle2", text: "Fim de PIS/COFINS, início da CBS" },
+      { icon: "Zap", text: "Split Payment obrigatório" },
+      { icon: "TrendingUp", text: "Crédito fiscal só após recolhimento efetivo" },
+      { icon: "ShieldCheck", text: "IPI reduzido a zero (exceto Zona Franca de Manaus)" },
+      { icon: "Lightbulb", text: "Início do Imposto Seletivo (IS)" },
+      { icon: "Calculator", text: "Revisar preços, margens e contratos" }
     ]
   },
   {
     year: "2029-2032 – Transição Gradual",
     bullets: [
-      "Redução progressiva de ICMS/ISS",
-      "🚀 Aumento gradual do IBS",
-      "💼 Gestão atenta dos créditos e Fundo de Compensação"
+      { icon: "TrendingUp", text: "Redução progressiva de ICMS/ISS" },
+      { icon: "TrendingUp", text: "Aumento gradual do IBS" },
+      { icon: "Calculator", text: "Gestão atenta dos créditos e Fundo de Compensação" }
     ]
   },
   {
     year: "2033 – Sistema Pleno Implementado",
     bullets: [
-      "🧩 Extinção total de ICMS, ISS e IPI",
-      "IBS totalmente implementado e não cumulativo",
-      "🔍 Primeira avaliação quinquenal da reforma"
+      { icon: "CheckCircle2", text: "Extinção total de ICMS, ISS e IPI" },
+      { icon: "ShieldCheck", text: "IBS totalmente implementado e não cumulativo" },
+      { icon: "Target", text: "Primeira avaliação quinquenal da reforma" }
     ]
   }
 ];
@@ -332,15 +338,23 @@ const generateInfographic = async (
       ctx.textAlign = 'left';
       ctx.fillText(item.year, cardX + 20, y + 38);
 
-      // Bullets
+      // Bullets with icons and smart text wrapping
       ctx.font = '600 16px system-ui, -apple-system, sans-serif';
       ctx.fillStyle = COLORS.textSecondary;
       let bulletY = y + 62;
+      
       item.bullets.forEach((bullet) => {
         if (bulletY < y + cardHeight - 10) {
-          const bulletText = bullet.length > 60 ? bullet.substring(0, 57) + '...' : bullet;
-          ctx.fillText(bulletText, cardX + 20, bulletY);
-          bulletY += 22;
+          // Draw icon if present
+          if (bullet.icon) {
+            drawIcon(ctx, bullet.icon, cardX + 20, bulletY - 12, 16, COLORS.primary);
+          }
+          
+          // Draw text with wrapping
+          const textX = cardX + (bullet.icon ? 48 : 20);
+          const maxTextWidth = cardWidth - (bullet.icon ? 68 : 40);
+          const linesUsed = wrapText(ctx, bullet.text, textX, bulletY, maxTextWidth, 22);
+          bulletY += linesUsed * 22 + 4; // 4px extra spacing between bullets
         }
       });
     });
