@@ -74,6 +74,15 @@ const Header = () => {
         </Link>
       </li>
       <li>
+        <Link 
+          to="/plano-implementacao" 
+          className={`hover:opacity-80 transition-colors ${isScrolled && !isMobile ? 'text-idvl-text-dark' : 'text-white'} ${isMobile ? 'text-lg' : ''}`}
+          onClick={() => isMobile && setIsMenuOpen(false)}
+        >
+          Plano de Implementação
+        </Link>
+      </li>
+      <li>
         <ContactButton
           prefillText='Olá! Gostaria de falar com um especialista sobre a Reforma Tributária.'
           className={`hover:opacity-80 transition-colors ${isScrolled && !isMobile ? 'text-idvl-text-dark' : 'text-white'} ${isMobile ? 'text-lg' : ''}`}

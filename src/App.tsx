@@ -12,6 +12,7 @@ import Auth from "./pages/Auth";
 import Admin from "./pages/Admin";
 import Simulador from "./pages/Simulador";
 import Infograficos from "./pages/Infograficos";
+import PlanoImplementacao from "./pages/PlanoImplementacao";
 import Terms from "./pages/Terms";
 import Privacy from "./pages/Privacy";
 import { AuthProvider } from "./hooks/useAuth";
@@ -77,6 +78,12 @@ const App = () => {
                 <Route path="/infograficos" element={
                   <ProtectedRoute>
                     <Infograficos />
+                  </ProtectedRoute>
+                } />
+                
+                <Route path="/plano-implementacao" element={
+                  <ProtectedRoute>
+                    <PlanoImplementacao />
                   </ProtectedRoute>
                 } />
                 
