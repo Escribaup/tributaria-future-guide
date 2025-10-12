@@ -1,196 +1,264 @@
 import { useState } from "react";
-import Header from "@/components/Header";
-import Footer from "@/components/Footer";
+import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { Loader2, Download, Image as ImageIcon } from "lucide-react";
+import { Loader2, Download } from "lucide-react";
+import { toast } from "sonner";
+import Header from "@/components/Header";
+import Footer from "@/components/Footer";
 
-const DEFAULT_PROMPT = `Create a professional vertical infographic (1080x1350px) for social media about Brazil's Tax Reform Timeline.
+// Timeline data structure - prevents errors and ensures correct content
+const timelineData = [
+  {
+    year: "2025 – Preparação Estratégica",
+    bullets: [
+      "Último ano antes da transição",
+      "📊 Revisar regime tributário e fluxo de caixa",
+      "🧾 Diagnosticar créditos acumulados (ICMS, PIS, COFINS)",
+      "💻 Treinar equipes e atualizar sistemas fiscais"
+    ]
+  },
+  {
+    year: "Até Dez/2025 – Testes e CIB",
+    bullets: [
+      "Piloto da CBS e Apuração Assistida (jul/25)",
+      "🏢 Adaptação ao Cadastro Imobiliário Brasileiro (CIB)"
+    ]
+  },
+  {
+    year: "2026 – Ano de Teste (Alíquota 1%)",
+    bullets: [
+      "🧾 IBS (0,1%) + CBS (0,9%) nas notas fiscais",
+      "🏢 DF-e obrigatório para novos setores",
+      "💳 Split Payment em fase piloto"
+    ]
+  },
+  {
+    year: "2027 – Início da Cobrança Efetiva",
+    bullets: [
+      "Fim de PIS/COFINS, início da CBS",
+      "💰 Split Payment obrigatório",
+      "📉 Crédito fiscal só após recolhimento efetivo",
+      "🏭 IPI reduzido a zero (exceto Zona Franca de Manaus)",
+      "💡 Início do Imposto Seletivo (IS)",
+      "📈 Revisar preços, margens e contratos"
+    ]
+  },
+  {
+    year: "2029-2032 – Transição Gradual",
+    bullets: [
+      "Redução progressiva de ICMS/ISS",
+      "🚀 Aumento gradual do IBS",
+      "💼 Gestão atenta dos créditos e Fundo de Compensação"
+    ]
+  },
+  {
+    year: "2033 – Sistema Pleno Implementado",
+    bullets: [
+      "🧩 Extinção total de ICMS, ISS e IPI",
+      "IBS totalmente implementado e não cumulativo",
+      "🔍 Primeira avaliação quinquenal da reforma"
+    ]
+  }
+];
 
-IMPORTANT INSTRUCTIONS:
-- DO NOT create or draw any logos
-- Leave a WHITE RECTANGULAR SPACE (200x60px) at top-left of header for logo placement
-- Leave a WHITE RECTANGULAR SPACE (100x30px) at bottom-right of footer for logo placement
-- Each year should appear ONLY ONCE in the timeline
-- Use clear, professional typography
-
-HEADER SECTION (top 150px):
-- Reserved logo space: 200x60px white rectangle at top-left
-- Title: "Reforma Tributária: Linha do Tempo 2025-2033"
-- Subtitle: "Prepare sua empresa para a transformação total"
-
-BACKGROUND:
-- Subtle gradient: #232d42 (top) to #1e6efb (bottom)
-- Clean, professional, corporate style
-- Sufficient contrast for text readability
-
-TIMELINE (vertical structure with connecting line in #1e6efb):
-
-📅 2025 – Preparação Estratégica
-• Último ano antes da transição
-• 📊 Revisar regime tributário e fluxo de caixa
-• 🧾 Diagnosticar créditos acumulados (ICMS, PIS, COFINS)
-• 💻 Treinar equipes e atualizar sistemas fiscais
-
-🧪 Até Dez/2025 – Testes e CIB
-• Piloto da CBS e Apuração Assistida (jul/25)
-• 🏢 Adaptação ao Cadastro Imobiliário Brasileiro (CIB)
-
-💡 2026 – Ano de Teste (Alíquota 1%)
-• 🧾 IBS (0,1%) + CBS (0,9%) nas notas fiscais
-• 🏢 DF-e obrigatório para novos setores
-• 💳 Split Payment em fase piloto
-
-⚙️ 2027 – Início da Cobrança Efetiva
-• Fim de PIS/COFINS, início da CBS
-• 💰 Split Payment obrigatório
-• 📉 Crédito fiscal só após recolhimento efetivo
-• 🏭 IPI reduzido a zero (exceto Zona Franca de Manaus)
-• 💡 Início do Imposto Seletivo (IS)
-• 📈 Revisar preços, margens e contratos
-
-📊 2029-2032 – Transição Gradual
-• Redução progressiva de ICMS/ISS
-• 🚀 Aumento gradual do IBS
-• 💼 Gestão atenta dos créditos e Fundo de Compensação
-
-🏛️ 2033 – Sistema Pleno Implementado
-• 🧩 Extinção total de ICMS, ISS e IPI
-• IBS totalmente implementado e não cumulativo
-• 🔍 Primeira avaliação quinquenal da reforma
-
-FOOTER SECTION (bottom 100px):
-- Background: slightly darker shade (#1a2335)
-- Bold CTA text: "Acesse o Simulador e Assistente IA"
-- URL: "https://reforma.idvl.com.br/" (large, clear font)
-- Reserved logo space: 100x30px white rectangle at bottom-right
-
-STYLE GUIDELINES:
-- Typography: Montserrat Bold for headings, Open Sans for body text
-- Cards/sections: white/light gray (#f2f2f2) with subtle shadows
-- Icons: bright blue (#1e6efb) for visual consistency
-- High contrast for readability on mobile devices
-- Modern, clean, minimalist corporate aesthetic
-- Professional color balance throughout`;
-
-const composeWithLogo = async (generatedImageUrl: string): Promise<string> => {
+// Helper to load images
+const loadImage = (url: string): Promise<HTMLImageElement> => {
   return new Promise((resolve, reject) => {
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    
-    if (!ctx) {
-      reject(new Error('Could not get canvas context'));
-      return;
+    const img = new Image();
+    if (!url.startsWith('data:')) {
+      img.crossOrigin = 'anonymous';
     }
-
-    // Carregar a imagem gerada pela IA
-    const aiImage = new Image();
-    aiImage.crossOrigin = 'anonymous';
-    
-    aiImage.onload = () => {
-      // Configurar canvas com as dimensões da imagem
-      canvas.width = aiImage.width;
-      canvas.height = aiImage.height;
-      
-      // Desenhar a imagem base
-      ctx.drawImage(aiImage, 0, 0);
-      
-      // Carregar e sobrepor a logo no header
-      const logoHeader = new Image();
-      logoHeader.onload = () => {
-        // Posicionar logo no header (top-left com margem)
-        const headerLogoWidth = 200;
-        const headerLogoHeight = 60;
-        const headerX = 40; // margem esquerda
-        const headerY = 40; // margem superior
-        
-        ctx.drawImage(logoHeader, headerX, headerY, headerLogoWidth, headerLogoHeight);
-        
-        // Carregar e sobrepor a logo no footer
-        const logoFooter = new Image();
-        logoFooter.onload = () => {
-          // Posicionar logo no footer (bottom-right com margem)
-          const footerLogoWidth = 100;
-          const footerLogoHeight = 30;
-          const footerX = canvas.width - footerLogoWidth - 40; // margem direita
-          const footerY = canvas.height - footerLogoHeight - 40; // margem inferior
-          
-          ctx.drawImage(logoFooter, footerX, footerY, footerLogoWidth, footerLogoHeight);
-          
-          // Converter canvas para data URL
-          const finalImage = canvas.toDataURL('image/png', 1.0);
-          resolve(finalImage);
-        };
-        
-        logoFooter.onerror = () => reject(new Error('Failed to load footer logo'));
-        logoFooter.src = '/logo-idvl-white.png';
-      };
-      
-      logoHeader.onerror = () => reject(new Error('Failed to load header logo'));
-      logoHeader.src = '/logo-idvl-white.png';
-    };
-    
-    aiImage.onerror = () => reject(new Error('Failed to load AI generated image'));
-    aiImage.src = generatedImageUrl;
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = url;
   });
 };
 
-const Infograficos = () => {
-  const [prompt, setPrompt] = useState(DEFAULT_PROMPT);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
-  const { toast } = useToast();
+// Compose the final infographic with background + content + logos
+const composeInfographic = async (backgroundUrl: string): Promise<string> => {
+  const canvas = document.createElement('canvas');
+  const ctx = canvas.getContext('2d');
+  
+  if (!ctx) {
+    throw new Error('Could not get canvas context');
+  }
 
-  const handleGenerate = async () => {
-    if (!prompt.trim()) {
-      toast({
-        title: "Erro",
-        description: "Por favor, insira um prompt para gerar o infográfico",
-        variant: "destructive",
+  // Set canvas dimensions
+  canvas.width = 1080;
+  canvas.height = 1350;
+
+  try {
+    // Load and draw background
+    const bgImage = await loadImage(backgroundUrl);
+    ctx.drawImage(bgImage, 0, 0, 1080, 1350);
+
+    // Load logo
+    const logo = await loadImage('/logo-idvl-white.png');
+
+    // === HEADER SECTION ===
+    // Draw semi-transparent overlay for better text readability
+    ctx.fillStyle = 'rgba(35, 45, 66, 0.85)';
+    ctx.fillRect(0, 0, 1080, 150);
+
+    // Draw header logo (top-left)
+    ctx.drawImage(logo, 40, 40, 200, 60);
+
+    // Title
+    ctx.font = 'bold 42px system-ui, -apple-system, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.fillText('Reforma Tributária:', 540, 60);
+    ctx.fillText('Linha do Tempo 2025-2033', 540, 100);
+
+    // Subtitle
+    ctx.font = '20px system-ui, -apple-system, sans-serif';
+    ctx.fillStyle = '#e2e8f0';
+    ctx.fillText('Prepare sua empresa para a transformação total', 540, 130);
+
+    // === TIMELINE SECTION ===
+    const timelineX = 540;
+    const startY = 200;
+    const cardWidth = 480;
+    const cardHeight = 140;
+    const verticalSpacing = 170;
+
+    // Draw vertical timeline spine
+    ctx.strokeStyle = '#1e6efb';
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(timelineX, 160);
+    ctx.lineTo(timelineX, 1230);
+    ctx.stroke();
+
+    // Draw timeline cards
+    timelineData.forEach((item, index) => {
+      const y = startY + (index * verticalSpacing);
+      const isLeft = index % 2 === 0;
+      const cardX = isLeft ? timelineX - cardWidth - 30 : timelineX + 30;
+
+      // Draw connector dot
+      ctx.fillStyle = '#1e6efb';
+      ctx.beginPath();
+      ctx.arc(timelineX, y + 40, 12, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Draw card background
+      ctx.fillStyle = '#ffffff';
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.15)';
+      ctx.shadowBlur = 10;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 4;
+      ctx.beginPath();
+      ctx.roundRect(cardX, y, cardWidth, cardHeight, 12);
+      ctx.fill();
+      ctx.shadowColor = 'transparent';
+      ctx.shadowBlur = 0;
+
+      // Draw card title
+      ctx.font = 'bold 22px system-ui, -apple-system, sans-serif';
+      ctx.fillStyle = '#0b1a37';
+      ctx.textAlign = 'left';
+      ctx.fillText(item.year, cardX + 20, y + 35);
+
+      // Draw bullets
+      ctx.font = '16px system-ui, -apple-system, sans-serif';
+      ctx.fillStyle = '#334155';
+      let bulletY = y + 60;
+      item.bullets.forEach((bullet) => {
+        if (bulletY < y + cardHeight - 15) {
+          const bulletText = bullet.length > 60 ? bullet.substring(0, 57) + '...' : bullet;
+          ctx.fillText(bulletText, cardX + 20, bulletY);
+          bulletY += 22;
+        }
       });
-      return;
-    }
+    });
 
-    setIsGenerating(true);
+    // === FOOTER SECTION ===
+    // Draw footer background
+    ctx.fillStyle = '#1a2335';
+    ctx.fillRect(0, 1230, 1080, 120);
+
+    // Draw footer logo (bottom-right)
+    ctx.drawImage(logo, 1080 - 140, 1350 - 70, 100, 30);
+
+    // CTA text
+    ctx.font = 'bold 24px system-ui, -apple-system, sans-serif';
+    ctx.fillStyle = '#ffffff';
+    ctx.textAlign = 'center';
+    ctx.fillText('Acesse o Simulador e Assistente IA', 540, 1270);
+
+    // URL
+    ctx.font = 'bold 28px system-ui, -apple-system, sans-serif';
+    ctx.fillStyle = '#1e6efb';
+    ctx.fillText('https://reforma.idvl.com.br/', 540, 1310);
+
+    // Convert to PNG
+    return canvas.toDataURL('image/png', 1.0);
+  } catch (error) {
+    console.error('Error composing infographic:', error);
+    throw error;
+  }
+};
+
+const Infograficos = () => {
+  const [backgroundImage, setBackgroundImage] = useState<string | null>(null);
+  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  const [isGeneratingBg, setIsGeneratingBg] = useState(false);
+  const [isComposing, setIsComposing] = useState(false);
+
+  const handleGenerateBackground = async () => {
+    setIsGeneratingBg(true);
+    setBackgroundImage(null);
     setGeneratedImage(null);
 
     try {
-      // Passo 1: Gerar infográfico com IA
-      const { data, error } = await supabase.functions.invoke("generate-infographic", {
-        body: { prompt },
-      });
+      toast.loading("Gerando fundo com IA...", { id: "bg-gen" });
+      
+      const { data, error } = await supabase.functions.invoke("generate-infographic-bg");
 
       if (error) throw error;
 
       if (data?.imageUrl) {
-        // Passo 2: Compor com logo real
-        toast({
-          title: "Processando...",
-          description: "Adicionando logo IDVL ao infográfico",
-        });
-        
-        const finalImage = await composeWithLogo(data.imageUrl);
-        setGeneratedImage(finalImage);
-        
-        toast({
-          title: "Sucesso!",
-          description: "Infográfico gerado e composto com logo IDVL",
-        });
+        setBackgroundImage(data.imageUrl);
+        toast.success("Fundo gerado! Agora monte o infográfico final.", { id: "bg-gen" });
       } else {
-        throw new Error("Nenhuma imagem foi gerada");
+        throw new Error("Nenhuma imagem de fundo foi gerada");
       }
-    } catch (error) {
-      console.error("Error generating infographic:", error);
-      toast({
-        title: "Erro",
-        description: error.message || "Não foi possível gerar o infográfico. Tente novamente.",
-        variant: "destructive",
-      });
+    } catch (error: any) {
+      console.error("Error generating background:", error);
+      toast.error(
+        error.message || "Não foi possível gerar o fundo. Tente novamente.",
+        { id: "bg-gen" }
+      );
     } finally {
-      setIsGenerating(false);
+      setIsGeneratingBg(false);
+    }
+  };
+
+  const handleComposeInfographic = async () => {
+    if (!backgroundImage) {
+      toast.error("Gere o fundo primeiro!");
+      return;
+    }
+
+    setIsComposing(true);
+
+    try {
+      toast.loading("Compondo infográfico com conteúdo e logos...", { id: "compose" });
+      
+      const finalImage = await composeInfographic(backgroundImage);
+      setGeneratedImage(finalImage);
+      
+      toast.success("Infográfico pronto para download!", { id: "compose" });
+    } catch (error: any) {
+      console.error("Error composing infographic:", error);
+      toast.error(
+        error.message || "Não foi possível compor o infográfico. Tente novamente.",
+        { id: "compose" }
+      );
+    } finally {
+      setIsComposing(false);
     }
   };
 
@@ -204,10 +272,7 @@ const Infograficos = () => {
     link.click();
     document.body.removeChild(link);
 
-    toast({
-      title: "Download iniciado",
-      description: "O infográfico está sendo baixado",
-    });
+    toast.success("Download iniciado!");
   };
 
   return (
@@ -226,49 +291,57 @@ const Infograficos = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Editor de Prompt */}
+            {/* Controls */}
             <Card>
               <CardHeader>
-                <CardTitle>Prompt de Geração</CardTitle>
+                <CardTitle>Geração do Infográfico</CardTitle>
                 <CardDescription>
-                  Personalize o prompt para gerar diferentes variações do infográfico
+                  Processo em 2 etapas: primeiro gera o fundo, depois monta o conteúdo
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4">
-                <Textarea
-                  value={prompt}
-                  onChange={(e) => setPrompt(e.target.value)}
-                  rows={20}
-                  className="font-mono text-sm"
-                  placeholder="Insira o prompt para gerar o infográfico..."
-                />
-                
-                <div className="flex gap-2">
-                  <Button
-                    onClick={handleGenerate}
-                    disabled={isGenerating}
+                <div className="flex gap-4">
+                  <Button 
+                    onClick={handleGenerateBackground}
+                    disabled={isGeneratingBg || isComposing}
                     className="flex-1"
+                    size="lg"
                   >
-                    {isGenerating ? (
+                    {isGeneratingBg ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Gerando...
+                        Gerando fundo...
                       </>
                     ) : (
-                      <>
-                        <ImageIcon className="mr-2 h-4 w-4" />
-                        Gerar Infográfico
-                      </>
+                      "1. Gerar Fundo com IA"
                     )}
                   </Button>
-                  
-                  <Button
-                    variant="outline"
-                    onClick={() => setPrompt(DEFAULT_PROMPT)}
+
+                  <Button 
+                    onClick={handleComposeInfographic}
+                    disabled={!backgroundImage || isGeneratingBg || isComposing}
+                    className="flex-1"
+                    size="lg"
+                    variant="secondary"
                   >
-                    Resetar
+                    {isComposing ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Montando...
+                      </>
+                    ) : (
+                      "2. Montar Infográfico Final"
+                    )}
                   </Button>
                 </div>
+
+                {backgroundImage && !generatedImage && (
+                  <div className="p-4 bg-muted rounded-lg">
+                    <p className="text-sm text-muted-foreground text-center">
+                      ✅ Fundo gerado! Clique em "Montar Infográfico Final" para adicionar conteúdo e logos.
+                    </p>
+                  </div>
+                )}
               </CardContent>
             </Card>
 
@@ -281,10 +354,12 @@ const Infograficos = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {isGenerating ? (
-                  <div className="flex flex-col items-center justify-center h-96 bg-muted rounded-lg">
-                    <Loader2 className="h-12 w-12 animate-spin text-primary mb-4" />
-                    <p className="text-muted-foreground">Gerando infográfico...</p>
+                {(isGeneratingBg || isComposing) ? (
+                  <div className="flex flex-col items-center justify-center py-20 space-y-4">
+                    <Loader2 className="h-12 w-12 animate-spin text-primary" />
+                    <p className="text-muted-foreground">
+                      {isGeneratingBg ? "Gerando fundo com IA..." : "Compondo infográfico com conteúdo e logos..."}
+                    </p>
                   </div>
                 ) : generatedImage ? (
                   <div className="space-y-4">
@@ -302,17 +377,17 @@ const Infograficos = () => {
                       variant="default"
                     >
                       <Download className="mr-2 h-4 w-4" />
-                      Baixar Infográfico
+                      Baixar Infográfico (PNG 1080x1350)
                     </Button>
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center justify-center h-96 bg-muted rounded-lg">
-                    <ImageIcon className="h-12 w-12 text-muted-foreground mb-4" />
-                    <p className="text-muted-foreground">
+                  <div className="flex flex-col items-center justify-center py-20 space-y-4">
+                    <div className="text-6xl">🎨</div>
+                    <p className="text-muted-foreground text-center">
                       Nenhum infográfico gerado ainda
                     </p>
-                    <p className="text-sm text-muted-foreground mt-2">
-                      Clique em "Gerar Infográfico" para começar
+                    <p className="text-sm text-muted-foreground text-center max-w-sm">
+                      Clique em "Gerar Fundo com IA" para começar. Depois monte o infográfico com conteúdo e logos.
                     </p>
                   </div>
                 )}
