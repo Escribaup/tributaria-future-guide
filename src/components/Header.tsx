@@ -174,7 +174,7 @@ const Header = () => {
                   <Button 
                     onClick={signOut}
                     variant="outline"
-                    className={`${isScrolled ? 'border-idvl-blue-dark text-idvl-blue-dark hover:bg-idvl-blue-dark hover:text-white' : 'border-white text-white hover:bg-white hover:text-idvl-blue-dark'}`}
+                    className={`${isScrolled ? 'border-idvl-blue-dark text-idvl-blue-dark bg-white hover:bg-idvl-blue-dark hover:text-white' : 'border-white text-white bg-transparent hover:bg-white hover:text-idvl-blue-dark'}`}
                   >
                     Sair
                   </Button>
