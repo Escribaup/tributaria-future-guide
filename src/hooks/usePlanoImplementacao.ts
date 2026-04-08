@@ -178,9 +178,10 @@ export const usePlanoImplementacao = () => {
   // Atualizar detalhes completos da tarefa (temporal e documentação)
   const updateTaskDetailsMutation = useMutation({
     mutationFn: async ({ taskId, updates }: { taskId: string; updates: Partial<ImplementationTask> }) => {
+      const { checkpoints, ...dbUpdates } = updates as any;
       const { error } = await supabase
         .from('implementation_tasks')
-        .update(updates)
+        .update(dbUpdates)
         .eq('id', taskId);
 
       if (error) throw error;
@@ -345,9 +346,10 @@ export const usePlanoImplementacao = () => {
       phaseId: string; 
       updates: Partial<ImplementationPhase> 
     }) => {
+      const { checkpoints, tasks, ...dbUpdates } = updates as any;
       const { error } = await supabase
         .from('implementation_phases')
-        .update(updates)
+        .update(dbUpdates)
         .eq('id', phaseId);
 
       if (error) throw error;
