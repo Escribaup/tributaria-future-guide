@@ -132,7 +132,7 @@ const Auth = () => {
               <CardHeader>
                 <CardTitle>Criar conta</CardTitle>
                 <CardDescription>
-                  Crie uma nova conta de administrador.
+                  Crie uma nova conta para acessar a plataforma.
                 </CardDescription>
               </CardHeader>
               <form onSubmit={handleSignUp}>
