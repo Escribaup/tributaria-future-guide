@@ -1,58 +1,29 @@
 
 
-## Plano: Redesenhar Interface da Calculadora no Padrão da API Gov
+## Plano: Corrigir Calculadora — Campo de Classificação Tributária e Fluxo
 
-Redesenhar a calculadora para espelhar o layout da imagem de referência (API Gov), com dois painéis lado a lado e um fluxo em duas etapas: primeiro classificar, depois calcular.
+### Problema Identificado
 
-### Fluxo em Duas Etapas
+Testei as edge functions diretamente e ambas funcionam corretamente. O problema está no **frontend**:
 
-1. **Classificar**: Usuário preenche descrição, seleciona UF/município e data. Clica em "Classificar" → sistema chama a edge function apenas para classificar (AI + API Gov) e retorna NCM/NBS, CST e cClassTrib.
-2. **Revisar e Ajustar**: Usuário vê os campos NCM/NBS, CST e cClassTrib preenchidos automaticamente, mas pode editá-los antes de calcular.
-3. **Calcular**: Com a classificação confirmada, usuário informa o preço e clica em "Calcular Tributos" → sistema envia tudo para a edge function que chama o regime-geral.
+1. **Campo `cClassTrib` quebrado**: A API Gov retorna classificações com campo `codigo`, mas o formulário tenta ler `cClassTrib`. Isso faz o dropdown mostrar valores `undefined` e enviar dados incorretos ao calcular.
 
-### Layout (conforme imagem de referência)
-
-```text
-┌─────────────────────────────┬──────────────────────────────┐
-│  Operação de Consumo        │  Tributação                  │
-│                             │                              │
-│  Data do Fato Gerador       │  Tipo: ○ Bem  ● Serviço     │
-│  [01/01/2027]               │                              │
-│                             │  Situação Tributária (CST)   │
-│  Local da Operação          │  [200 - Alíquota reduzida ▼] │
-│  UF [PR ▼]  Município [▼]  │                              │
-│                             │  Classificação (cClassTrib)  │
-│  NCM/NBS: [código]         │  [200052 - Prestação... ▼]   │
-│  Descrição: [texto]        │                              │
-│                             │  Base de Cálculo             │
-│  [Classificar]              │  R$ [100.00]                 │
-│                             │  [Calcular Tributos]         │
-└─────────────────────────────┴──────────────────────────────┘
-```
+2. **Mapeamento errado nos SelectItems**: Na linha 354, `c.cClassTrib` é `undefined` (o campo correto é `c.codigo`), então o valor cai no fallback `String(i)` (0, 1, 2...) — totalmente errado.
 
 ### Alterações
 
-**1. Edge Function `calcular-tributos/index.ts`**
-- Adicionar modo `classificar`: recebe apenas descrição e retorna NCM/NBS, CST sugerido, lista de classificações tributárias disponíveis
-- Modo `calcular`: mantém o fluxo atual, mas aceita NCM/NBS, CST e cClassTrib do usuário (não mais inferidos)
-- Buscar lista de CSTs e classificações tributárias da API Gov para popular os selects
+**1. `src/components/calculadora/CalculadoraForm.tsx`**
 
-**2. Componente `CalculadoraForm.tsx`** - Redesenho completo
-- Layout em dois painéis (grid 2 colunas):
-  - **Esquerda - Operação de Consumo**: Data do fato gerador, UF, município, campo descrição (textarea), NCM/NBS (editável após classificação)
-  - **Direita - Tributação**: Radio "Bem/Serviço", Select de CST (preenchido pela AI, editável), Select de cClassTrib (preenchido pela AI, editável), Base de cálculo (preço)
-- Botão "Classificar" (etapa 1) e botão "Calcular" (etapa 2, habilitado só após classificação)
-- Campos NCM/NBS, CST e cClassTrib editáveis pelo usuário
+Corrigir o mapeamento de `classificacoesTributarias`:
+- Linha 154: `listas.classificacoesTributarias[0].cClassTrib` → `.codigo`
+- Linha 354: `value={c.cClassTrib || ...}` → `value={c.codigo || ...}`  
+- Linha 355: `{c.cClassTrib} - {c.descricao}` → `{c.codigo} - {c.descricao}`
 
-**3. Página `Calculadora.tsx`**
-- Adicionar handler `handleClassificar` separado do `handleCalcular`
-- Gerenciar estados intermediários (classificação pendente, classificação confirmada)
+Isso resolve o dropdown de classificação tributária, permitindo ao usuário ver e alterar a classificação corretamente antes de calcular.
 
-**4. `CalculadoraResultados.tsx`** - Sem alterações estruturais (tabela já está boa)
+### Resultado Esperado
 
-### Detalhes Técnicos
-- A edge function buscará listas de CSTs e classificações tributárias (`/dados-abertos/classificacoes-tributarias/cbs-ibs`) para popular os selects
-- O campo NCM/NBS será um Input editável (não readonly) após a classificação automática
-- O tipo Bem/Serviço será inferido pela AI mas editável via radio buttons
-- Quando o usuário altera o tipo (Bem↔Serviço), o campo NCM/NBS limpa para reclassificação
+- Dropdown de classificação tributária mostra os códigos e descrições corretos (ex: "000001 - Situações tributadas integralmente pelo IBS e CBS")
+- Usuário pode alterar CST, cClassTrib e NCM/NBS antes de calcular
+- O botão "Calcular Tributos" envia o código correto da classificação
 
