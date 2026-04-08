@@ -151,7 +151,7 @@ const CalculadoraForm: React.FC<CalculadoraFormProps> = ({
       setClassTribs(listas.classificacoesTributarias || []);
       // Try to find a matching cClassTrib
       if (listas.classificacoesTributarias?.length > 0) {
-        setCClassTrib(listas.classificacoesTributarias[0].cClassTrib || '000001');
+        setCClassTrib(listas.classificacoesTributarias[0].codigo || '000001');
       } else {
         setCClassTrib('000001');
       }
@@ -351,8 +351,8 @@ const CalculadoraForm: React.FC<CalculadoraFormProps> = ({
                   <SelectGroup>
                     <SelectLabel>Classificações</SelectLabel>
                     {classTribs.slice(0, 100).map((c: any, i: number) => (
-                      <SelectItem key={c.cClassTrib || i} value={c.cClassTrib || String(i)}>
-                        {c.cClassTrib} - {c.descricao?.substring(0, 60) || 'Sem descrição'}
+                      <SelectItem key={c.codigo || i} value={c.codigo || String(i)}>
+                        {c.codigo} - {c.descricao?.substring(0, 60) || 'Sem descrição'}
                       </SelectItem>
                     ))}
                   </SelectGroup>
