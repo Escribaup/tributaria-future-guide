@@ -83,6 +83,15 @@ const Header = () => {
         </Link>
       </li>
       <li>
+        <Link 
+          to="/calculadora" 
+          className={`hover:opacity-80 transition-colors ${isScrolled && !isMobile ? 'text-idvl-text-dark' : 'text-white'} ${isMobile ? 'text-lg' : ''}`}
+          onClick={() => isMobile && setIsMenuOpen(false)}
+        >
+          Calculadora
+        </Link>
+      </li>
+      <li>
         <ContactButton
           prefillText='Olá! Gostaria de falar com um especialista sobre a Reforma Tributária.'
           className={`hover:opacity-80 transition-colors ${isScrolled && !isMobile ? 'text-idvl-text-dark' : 'text-white'} ${isMobile ? 'text-lg' : ''}`}
