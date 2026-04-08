@@ -32,7 +32,7 @@ async function govPost(path: string, body: unknown) {
   return res.json();
 }
 
-async function classifyWithAI(descricao: string): Promise<{ tipo: "ncm" | "nbs"; codigo: string }> {
+async function classifyWithAI(descricao: string): Promise<{ tipo: "ncm" | "nbs"; codigo: string; descricao_classificacao: string }> {
   const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
   if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY not configured");
 
@@ -53,7 +53,8 @@ REGRAS:
 - Se for um produto/mercadoria física, retorne o código NCM (8 dígitos numéricos)
 - Se for um serviço, retorne o código NBS (9 dígitos numéricos)
 - Retorne APENAS o código, sem formatação, pontos ou traços
-- Use o código mais específico possível`,
+- Use o código mais específico possível
+- Sugira também o CST mais adequado (3 dígitos)`,
         },
         {
           role: "user",
@@ -78,12 +79,16 @@ REGRAS:
                   type: "string",
                   description: "Código NCM (8 dígitos) ou NBS (9 dígitos), apenas números",
                 },
+                cst_sugerido: {
+                  type: "string",
+                  description: "CST sugerido (3 dígitos), ex: 000 para tributação integral, 200 para alíquota reduzida",
+                },
                 descricao_classificacao: {
                   type: "string",
                   description: "Breve descrição do porquê dessa classificação",
                 },
               },
-              required: ["tipo", "codigo", "descricao_classificacao"],
+              required: ["tipo", "codigo", "cst_sugerido", "descricao_classificacao"],
               additionalProperties: false,
             },
           },
@@ -95,7 +100,7 @@ REGRAS:
 
   if (!response.ok) {
     if (response.status === 429) throw new Error("Rate limit exceeded. Tente novamente em alguns segundos.");
-    if (response.status === 402) throw new Error("Créditos insuficientes. Adicione fundos em Settings > Workspace > Usage.");
+    if (response.status === 402) throw new Error("Créditos insuficientes.");
     const t = await response.text();
     throw new Error(`AI Gateway error: ${t}`);
   }
@@ -105,7 +110,183 @@ REGRAS:
   if (!toolCall) throw new Error("AI não retornou classificação");
 
   const args = JSON.parse(toolCall.function.arguments);
-  return { tipo: args.tipo, codigo: args.codigo.replace(/\D/g, "") };
+  return {
+    tipo: args.tipo,
+    codigo: args.codigo.replace(/\D/g, ""),
+    descricao_classificacao: args.descricao_classificacao,
+    cst_sugerido: args.cst_sugerido || "000",
+  } as any;
+}
+
+// ── Mode: classificar ──
+async function handleClassificar(body: any) {
+  const { descricao, ano } = body;
+  if (!descricao) throw new Error("Descrição é obrigatória");
+
+  const anoRef = ano || 2026;
+  const dataRef = `${anoRef}-01-01`;
+
+  // 1. AI classification
+  console.log("Classifying:", descricao);
+  const aiResult = await classifyWithAI(descricao);
+  console.log("AI result:", aiResult);
+
+  // 2. Get NCM/NBS details
+  let ncmNbsData: any = null;
+  try {
+    if (aiResult.tipo === "ncm") {
+      ncmNbsData = await govGet("/dados-abertos/ncm", { ncm: aiResult.codigo, data: dataRef });
+    } else {
+      ncmNbsData = await govGet("/dados-abertos/nbs", { nbs: aiResult.codigo, data: dataRef });
+    }
+  } catch (e) {
+    console.warn("NCM/NBS lookup warning:", e.message);
+  }
+
+  // 3. Get list of CSTs and classificações tributárias
+  let classificacoesTributarias: any[] = [];
+  try {
+    classificacoesTributarias = await govGet("/dados-abertos/classificacoes-tributarias/cbs-ibs", { data: dataRef });
+  } catch (e) {
+    console.warn("ClassTrib list warning:", e.message);
+  }
+
+  // 4. Build CST list (common ones)
+  const cstList = [
+    { codigo: "000", descricao: "Tributação integral" },
+    { codigo: "200", descricao: "Alíquota reduzida" },
+    { codigo: "300", descricao: "Alíquota zero" },
+    { codigo: "400", descricao: "Isento" },
+    { codigo: "500", descricao: "Imune" },
+    { codigo: "600", descricao: "Suspensão" },
+    { codigo: "900", descricao: "Outros" },
+  ];
+
+  return {
+    classificacao: {
+      tipo: aiResult.tipo,
+      codigo: aiResult.codigo,
+      cst_sugerido: (aiResult as any).cst_sugerido || "000",
+      descricao_classificacao: aiResult.descricao_classificacao,
+      ncmNbsData,
+    },
+    listas: {
+      csts: cstList,
+      classificacoesTributarias: classificacoesTributarias || [],
+    },
+  };
+}
+
+// ── Mode: calcular ──
+async function handleCalcular(body: any) {
+  const { tipo, codigo, cst, cClassTrib, preco, uf, codigoUf, codigoMunicipio, ano } = body;
+
+  if (!codigo || !preco) throw new Error("Código NCM/NBS e preço são obrigatórios");
+
+  const anoRef = ano || 2026;
+  const dataRef = `${anoRef}-01-01`;
+  const dhFatoGerador = `${anoRef}-01-01T12:00:00-03:00`;
+
+  // Get NCM/NBS details for IS check
+  let ncmNbsData: any = null;
+  try {
+    if (tipo === "ncm") {
+      ncmNbsData = await govGet("/dados-abertos/ncm", { ncm: codigo, data: dataRef });
+    } else {
+      ncmNbsData = await govGet("/dados-abertos/nbs", { nbs: codigo, data: dataRef });
+    }
+  } catch (e) {
+    console.warn("NCM/NBS lookup:", e.message);
+  }
+
+  // Get tax rates
+  const [aliquotaUniao, aliquotaUf, aliquotaMunicipio] = await Promise.all([
+    govGet("/dados-abertos/aliquota-uniao", { data: dataRef }).catch(() => null),
+    codigoUf ? govGet("/dados-abertos/aliquota-uf", { codigoUf: String(codigoUf), data: dataRef }).catch(() => null) : null,
+    codigoMunicipio ? govGet("/dados-abertos/aliquota-municipio", { codigoMunicipio: String(codigoMunicipio), data: dataRef }).catch(() => null) : null,
+  ]);
+
+  // Build item
+  const useCst = cst || "000";
+  const useClassTrib = cClassTrib || "000001";
+
+  const itemPayload: any = {
+    numero: 1,
+    cst: useCst,
+    cClassTrib: useClassTrib,
+    baseCalculo: preco,
+    quantidade: 1,
+  };
+
+  if (tipo === "ncm") {
+    itemPayload.ncm = codigo;
+  } else {
+    itemPayload.nbs = codigo;
+  }
+
+  if (ncmNbsData?.tributadoPeloImpostoSeletivo) {
+    itemPayload.impostoSeletivo = {
+      cst: "000",
+      baseCalculo: preco,
+      impostoInformado: 0,
+      cClassTrib: "000001",
+    };
+  }
+
+  const operacao = {
+    id: crypto.randomUUID().replace(/-/g, ""),
+    versao: "0.0.1",
+    dhFatoGerador,
+    municipio: codigoMunicipio || 4314902,
+    uf: uf || "RS",
+    itens: [itemPayload],
+  };
+
+  console.log("Calling regime-geral:", JSON.stringify(operacao));
+  const resultado = await govPost("/regime-geral", operacao);
+  console.log("Result:", JSON.stringify(resultado));
+
+  const item = resultado?.objetos?.[0];
+  const ibscbs = item?.tribCalc?.IBSCBS;
+  const grupo = ibscbs?.gIBSCBS;
+  const is = item?.tribCalc?.IS;
+
+  return {
+    classificacao: {
+      tipo,
+      codigo,
+      cst: useCst,
+      cClassTrib: useClassTrib,
+      descricao_ncm_nbs: ncmNbsData,
+    },
+    aliquotas: {
+      uniao: aliquotaUniao,
+      uf: aliquotaUf,
+      municipio: aliquotaMunicipio,
+    },
+    resultado: {
+      baseCalculo: grupo?.vBC || preco,
+      cbs: {
+        aliquota: grupo?.gCBS?.pCBS || 0,
+        valor: grupo?.gCBS?.vCBS || 0,
+        reducao: grupo?.gCBS?.gRed || null,
+      },
+      ibsUf: {
+        aliquota: grupo?.gIBSUF?.pIBSUF || 0,
+        valor: grupo?.gIBSUF?.vIBSUF || 0,
+        reducao: grupo?.gIBSUF?.gRed || null,
+      },
+      ibsMun: {
+        aliquota: grupo?.gIBSMun?.pIBSMun || 0,
+        valor: grupo?.gIBSMun?.vIBSMun || 0,
+        reducao: grupo?.gIBSMun?.gRed || null,
+      },
+      ibsTotal: grupo?.vIBS || 0,
+      is: is ? { aliquota: is.pIS || 0, valor: is.vIS || 0 } : null,
+    },
+    totais: resultado?.total || null,
+    respostaBruta: resultado,
+  };
 }
 
 serve(async (req) => {
@@ -114,140 +295,15 @@ serve(async (req) => {
   }
 
   try {
-    const { descricao, preco, uf, municipio, codigoMunicipio, codigoUf, ano } = await req.json();
+    const body = await req.json();
+    const modo = body.modo || "calcular";
 
-    if (!descricao || !preco) {
-      return new Response(JSON.stringify({ error: "Descrição e preço são obrigatórios" }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-
-    const anoRef = ano || 2026;
-    const dataRef = `${anoRef}-01-01`;
-    const dhFatoGerador = `${anoRef}-01-01T12:00:00-03:00`;
-
-    // Step 1: AI classification
-    console.log("Classifying product:", descricao);
-    const classification = await classifyWithAI(descricao);
-    console.log("Classification:", classification);
-
-    // Step 2: Get NCM/NBS details from gov API
-    let ncmNbsData: any = null;
-    try {
-      if (classification.tipo === "ncm") {
-        ncmNbsData = await govGet("/dados-abertos/ncm", { ncm: classification.codigo, data: dataRef });
-      } else {
-        ncmNbsData = await govGet("/dados-abertos/nbs", { nbs: classification.codigo, data: dataRef });
-      }
-    } catch (e) {
-      console.warn("NCM/NBS lookup warning:", e.message);
-    }
-
-    // Step 3: Get classifications list to find default cClassTrib
-    let classificacoes: any[] = [];
-    try {
-      classificacoes = await govGet("/dados-abertos/classificacoes-tributarias/cbs-ibs", { data: dataRef });
-    } catch (e) {
-      console.warn("ClassTrib lookup warning:", e.message);
-    }
-
-    // Default: use "000001" (tributação padrão sem redução)
-    const cClassTrib = "000001";
-    const cst = "000"; // tributação integral
-
-    // Step 4: Get tax rates
-    const [aliquotaUniao, aliquotaUf, aliquotaMunicipio] = await Promise.all([
-      govGet("/dados-abertos/aliquota-uniao", { data: dataRef }).catch(() => null),
-      codigoUf ? govGet("/dados-abertos/aliquota-uf", { codigoUf: String(codigoUf), data: dataRef }).catch(() => null) : null,
-      codigoMunicipio ? govGet("/dados-abertos/aliquota-municipio", { codigoMunicipio: String(codigoMunicipio), data: dataRef }).catch(() => null) : null,
-    ]);
-
-    // Step 5: Build and call regime-geral
-    const itemPayload: any = {
-      numero: 1,
-      cst,
-      cClassTrib,
-      baseCalculo: preco,
-      quantidade: 1,
-    };
-
-    if (classification.tipo === "ncm") {
-      itemPayload.ncm = classification.codigo;
+    let response: any;
+    if (modo === "classificar") {
+      response = await handleClassificar(body);
     } else {
-      itemPayload.nbs = classification.codigo;
+      response = await handleCalcular(body);
     }
-
-    // Add IS info if applicable
-    if (ncmNbsData?.tributadoPeloImpostoSeletivo) {
-      itemPayload.impostoSeletivo = {
-        cst: "000",
-        baseCalculo: preco,
-        impostoInformado: 0,
-        cClassTrib: "000001",
-      };
-    }
-
-    const operacao = {
-      id: crypto.randomUUID().replace(/-/g, ""),
-      versao: "0.0.1",
-      dhFatoGerador,
-      municipio: codigoMunicipio || 4314902,
-      uf: uf || "RS",
-      itens: [itemPayload],
-    };
-
-    console.log("Calling regime-geral with:", JSON.stringify(operacao));
-    const resultado = await govPost("/regime-geral", operacao);
-    console.log("Result:", JSON.stringify(resultado));
-
-    // Parse response to extract key values
-    const item = resultado?.objetos?.[0];
-    const ibscbs = item?.tribCalc?.IBSCBS;
-    const grupo = ibscbs?.gIBSCBS;
-    const is = item?.tribCalc?.IS;
-
-    const response = {
-      classificacao: {
-        tipo: classification.tipo,
-        codigo: classification.codigo,
-        cst,
-        cClassTrib,
-        descricao_ncm_nbs: ncmNbsData,
-      },
-      aliquotas: {
-        uniao: aliquotaUniao,
-        uf: aliquotaUf,
-        municipio: aliquotaMunicipio,
-      },
-      resultado: {
-        baseCalculo: grupo?.vBC || preco,
-        cbs: {
-          aliquota: grupo?.gCBS?.pCBS || 0,
-          valor: grupo?.gCBS?.vCBS || 0,
-          reducao: grupo?.gCBS?.gRed || null,
-        },
-        ibsUf: {
-          aliquota: grupo?.gIBSUF?.pIBSUF || 0,
-          valor: grupo?.gIBSUF?.vIBSUF || 0,
-          reducao: grupo?.gIBSUF?.gRed || null,
-        },
-        ibsMun: {
-          aliquota: grupo?.gIBSMun?.pIBSMun || 0,
-          valor: grupo?.gIBSMun?.vIBSMun || 0,
-          reducao: grupo?.gIBSMun?.gRed || null,
-        },
-        ibsTotal: grupo?.vIBS || 0,
-        is: is
-          ? {
-              aliquota: is.pIS || 0,
-              valor: is.vIS || 0,
-            }
-          : null,
-      },
-      totais: resultado?.total || null,
-      respostaBruta: resultado,
-    };
 
     return new Response(JSON.stringify(response), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
