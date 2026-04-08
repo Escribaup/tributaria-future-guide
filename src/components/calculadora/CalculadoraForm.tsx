@@ -15,6 +15,7 @@ import {
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { InfoIcon, Loader2, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { supabase } from "@/integrations/supabase/client";
 
 interface UF {
   sigla: string;
@@ -46,8 +47,6 @@ interface CalculadoraFormProps {
   } | null;
 }
 
-const GOV_API = "https://consumo.tributos.gov.br/servico/calcular-tributos-consumo/api/calculadora";
-
 const ANOS = ["2026", "2027", "2028", "2029", "2030", "2031", "2032", "2033"];
 
 const CalculadoraForm: React.FC<CalculadoraFormProps> = ({ onSubmit, loading, classificacao }) => {
@@ -62,16 +61,16 @@ const CalculadoraForm: React.FC<CalculadoraFormProps> = ({ onSubmit, loading, cl
   const [loadingUfs, setLoadingUfs] = useState(false);
   const [loadingMunicipios, setLoadingMunicipios] = useState(false);
 
-  // Load UFs on mount
+  // Load UFs on mount via edge function
   useEffect(() => {
     const fetchUfs = async () => {
       setLoadingUfs(true);
       try {
-        const res = await fetch(`${GOV_API}/dados-abertos/ufs`);
-        if (res.ok) {
-          const data = await res.json();
-          setUfs(Array.isArray(data) ? data.sort((a: UF, b: UF) => a.nome.localeCompare(b.nome)) : []);
-        }
+        const { data, error } = await supabase.functions.invoke('buscar-localidades', {
+          body: { tipo: 'ufs' },
+        });
+        if (error) throw error;
+        setUfs(Array.isArray(data) ? data.sort((a: UF, b: UF) => a.nome.localeCompare(b.nome)) : []);
       } catch (e) {
         console.error("Error loading UFs:", e);
       } finally {
@@ -81,7 +80,7 @@ const CalculadoraForm: React.FC<CalculadoraFormProps> = ({ onSubmit, loading, cl
     fetchUfs();
   }, []);
 
-  // Load municipios when UF changes
+  // Load municipios when UF changes via edge function
   useEffect(() => {
     if (!uf) {
       setMunicipios([]);
@@ -93,11 +92,11 @@ const CalculadoraForm: React.FC<CalculadoraFormProps> = ({ onSubmit, loading, cl
       setLoadingMunicipios(true);
       setMunicipio('');
       try {
-        const res = await fetch(`${GOV_API}/dados-abertos/ufs/municipios?siglaUf=${uf}`);
-        if (res.ok) {
-          const data = await res.json();
-          setMunicipios(Array.isArray(data) ? data.sort((a: Municipio, b: Municipio) => a.nome.localeCompare(b.nome)) : []);
-        }
+        const { data, error } = await supabase.functions.invoke('buscar-localidades', {
+          body: { tipo: 'municipios', siglaUf: uf },
+        });
+        if (error) throw error;
+        setMunicipios(Array.isArray(data) ? data.sort((a: Municipio, b: Municipio) => a.nome.localeCompare(b.nome)) : []);
       } catch (e) {
         console.error("Error loading municipios:", e);
       } finally {
@@ -127,7 +126,6 @@ const CalculadoraForm: React.FC<CalculadoraFormProps> = ({ onSubmit, loading, cl
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {/* Descrição do Produto */}
       <div className="rounded-xl bg-muted p-6 shadow-sm space-y-5">
         <h3 className="text-xl font-bold text-foreground">Dados do Produto/Serviço</h3>
 
@@ -177,7 +175,6 @@ const CalculadoraForm: React.FC<CalculadoraFormProps> = ({ onSubmit, loading, cl
         </div>
       </div>
 
-      {/* Localização */}
       <div className="rounded-xl bg-muted p-6 shadow-sm space-y-5">
         <h3 className="text-xl font-bold text-foreground">Localização da Operação</h3>
         <div className="grid md:grid-cols-2 gap-4">
@@ -216,7 +213,6 @@ const CalculadoraForm: React.FC<CalculadoraFormProps> = ({ onSubmit, loading, cl
         </div>
       </div>
 
-      {/* Classificação automática (readonly, shown after calculation) */}
       {classificacao && (
         <div className="rounded-xl bg-accent p-6 shadow-sm space-y-3">
           <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
