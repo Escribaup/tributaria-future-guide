@@ -82,7 +82,7 @@ const Index = () => {
         <CallToAction />
         
         {/* Botão de teste do webhook - Visível apenas em desenvolvimento */}
-        {process.env.NODE_ENV === 'development' && (
+        {import.meta.env.DEV && (
           <div className="container mx-auto my-8 p-4 bg-gray-100 rounded-lg">
             <h3 className="text-lg font-medium mb-4">Área de Desenvolvimento</h3>
             <Button 
