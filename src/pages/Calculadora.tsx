@@ -76,7 +76,7 @@ const Calculadora = () => {
       <Header />
       <PageHeader
         title="Calculadora da Reforma Tributária"
-        subtitle="Calcule automaticamente CBS, IBS e Imposto Seletivo usando a API oficial do governo. Informe apenas a descrição do produto e o sistema classifica e calcula tudo."
+        description="Calcule automaticamente CBS, IBS e Imposto Seletivo usando a API oficial do governo. Informe apenas a descrição do produto e o sistema classifica e calcula tudo."
       />
       <main className="flex-grow container-custom py-12">
         <div className="max-w-4xl mx-auto space-y-10">
